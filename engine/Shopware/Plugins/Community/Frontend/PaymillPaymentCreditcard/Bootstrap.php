@@ -90,7 +90,7 @@ class Shopware_Plugins_Frontend_PaymillPaymentCreditcard_Bootstrap extends Shopw
         $paymentRow = Shopware()->Payments()->createRow(
             array(
                 'name' => 'paymillcc',
-                'description' => 'Paymill Kreditkartenzahlung',
+                'description' => 'Kreditkartenzahlung',
                 'action' => 'payment_paymillcc',
                 'active' => 1,
                 'template' => 'paymillcc.tpl',
