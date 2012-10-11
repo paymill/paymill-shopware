@@ -3,16 +3,40 @@
 </script>
 <script type="text/javascript" src="{$bridgeUrl}"></script>
 <script type="text/javascript">
+    function validate() {
+        var errors = $("#errors");
+        errors.parent().hide();
+        errors.html("");
+        var result = true;
+        if (!paymill.validateCardNumber($('#card-number').val())) {
+          errors.append("<li>Bitte geben Sie eine gültige Kartennummer ein</li>");
+          result = false;
+        }
+        if (!paymill. validateCvc($('#card-cvc').val())) {
+          errors.append("<li>Bitte geben sie einen gültigen Sicherheitscode ein (Rückseite der Karte).</li>");
+          result = false;
+        }
+        if (!paymill.validateExpiry($('#card-expiry-month').val(), $('#card-expiry-year').val())) {
+          errors.append("<li>Das Ablaufdatum der Karte ist ungültig.</li>");
+          result = false;
+        }
+        if (!result) {
+            errors.parent().show();
+        }
+        return result;
+    }
     $(document).ready(function() {
         var paymill_form_id = "payment_mean{$payment_mean.id}";
         $("form.payment").submit(function(event) {
             if ($('#' + paymill_form_id).attr("checked") == "checked") {
-                paymill.createToken({
-                    number: $('#card-number').val(), 
-                    exp_month: $('#card-expiry-month').val(), 
-                    exp_year: $('#card-expiry-year').val(), 
-                    cvc: $('#card-cvc').val()
-                }, PaymillResponseHandler);
+                if (validate()) {
+                    paymill.createToken({
+                        number: $('#card-number').val(), 
+                        exp_month: $('#card-expiry-month').val(), 
+                        exp_year: $('#card-expiry-year').val(), 
+                        cvc: $('#card-cvc').val()
+                    }, PaymillResponseHandler);
+                } 
                 return false;
             }
         });
@@ -28,6 +52,10 @@
         }
     }
 </script>
+<div class="error" style="display: none">
+<ul id="errors">
+</ul>
+</div>
 {if $paymillError == 1}
 <div class="error">
     <ul>
@@ -38,16 +66,16 @@
 <div class="debit">
     <p class="none">
         <label>Kreditkarten-nummer</label>
-        <input id="card-number" type="text" size="20" class="text" value="4111111111111111"/>
+        <input id="card-number" type="text" size="20" class="text" />
     </p>
     <p class="none">
         <label>CVC</label>
-        <input id="card-cvc" type="text" size="4" class="text" value="555"/>
+        <input id="card-cvc" type="text" size="4" class="text" />
     </p>
     <p class="none">
         <label>Gültig bis (MM/YYYY)</label>
-        <input id="card-expiry-month" type="text" style="width: 30px; display: inline-block;" class="text" value="06"/>
-        <input id="card-expiry-year" type="text" style="width: 60px; display: inline-block;" class="text" value="2019"/>
+        <input id="card-expiry-month" type="text" style="width: 30px; display: inline-block;" class="text" />
+        <input id="card-expiry-year" type="text" style="width: 60px; display: inline-block;" class="text" />
     </p>
     <p class="description">Die mit einem * markierten Felder sind Pflichtfelder.
     </p>
