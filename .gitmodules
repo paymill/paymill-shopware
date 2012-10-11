@@ -1,0 +1,3 @@
+[submodule "engine/Shopware/Plugins/Community/Frontend/PaymillPaymentCreditcard/paymill"]
+	path = engine/Shopware/Plugins/Community/Frontend/PaymillPaymentCreditcard/paymill
+	url = https://github.com/Paymill/Paymill-PHP.git
