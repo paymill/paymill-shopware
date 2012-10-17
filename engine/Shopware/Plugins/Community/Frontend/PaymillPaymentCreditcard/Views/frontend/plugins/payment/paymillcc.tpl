@@ -30,12 +30,17 @@
         $("form.payment").submit(function(event) {
             if ($('#' + paymill_form_id).attr("checked") == "checked") {
                 if (validate()) {
-                    paymill.createToken({
-                        number: $('#card-number').val(), 
-                        exp_month: $('#card-expiry-month').val(), 
-                        exp_year: $('#card-expiry-year').val(), 
-                        cvc: $('#card-cvc').val()
-                    }, PaymillResponseHandler);
+                    try {
+                        paymill.createToken({
+                            number: $('#card-number').val(), 
+                            cardholder: "Test",
+                            exp_month: $('#card-expiry-month').val(), 
+                            exp_year: $('#card-expiry-year').val(), 
+                            cvc: $('#card-cvc').val()
+                        }, PaymillResponseHandler);
+                    } catch (e) {
+                        alert("Ein Fehler ist aufgetreten: " + e);
+                    }
                 } 
                 return false;
             }

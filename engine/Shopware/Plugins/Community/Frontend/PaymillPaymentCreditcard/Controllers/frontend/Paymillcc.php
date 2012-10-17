@@ -31,7 +31,11 @@
 class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controllers_Frontend_Payment
 {
     public function indexAction() {
+        
+        // read transaction token from session
         $paymillToken = Shopware()->Session()->paymillTransactionToken;
+        
+        // check if token present
         if (empty($paymillToken)) {
             Shopware_Plugins_Frontend_PaymillPaymentCreditcard_Bootstrap::logAction("No paymill token was provided. Redirect to payments page.");
             $url = $this->Front()->Router()->assemble(array(
@@ -47,7 +51,6 @@ class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controller
             Shopware_Plugins_Frontend_PaymillPaymentCreditcard_Bootstrap::logAction("Start processing payment with token " . $paymillToken);
             
             $config = Shopware()->Plugins()->Frontend()->PaymillPaymentCreditcard()->Config();
-            
             $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
             
             // process the payment
@@ -63,25 +66,34 @@ class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controller
                 'apiUrl' => $config->apiUrl,
                 'loggerCallback' => array('Shopware_Plugins_Frontend_PaymillPaymentCreditcard_Bootstrap', 'logAction')
             ));
-            Shopware_Plugins_Frontend_PaymillPaymentCreditcard_Bootstrap::logAction("Payment processing resulted in: " . $result);
+            Shopware_Plugins_Frontend_PaymillPaymentCreditcard_Bootstrap::logAction(
+                "Payment processing resulted in: " 
+                . ($result ? "Success" : "Fail")
+            );
             
-            // finish the order
+            // finish the order if payment was sucessfully processed
             if ($result === true) {
+                
                 Shopware_Plugins_Frontend_PaymillPaymentCreditcard_Bootstrap::logAction("Finish order.");
                 $this->saveOrder($paymillToken, md5($paymillToken));
+                
                 // reset the session field
                 Shopware()->Session()->paymillTransactionToken = null;
                 return $this->forward('finish', 'checkout', null, array('sUniqueID' => md5(microtime())));
+                
             } else {
-                throw new Exception("Die Zahlung konnte nicht durchgeführt werden. Bitte prüfen Sie das Log.");                
+                Shopware()->Session()->paymillTransactionToken = null;
+                throw new Exception("An error occured while processing your payment");                
             }
-            
         }
     }
     
     private function processPayment($params) {  
+        
+        // setup the logger
+        $logger = $params['loggerCallback'];
                
-        // enhance paramters
+        // reformat paramters
         $params['currency'] = strtolower($params['currency']);
         
         require_once $params['libBase'] . 'Services/Paymill/Transactions.php';
@@ -119,51 +131,59 @@ class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controller
         
         // perform conection to the Paymill API and trigger the payment
         try {
+            
             // create card
             $creditcard = $creditcardsObject->create($creditcardParams);
-            
             if (!isset($creditcard['id'])) {
-                call_user_func_array($params['loggerCallback'], array("No creditcard created"));
+                call_user_func_array($logger, array("No creditcard created: " . var_export($creditcard, true)));
                 return false;
             } else {
-                call_user_func_array($params['loggerCallback'], array("Creditcard created: " . $creditcard['id']));
+                call_user_func_array($logger, array("Creditcard created: " . $creditcard['id']));
             }
             
             // create client
             $clientParams['creditcard'] = $creditcard['id'];
             $client = $clientsObject->create($clientParams);
-            
             if (!isset($client['id'])) {
-                call_user_func_array($params['loggerCallback'], array("No client created"));
+                call_user_func_array($logger, array("No client created" . var_export($client, true)));
                 return false;
             } else {
-                call_user_func_array($params['loggerCallback'], array("Client created: " . $client['id']));
+                call_user_func_array($logger, array("Client created: " . $client['id']));
             }
         
             // create transaction
             $transactionParams['client'] = $client['id'];
             $transaction = $transactionsObject->create($transactionParams);
             if (!isset($transaction['id'])) {
-                call_user_func_array($params['loggerCallback'], array("No client created"));
+                call_user_func_array($logger, array("No transaction created" . var_export($transaction, true)));
                 return false;
             } else {
-                call_user_func_array($params['loggerCallback'], array("Transaction created: " . $transaction['id']));
+                call_user_func_array($logger, array("Transaction created: " . $transaction['id']));
             }
         
+            // check result
             if (is_array($transaction) && array_key_exists('status', $transaction)) {
                 if ($transaction['status'] == "closed") {
+                    // transaction was successfully issued
                     return true;
                 } elseif ($transaction['status'] == "open") {
-                    call_user_func_array($params['loggerCallback'], array("Status is open."));
+                    // transaction was issued but status is open for any reason
+                    call_user_func_array($logger, array("Status is open."));
                     return false;
                 } else {
-                    call_user_func_array($params['loggerCallback'], array("Unknown error."));
+                    // another error occured
+                    call_user_func_array($logger, array("Unknown error." . var_export($transaction, true)));
                     return false;
                 }
             } else {
+                // another error occured
+                call_user_func_array($logger, array("Transaction could not be issued."));
+                return false;
             }
+            
         } catch (Services_Paymill_Exception $ex) {
-            call_user_func_array($params['loggerCallback'], array("Exception thrown from paymill wrapper: " . $ex->getMessage()));
+            // paymill wrapper threw an exception
+            call_user_func_array($logger, array("Exception thrown from paymill wrapper: " . $ex->getMessage()));
             return false;
         }
         

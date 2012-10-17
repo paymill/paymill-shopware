@@ -11,4 +11,4 @@ You have to clone with `--recursive` flag in order to get all required submodule
 - Merge the content of the Paymill-Shopware-Module directory with your Shopware installation. 
 - In your administration backend configure the PaymillPaymentCreditcard plugin: Insert your private and public key.
 - Enable the Paymill plugin.
-- If you enable logging in the plugin make sure that log.txt inside the plugin directory is writable.
+- If you enable logging in the plugin configuration make sure that log.txt inside the plugin directory is writable. Otherwise logging information will not be stored to the logfile.
