@@ -37,7 +37,7 @@ class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controller
         
         // check if token present
         if (empty($paymillToken)) {
-            Shopware_Plugins_Frontend_PaymillPaymentCreditcard_Bootstrap::logAction("No paymill token was provided. Redirect to payments page.");
+            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap::logAction("No paymill token was provided. Redirect to payments page.");
             $url = $this->Front()->Router()->assemble(array(
                 'action' => 'payment',
                 'sTarget' => 'checkout',
@@ -48,9 +48,9 @@ class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controller
             $this->redirect($url . '&paymill_error=1');
         } else {
             
-            Shopware_Plugins_Frontend_PaymillPaymentCreditcard_Bootstrap::logAction("Start processing payment with token " . $paymillToken);
+            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap::logAction("Start processing payment with token " . $paymillToken);
             
-            $config = Shopware()->Plugins()->Frontend()->PaymillPaymentCreditcard()->Config();
+            $config = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
             $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
             
             // process the payment
@@ -66,7 +66,7 @@ class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controller
                 'apiUrl' => $config->apiUrl,
                 'loggerCallback' => array('Shopware_Plugins_Frontend_PaymillPaymentCreditcard_Bootstrap', 'logAction')
             ));
-            Shopware_Plugins_Frontend_PaymillPaymentCreditcard_Bootstrap::logAction(
+            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap::logAction(
                 "Payment processing resulted in: " 
                 . ($result ? "Success" : "Fail")
             );
@@ -74,7 +74,7 @@ class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controller
             // finish the order if payment was sucessfully processed
             if ($result === true) {
                 
-                Shopware_Plugins_Frontend_PaymillPaymentCreditcard_Bootstrap::logAction("Finish order.");
+                Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap::logAction("Finish order.");
                 $this->saveOrder($paymillToken, md5($paymillToken));
                 
                 // reset the session field

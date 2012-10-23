@@ -28,7 +28,7 @@
  * @author     Paymill
  */
 
-class Shopware_Plugins_Frontend_PaymillPaymentCreditcard_Bootstrap extends Shopware_Components_Plugin_Bootstrap
+class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
     // get the payment row
     public function Payment() {
@@ -169,7 +169,7 @@ class Shopware_Plugins_Frontend_PaymillPaymentCreditcard_Bootstrap extends Shopw
      * called on payment configuration account/payment
      */
     public static function onpaymentAction(Enlight_Event_EventArgs $args) {
-        $config = Shopware()->Plugins()->Frontend()->PaymillPaymentCreditcard()->Config();
+        $config = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $args->getSubject()->View()->publicKey = $config->publicKey;
         $args->getSubject()->View()->bridgeUrl = $config->bridgeUrl;
         $args->getSubject()->View()->paymillError = $args->getSubject()->Request()->paymill_error;
