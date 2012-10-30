@@ -57,15 +57,26 @@ class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controller
             $config = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
             $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
             
+            
+            $paymillLibraryVersion = $config->paymillUseV2;
+            if (!$paymillLibraryVersion) {
+                $libBase = dirname(dirname(dirname(__FILE__))) . '/paymill/v1/lib/';
+                $libVersion = 'v1';
+            } else {
+                $libBase = dirname(dirname(dirname(__FILE__))) . '/paymill/v2/lib/';
+                $libVersion = 'v2';
+            }
+            
             // process the payment
             $result = $this->processPayment(array(
+                'libVersion' => $libVersion,
                 'token' => $paymillToken,
                 'amount' => $this->getAmount() * 100,
                 'currency' => $this->getCurrencyShortName(),
                 'name' => $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname'],
                 'email' => $user['additional']['user']['email'],
                 'description' => 'Order ' . $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname'],
-                'libBase' => dirname(dirname(dirname(__FILE__))) . '/paymill/lib/',
+                'libBase' => $libBase,
                 'privateKey' => $config->privateKey,
                 'apiUrl' => $config->apiUrl,
                 'loggerCallback' => array('Shopware_Plugins_Frontend_PaymillPaymentCreditcard_Bootstrap', 'logAction')
@@ -93,7 +104,8 @@ class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controller
     }
     
     /**
-     * Processes the payment
+     * Processes the payment against the paymill API
+     * @param $params array The settings array
      * @return boolean
      */
     private function processPayment($params) {  
@@ -104,42 +116,51 @@ class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controller
         // reformat paramters
         $params['currency'] = strtolower($params['currency']);
         
-        require_once $params['libBase'] . 'Services/Paymill/Transactions.php';
-        require_once $params['libBase'] . 'Services/Paymill/Clients.php';
-        require_once $params['libBase'] . 'Services/Paymill/Creditcards.php';
-        
         // setup client params
         $clientParams = array(
             'email' => $params['email'],
-            'description' => $params['description']
+            'description' => $params['name']
         );
-        
+
         // setup credit card params
         $creditcardParams = array(
             'token' => $params['token']
         );
-        
+
         // setup transaction params
         $transactionParams = array(
             'amount' => $params['amount'],
             'currency' => $params['currency'],
             'description' => $params['description']
         );
-
-        // Access objects for the Paymill API
+                
+        require_once $params['libBase'] . 'Services/Paymill/Transactions.php';
+        require_once $params['libBase'] . 'Services/Paymill/Clients.php';
+        
         $clientsObject = new Services_Paymill_Clients(
-            $params['privateKey'], $params['apiUrl']
-        );
-        $creditcardsObject = new Services_Paymill_Creditcards(
             $params['privateKey'], $params['apiUrl']
         );
         $transactionsObject = new Services_Paymill_Transactions(
             $params['privateKey'], $params['apiUrl']
         );
         
+        // In the PHP-Wrapper version v1 an explicit creditcard object exists.
+        // This was replaced by a payments object in v2.
+        if ($params['libVersion'] == 'v1') {
+            require_once $params['libBase'] . 'Services/Paymill/Creditcards.php';
+            $creditcardsObject = new Services_Paymill_Creditcards(
+                $params['privateKey'], $params['apiUrl']
+            );
+        } elseif ($params['libVersion'] == 'v2') {
+            require_once $params['libBase'] . 'Services/Paymill/Payments.php';
+            $creditcardsObject = new Services_Paymill_Payments(
+                $params['privateKey'], $params['apiUrl']
+            );
+        }
+        
         // perform conection to the Paymill API and trigger the payment
         try {
-            
+
             // create card
             $creditcard = $creditcardsObject->create($creditcardParams);
             if (!isset($creditcard['id'])) {
@@ -148,7 +169,7 @@ class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controller
             } else {
                 call_user_func_array($logger, array("Creditcard created: " . $creditcard['id']));
             }
-            
+
             // create client
             $clientParams['creditcard'] = $creditcard['id'];
             $client = $clientsObject->create($clientParams);
@@ -158,9 +179,12 @@ class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controller
             } else {
                 call_user_func_array($logger, array("Client created: " . $client['id']));
             }
-        
+
             // create transaction
             $transactionParams['client'] = $client['id'];
+            if ($params['libVersion'] == 'v2') {
+                $transactionParams['payment'] = $creditcard['id'];
+            }
             $transaction = $transactionsObject->create($transactionParams);
             if (!isset($transaction['id'])) {
                 call_user_func_array($logger, array("No transaction created" . var_export($transaction, true)));
@@ -168,7 +192,7 @@ class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controller
             } else {
                 call_user_func_array($logger, array("Transaction created: " . $transaction['id']));
             }
-        
+
             // check result
             if (is_array($transaction) && array_key_exists('status', $transaction)) {
                 if ($transaction['status'] == "closed") {
@@ -188,13 +212,14 @@ class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controller
                 call_user_func_array($logger, array("Transaction could not be issued."));
                 return false;
             }
-            
+
         } catch (Services_Paymill_Exception $ex) {
             // paymill wrapper threw an exception
             call_user_func_array($logger, array("Exception thrown from paymill wrapper: " . $ex->getMessage()));
             return false;
-        }
+        }        
         
         return true;
     }
+
 }

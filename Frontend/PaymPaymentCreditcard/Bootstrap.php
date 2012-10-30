@@ -146,8 +146,24 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             'value' => 'https://api.paymill.de/v1/'
         ));
 
+        $form->setElement('checkbox', 'paymillDebugging', array(
+            'label' => 'Debugging aktivieren', 
+            'value' => '0'
+        ));
+        
         $form->setElement('checkbox', 'paymillLogging', array(
             'label' => 'Logging aktivieren', 
+            'value' => '0'
+        ));
+        
+        
+        // $form->setElement('checkbox', 'paymillUseV2', array(
+        //     'label' => 'V2-Wrapper benutzen', 
+        //     'value' => '0'
+        // ));
+        
+        $form->setElement('checkbox', 'paymillShowLabel', array(
+            'label' => 'Paymill Label anzeigen', 
             'value' => '0'
         ));
         
@@ -195,6 +211,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $args->getSubject()->View()->publicKey = $config->publicKey;
         $args->getSubject()->View()->bridgeUrl = $config->bridgeUrl;
         $args->getSubject()->View()->paymillError = $args->getSubject()->Request()->paymill_error;
+        $args->getSubject()->View()->paymillShowLabel = $config->paymillShowLabel;
     }
 
     /**

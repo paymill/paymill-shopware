@@ -1,3 +1,4 @@
+<link rel="stylesheet" type="text/css" href="{link file='frontend/_resources/paymill_styles.css'}" />
 <script type="text/javascript">
   var PAYMILL_PUBLIC_KEY = '{$publicKey}';
 </script>
@@ -69,8 +70,12 @@
 </div>
 {/if}
 <div class="debit">
+    <p>
+        <img src="{link file='frontend/_resources/icon_mastercard.png'}" />
+        <img src="{link file='frontend/_resources/icon_visa.png'}" />
+    </p>
     <p class="none">
-        <label>Kreditkarten-nummer</label>
+        <label>Kreditkarten-nummer *</label>
         <input id="card-number" type="text" size="20" class="text" />
     </p>
     <p class="none">
@@ -78,10 +83,13 @@
         <input id="card-cvc" type="text" size="4" class="text" />
     </p>
     <p class="none">
-        <label>Gültig bis (MM/YYYY)</label>
+        <label>Gültig bis (MM/YYYY) *</label>
         <input id="card-expiry-month" type="text" style="width: 30px; display: inline-block;" class="text" />
         <input id="card-expiry-year" type="text" style="width: 60px; display: inline-block;" class="text" />
     </p>
     <p class="description">Die mit einem * markierten Felder sind Pflichtfelder.
     </p>
+    {if $paymillShowLabel == 1}
+    <p><div class="paymill_powered"><div class="paymill_credits">Sichere Kreditkartenzahlung powered by <a href="http://www.paymill.de" target="_blank">Paymill</a></div></div></p>
+    {/if}
 </div>
