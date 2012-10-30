@@ -30,6 +30,10 @@
 
 class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controllers_Frontend_Payment
 {
+    /**
+     * Frontend index action controller
+     * @return void
+     */
     public function indexAction() {
         
         // read transaction token from session
@@ -88,6 +92,10 @@ class Shopware_Controllers_Frontend_PaymentPaymillcc extends Shopware_Controller
         }
     }
     
+    /**
+     * Processes the payment
+     * @return boolean
+     */
     private function processPayment($params) {  
         
         // setup the logger

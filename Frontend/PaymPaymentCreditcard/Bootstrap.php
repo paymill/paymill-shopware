@@ -30,12 +30,18 @@
 
 class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
-    // get the payment row
+    /**
+     * Returns the current payment row
+     * @return object The current Payment row
+     */
     public function Payment() {
         return Shopware()->Payments()->fetchRow(array('name=?' => 'paymillcc'));
     }
     
-    // installer
+    /**
+     * Performs the necessary installation steps
+     * @return boolean
+     */
     public function install() {
         
         $this->createPayments();
@@ -60,7 +66,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         return true;
     }
     
-    // uninstaller
+    /**
+     * Performs the necessary uninstallation steps
+     * @return boolean
+     */
     public function uninstall() {
         if ($payment = $this->Payment()) {
             $payment->delete();
@@ -68,7 +77,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         return parent::uninstall();
     }
 
-    // enabler
+    /**
+     * Enables the plugin
+     * @return boolean
+     */
     public function enable() {
         $payment = $this->Payment();
         $payment->active = 1;
@@ -76,7 +88,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         return parent::enable();
     }
 
-    // disabler
+    /**
+     * Disables the plugin
+     * @return boolean
+     */
     public function disable() {
         $payment = $this->Payment();
         $payment->active = 0;
@@ -85,7 +100,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         return parent::disable();
     }
 
-    // create payment entry
+    /**
+     * Creates the payment method
+     * @return void
+     */
     protected function createPayments() {
         $paymentRow = Shopware()->Payments()->createRow(
             array(
@@ -100,7 +118,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * the configuration path
+     * Creates the configuration fields
+     * @return void
      */
     public function createForm() {
         $form = $this->Form();
@@ -136,7 +155,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
     
     /**
-     * controller path
+     * Returns the controller path
+     * @return string
      */
     public static function onGetControllerPath(Enlight_Event_EventArgs $args) {
         Shopware()->Template()->addTemplateDir(dirname(__FILE__) . '/Views/');
@@ -144,7 +164,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
     
     /**
-     * Called on post requests
+     * Triggered on every request
+     * @return void
      */
     public static function onPostDispatch(Enlight_Event_EventArgs $args) {
         
@@ -166,7 +187,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
     
     /**
-     * called on payment configuration account/payment
+     * Payment action that is triggered on a payment update
+     * @return void
      */
     public static function onpaymentAction(Enlight_Event_EventArgs $args) {
         $config = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
@@ -178,13 +200,17 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     /**
      * Returns whether the current user did choose paymillcc as 
      * payment method
+     * @return boolean
      */
     public static function isPaymillPayment() {
         $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
         return $user['additional']['payment']['name'] == "paymillcc";
     }
     
-    // logger
+    /**
+     * Logger for events
+     * @return void
+     */
     public static function logAction($message) {
         $logfile = dirname(__FILE__) . '/log.txt';
         if (is_writable($logfile)) {
@@ -192,5 +218,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             fwrite($handle, "[" . date(DATE_RFC822) . "] " . $message . "\n");
             fclose($handle);
         }
+    }
+    
+    /**
+     * Returns the version
+     * @return string
+     */
+    public function getVersion() {
+        return "1.0.0";
     }
 }
