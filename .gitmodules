@@ -1,0 +1,6 @@
+[submodule "Frontend/PaymPaymentCreditcard/paymill/v1"]
+	path = Frontend/PaymPaymentCreditcard/paymill/v1
+	url = https://github.com/Paymill/Paymill-PHP.git
+[submodule "Frontend/PaymPaymentCreditcard/paymill/v2"]
+	path = Frontend/PaymPaymentCreditcard/paymill/v2
+	url = https://github.com/Paymill/Paymill-v2-PHP.git
