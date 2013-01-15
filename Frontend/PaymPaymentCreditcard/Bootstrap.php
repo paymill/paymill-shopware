@@ -27,50 +27,52 @@
  * @subpackage Paymill
  * @author     Paymill
  */
-
 class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
+
     /**
      * Returns the current payment row
      * @return object The current Payment row
      */
-    public function Payment() {
+    public function Payment()
+    {
         return Shopware()->Payments()->fetchRow(array('name=?' => 'paymillcc'));
     }
-    
+
     /**
      * Performs the necessary installation steps
      * @return boolean
      */
-    public function install() {
-        
-        $this->createPayments();
-        
-        $this->createForm();
-        
-        $hook = $this->createHook(
-            'Shopware_Controllers_Frontend_Account', 
-            'paymentAction', 
-            'onpaymentAction', 
-            Enlight_Hook_HookHandler::TypeAfter, 
-            0
-		);
-		$this->subscribeHook($hook);
-		
-        $event = $this->createEvent('Enlight_Controller_Action_PostDispatch', 'onPostDispatch');
-        $this->subscribeEvent($event);
+    public function install()
+    {
 
-        $event = $this->createEvent('Enlight_Controller_Dispatcher_ControllerPath_Frontend_PaymentPaymillcc', 'onGetControllerPath');
-        $this->subscribeEvent($event);
-        
+        $this->createPayments();
+
+        $this->createForm();
+
+        $hook = $this->createHook(
+                'Shopware_Controllers_Frontend_Account', 'paymentAction', 'onpaymentAction', Enlight_Hook_HookHandler::TypeAfter, 0
+        );
+        $this->subscribeHook($hook);
+
+        $this->subscribeEvent(
+                'Enlight_Controller_Action_PostDispatch', 'onPostDispatch'
+        );
+        $this->subscribeEvent(
+                'Enlight_Controller_Dispatcher_ControllerPath_Frontend_PaymentPaymillcc', 'onGetControllerPath'
+        );
+        $this->subscribeEvent(
+                'Enlight_Controller_Action_PreDispatch_Frontend_Checkout', 'onCheckoutConfirm'
+        );
         return true;
     }
-    
+
     /**
      * Performs the necessary uninstallation steps
      * @return boolean
      */
-    public function uninstall() {
+    public function uninstall()
+    {
         if ($payment = $this->Payment()) {
             $payment->delete();
         }
@@ -81,7 +83,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      * Enables the plugin
      * @return boolean
      */
-    public function enable() {
+    public function enable()
+    {
         $payment = $this->Payment();
         $payment->active = 1;
         $payment->save();
@@ -92,7 +95,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      * Disables the plugin
      * @return boolean
      */
-    public function disable() {
+    public function disable()
+    {
         $payment = $this->Payment();
         $payment->active = 0;
         $payment->save();
@@ -104,24 +108,26 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      * Creates the payment method
      * @return void
      */
-    protected function createPayments() {
+    protected function createPayments()
+    {
         $paymentRow = Shopware()->Payments()->createRow(
-            array(
-                'name' => 'paymillcc',
-                'description' => 'Kreditkartenzahlung',
-                'action' => 'payment_paymillcc',
-                'active' => 1,
-                'template' => 'paymillcc.tpl',
-                'pluginID' => $this->getId()
-            )
-        )->save();
+                        array(
+                            'name' => 'paymillcc',
+                            'description' => 'Kreditkartenzahlung',
+                            'action' => 'payment_paymillcc',
+                            'active' => 1,
+                            'template' => 'paymillcc.tpl',
+                            'pluginID' => $this->getId()
+                        )
+                )->save();
     }
 
     /**
      * Creates the configuration fields
      * @return void
      */
-    public function createForm() {
+    public function createForm()
+    {
         $form = $this->Form();
 
         $form->setElement('text', 'publicKey', array(
@@ -133,13 +139,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             'label' => 'Private Key',
             'required' => true
         ));
-        
+
         $form->setElement('text', 'bridgeUrl', array(
             'label' => 'Bridge URL',
             'required' => true,
             'value' => 'https://bridge.paymill.de/'
         ));
-        
+
         $form->setElement('text', 'apiUrl', array(
             'label' => 'API URL',
             'required' => true,
@@ -147,66 +153,73 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         ));
 
         $form->setElement('checkbox', 'paymillDebugging', array(
-            'label' => 'Debugging aktivieren', 
+            'label' => 'Debugging aktivieren',
             'value' => '0'
         ));
-        
+
         $form->setElement('checkbox', 'paymillLogging', array(
-            'label' => 'Logging aktivieren', 
+            'label' => 'Logging aktivieren',
             'value' => '0'
         ));
-        
-        
+
+
         // $form->setElement('checkbox', 'paymillUseV2', array(
-        //     'label' => 'V2-Wrapper benutzen', 
+        //     'label' => 'V2-Wrapper benutzen',
         //     'value' => '0'
         // ));
-        
+
         $form->setElement('checkbox', 'paymillShowLabel', array(
-            'label' => 'Paymill Label anzeigen', 
+            'label' => 'Paymill Label anzeigen',
             'value' => '0'
         ));
-        
+
         $form->save();
     }
-    
+
     /**
      * Returns the controller path
      * @return string
      */
-    public static function onGetControllerPath(Enlight_Event_EventArgs $args) {
+    public static function onGetControllerPath(Enlight_Event_EventArgs $args)
+    {
         Shopware()->Template()->addTemplateDir(dirname(__FILE__) . '/Views/');
         return dirname(__FILE__) . '/Controllers/frontend/Paymillcc.php';
     }
-    
+
     /**
      * Triggered on every request
      * @return void
      */
-    public static function onPostDispatch(Enlight_Event_EventArgs $args) {
-        
-        $request  = $args->getSubject()->Request();
+    public static function onPostDispatch(Enlight_Event_EventArgs $args)
+    {
+
+        $request = $args->getSubject()->Request();
         $response = $args->getSubject()->Response();
-        $view     = $args->getSubject()->View();
+        $view = $args->getSubject()->View();
 
         Shopware()->Template()->addTemplateDir(dirname(__FILE__) . '/Views/');
 
         if (!$request->isDispatched() || $response->isException() || $request->getModuleName() != 'frontend' || !$view->hasTemplate()) {
             return;
         }
-        
+
+        if ($request->get("controller") == "checkout" && self::isPaymillPayment()) {
+            $view->sRegisterFinished = "false";
+        }
+
         // if there is a token in the request save it for later use
         if ($request->get("paymillToken")) {
             Shopware()->Session()->paymillTransactionToken = $request->get("paymillToken");
             self::logAction("Token " . $request->get("paymillToken") . " stored to session");
         }
     }
-    
+
     /**
      * Payment action that is triggered on a payment update
      * @return void
      */
-    public static function onpaymentAction(Enlight_Event_EventArgs $args) {
+    public static function onpaymentAction(Enlight_Event_EventArgs $args)
+    {
         $config = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $args->getSubject()->View()->publicKey = $config->publicKey;
         $args->getSubject()->View()->bridgeUrl = $config->bridgeUrl;
@@ -215,20 +228,53 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * Returns whether the current user did choose paymillcc as 
+     * Extends the confirmationpage with an Errorbox, if there is an error.
+     *
+     * @param Enlight_Event_EventArgs $arguments
+     * @return null
+     */
+    public function onCheckoutConfirm(Enlight_Event_EventArgs $arguments)
+    {
+        $params = $arguments->getRequest()->getParams();
+        if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
+            return;
+        }
+        $pigmbhErrorMessage = Shopware()->Session()->pigmbhErrorMessage;
+        unset(Shopware()->Session()->pigmbhErrorMessage);
+        $view = $arguments->getSubject()->View();
+        $content = '{if $pigmbhErrorMessage}' .
+                '<div class="grid_20">' .
+                '<div class="error">' .
+                '<div class="center">' .
+                '<strong>' .
+                '{$pigmbhErrorMessage}' .
+                '</strong>' .
+                '</div>' .
+                '</div>' .
+                '</div>' .
+                '{/if}';
+        $view->extendsBlock("frontend_index_content_top", $content, "append");
+        $view->setScope(Enlight_Template_Manager::SCOPE_PARENT);
+        $view->pigmbhErrorMessage = $pigmbhErrorMessage;
+    }
+
+    /**
+     * Returns whether the current user did choose paymillcc as
      * payment method
      * @return boolean
      */
-    public static function isPaymillPayment() {
+    public static function isPaymillPayment()
+    {
         $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
         return $user['additional']['payment']['name'] == "paymillcc";
     }
-    
+
     /**
      * Logger for events
      * @return void
      */
-    public static function logAction($message) {
+    public static function logAction($message)
+    {
         $logfile = dirname(__FILE__) . '/log.txt';
         if (is_writable($logfile)) {
             $handle = fopen($logfile, 'a'); //
@@ -236,12 +282,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             fclose($handle);
         }
     }
-    
+
     /**
      * Returns the version
      * @return string
      */
-    public function getVersion() {
+    public function getVersion()
+    {
         return "1.0.0";
     }
+
 }

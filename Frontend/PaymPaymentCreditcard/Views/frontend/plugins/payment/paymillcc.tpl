@@ -1,8 +1,8 @@
 <link rel="stylesheet" type="text/css" href="{link file='frontend/_resources/paymill_styles.css'}" />
 <script type="text/javascript">
-  var PAYMILL_PUBLIC_KEY = '{$publicKey}';
+  var PAYMILL_PUBLIC_KEY = '{config name=publicKey}';
 </script>
-<script type="text/javascript" src="{$bridgeUrl}"></script>
+<script type="text/javascript" src="{config name=bridgeUrl}"></script>
 <script type="text/javascript">
     function validate() {
         var errors = $("#errors");
@@ -28,21 +28,27 @@
     }
     $(document).ready(function() {
         var paymill_form_id = "payment_mean{$payment_mean.id}";
-        $("form.payment").submit(function(event) {
+        $("#basketButton").click(function(event) {
             if ($('#' + paymill_form_id).attr("checked") == "checked") {
                 if (validate()) {
                     try {
                         paymill.createToken({
-                            number: $('#card-number').val(), 
+                            number: $('#card-number').val(),
                             cardholder: "Test",
-                            exp_month: $('#card-expiry-month').val(), 
-                            exp_year: $('#card-expiry-year').val(), 
-                            cvc: $('#card-cvc').val()
+                            exp_month: $('#card-expiry-month').val(),
+                            exp_year: $('#card-expiry-year').val(),
+                            cvc: $('#card-cvc').val(),
+                            amount_int: {$sBasket['sAmount']} * 100,
+                            currency: '{config name=currency|upper}'
                         }, PaymillResponseHandler);
                     } catch (e) {
                         alert("Ein Fehler ist aufgetreten: " + e);
                     }
-                } 
+                }else{
+                    $('html, body').animate({
+                        scrollTop: $("#errors").offset().top - 100
+                    }, 1000);
+                }
                 return false;
             }
         });
@@ -51,7 +57,7 @@
         if (error) {
             alert(error.apierror);
         } else {
-            var form = $("form.payment");
+            var form = $("#basketButton").parent().parent();
             var token = result.token;
             form.append("<input type='hidden' name='paymillToken' value='" + token + "'/>");
             form.get(0).submit();
@@ -69,7 +75,8 @@
     </ul>
 </div>
 {/if}
-<div class="debit">
+{if $Controller != "account"}
+    <div class="debit">
     <p>
         <img src="{link file='frontend/_resources/icon_mastercard.png'}" />
         <img src="{link file='frontend/_resources/icon_visa.png'}" />
@@ -79,7 +86,7 @@
         <input id="card-number" type="text" size="20" class="text" />
     </p>
     <p class="none">
-        <label>CVC</label>
+        <label>CVC*</label>
         <input id="card-cvc" type="text" size="4" class="text" />
     </p>
     <p class="none">
@@ -93,3 +100,4 @@
     <p><div class="paymill_powered"><div class="paymill_credits">Sichere Kreditkartenzahlung powered by <a href="http://www.paymill.de" target="_blank">Paymill</a></div></div></p>
     {/if}
 </div>
+{/if}
