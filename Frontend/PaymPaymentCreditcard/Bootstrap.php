@@ -31,12 +31,30 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 {
 
     /**
-     * Returns the current payment row
-     * @return object The current Payment row
+     * Returns the version
+     * @return string
      */
-    public function Payment()
+    public function getVersion()
     {
-        return Shopware()->Payments()->fetchRow(array('name=?' => 'paymillcc'));
+        return "1.0.1";
+    }
+    /**
+     * Get Info for the Pluginmanager
+     *
+     * @return array
+     */
+    public function getInfo()
+    {
+        return array(
+            'version' => $this->getVersion(),
+            'autor' => 'PayIntelligent GmbH',
+            'source' => $this->getSource(),
+            'support' => 'http://www.payintelligent.de',
+            'link' => 'http://www.payintelligent.de',
+            'copyright' => 'Copyright (c) 2013, PayIntelligent GmbH',
+            'label' => 'Paymill',
+            'description' => ''
+        );
     }
 
     /**
@@ -59,7 +77,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 'Enlight_Controller_Action_PostDispatch', 'onPostDispatch'
         );
         $this->subscribeEvent(
-                'Enlight_Controller_Dispatcher_ControllerPath_Frontend_PaymentPaymillcc', 'onGetControllerPath'
+                'Enlight_Controller_Dispatcher_ControllerPath_Frontend_PaymentPaymill', 'onGetControllerPath'
         );
         $this->subscribeEvent(
                 'Enlight_Controller_Action_PreDispatch_Frontend_Checkout', 'onCheckoutConfirm'
@@ -73,9 +91,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function uninstall()
     {
-        if ($payment = $this->Payment()) {
-            $payment->delete();
-        }
+        Shopware()->Db()->delete("s_core_paymentmeans", "name in('paymillcc','paymilldebit')");
         return parent::uninstall();
     }
 
@@ -85,9 +101,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function enable()
     {
-        $payment = $this->Payment();
-        $payment->active = 1;
-        $payment->save();
         return parent::enable();
     }
 
@@ -97,10 +110,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function disable()
     {
-        $payment = $this->Payment();
-        $payment->active = 0;
-        $payment->save();
-
         return parent::disable();
     }
 
@@ -110,16 +119,26 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     protected function createPayments()
     {
-        $paymentRow = Shopware()->Payments()->createRow(
-                        array(
-                            'name' => 'paymillcc',
-                            'description' => 'Kreditkartenzahlung',
-                            'action' => 'payment_paymillcc',
-                            'active' => 1,
-                            'template' => 'paymillcc.tpl',
-                            'pluginID' => $this->getId()
-                        )
-                )->save();
+        Shopware()->Payments()->createRow(
+                array(
+                    'name' => 'paymillcc',
+                    'description' => 'Kreditkartenzahlung',
+                    'action' => 'payment_paymill',
+                    'active' => 1,
+                    'template' => 'paymillcc.tpl',
+                    'pluginID' => $this->getId()
+                )
+        )->save();
+        Shopware()->Payments()->createRow(
+                array(
+                    'name' => 'paymilldebit',
+                    'description' => 'Lastschrift',
+                    'action' => 'payment_paymill',
+                    'active' => 1,
+                    'template' => 'paymilldebit.tpl',
+                    'pluginID' => $this->getId()
+                )
+        )->save();
     }
 
     /**
@@ -149,7 +168,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $form->setElement('text', 'apiUrl', array(
             'label' => 'API URL',
             'required' => true,
-            'value' => 'https://api.paymill.de/v1/'
+            'value' => 'https://api.paymill.de/v2/'
         ));
 
         $form->setElement('checkbox', 'paymillDebugging', array(
@@ -161,12 +180,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             'label' => 'Logging aktivieren',
             'value' => '0'
         ));
-
-
-        // $form->setElement('checkbox', 'paymillUseV2', array(
-        //     'label' => 'V2-Wrapper benutzen',
-        //     'value' => '0'
-        // ));
 
         $form->setElement('checkbox', 'paymillShowLabel', array(
             'label' => 'Paymill Label anzeigen',
@@ -183,7 +196,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     public static function onGetControllerPath(Enlight_Event_EventArgs $args)
     {
         Shopware()->Template()->addTemplateDir(dirname(__FILE__) . '/Views/');
-        return dirname(__FILE__) . '/Controllers/frontend/Paymillcc.php';
+        return dirname(__FILE__) . '/Controllers/frontend/Paymill.php';
     }
 
     /**
@@ -266,7 +279,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     public static function isPaymillPayment()
     {
         $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
-        return $user['additional']['payment']['name'] == "paymillcc";
+        return in_array($user['additional']['payment']['name'], array("paymillcc", "paymilldebit"));
     }
 
     /**
@@ -282,14 +295,4 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             fclose($handle);
         }
     }
-
-    /**
-     * Returns the version
-     * @return string
-     */
-    public function getVersion()
-    {
-        return "1.0.0";
-    }
-
 }
