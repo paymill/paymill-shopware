@@ -66,7 +66,7 @@
         }
     }
     function debugELV(message){
-        {if config name=paymillDebugging}
+        {if $debug}
             console.log("[PaymillELV] " + message);
         {/if}
     }

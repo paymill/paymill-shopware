@@ -70,7 +70,7 @@
         }
     }
     function debugCC(message){
-        {if config name=paymillDebugging}
+        {if $debug}
             console.log("[PaymillCC] " + message);
         {/if}
     }

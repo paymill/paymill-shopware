@@ -249,6 +249,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     public function onCheckoutConfirm(Enlight_Event_EventArgs $arguments)
     {
         $params = $arguments->getRequest()->getParams();
+        $arguments->getSubject()->View()->debug = $this->Config()->paymillDebugging;
         if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
             return;
         }
