@@ -34,7 +34,7 @@
                     try {
                         paymill.createToken({
                             number: $('#card-number').val(),
-                            cardholder: "Test",
+                            cardholder: $('#account-holder').val(),
                             exp_month: $('#card-expiry-month').val(),
                             exp_year: $('#card-expiry-year').val(),
                             cvc: $('#card-cvc').val(),
@@ -80,6 +80,10 @@
     <p>
         <img src="{link file='frontend/_resources/icon_mastercard.png'}" />
         <img src="{link file='frontend/_resources/icon_visa.png'}" />
+    </p>
+    <p class="none">
+        <label>Kontoinhaber *</label>
+        <input id="account-holder" type="text" size="20" class="text" value="{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}"/>
     </p>
     <p class="none">
         <label>Kreditkarten-nummer *</label>
