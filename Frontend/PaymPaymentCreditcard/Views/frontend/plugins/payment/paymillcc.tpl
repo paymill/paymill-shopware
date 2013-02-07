@@ -5,6 +5,7 @@
 <script type="text/javascript" src="{config name=bridgeUrl}"></script>
 <script type="text/javascript">
     function validate() {
+        debugCC("Paymill handler triggered");
         var errors = $("#errors");
         errors.parent().hide();
         errors.html("");
@@ -23,6 +24,8 @@
         }
         if (!result) {
             errors.parent().show();
+        }else{
+            debugCC("Validations successful");
         }
         return result;
     }
@@ -54,14 +57,22 @@
         });
     });
     function PaymillResponseHandler(error, result) {
+        debugCC("Started Paymill response handler");
         if (error) {
-            alert(error.apierror);
+            debugCC("API returned error:" + error.apierror);
+            alert("API returned error:" + error.apierror);
         } else {
+            debugCC("Received token from Paymill API: " + result.token);
             var form = $("#basketButton").parent().parent();
             var token = result.token;
             form.append("<input type='hidden' name='paymillToken' value='" + token + "'/>");
             form.get(0).submit();
         }
+    }
+    function debugCC(message){
+        {if config name=paymillDebugging}
+            console.log("[PaymillCC] " + message);
+        {/if}
     }
 </script>
 <div class="error" style="display: none">

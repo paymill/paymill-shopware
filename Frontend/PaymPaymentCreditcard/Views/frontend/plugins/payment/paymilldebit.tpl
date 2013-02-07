@@ -5,6 +5,7 @@
 <script type="text/javascript" src="{config name=bridgeUrl}"></script>
 <script type="text/javascript">
     function validate() {
+        debugELV("Paymill handler triggered");
         var errors = $("#errorsdebit");
         errors.parent().hide();
         errors.html("");
@@ -23,6 +24,8 @@
         }
         if (!result) {
             errors.parent().show();
+        }else{
+            debugELV("Validations successful");
         }
         return result;
     }
@@ -50,14 +53,22 @@
         });
     });
     function PaymillResponseHandler(error, result) {
+        debugELV("Started Paymill response handler");
         if (error) {
-            alert(error.apierror);
+            debugELV("API returned error:" + error.apierror);
+            alert("API returned error:" + error.apierror);
         } else {
+            debugELV("Received token from Paymill API: " + result.token);
             var form = $("#basketButton").parent().parent();
             var token = result.token;
             form.append("<input type='hidden' name='paymillToken' value='" + token + "'/>");
             form.get(0).submit();
         }
+    }
+    function debugELV(message){
+        {if config name=paymillDebugging}
+            console.log("[PaymillELV] " + message);
+        {/if}
     }
 </script>
 <div class="error" style="display: none">
