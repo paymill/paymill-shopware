@@ -4,7 +4,7 @@
 </script>
 <script type="text/javascript" src="{config name=bridgeUrl}"></script>
 <script type="text/javascript">
-    function validate() {
+    function validateELV() {
         debugELV("Paymill handler triggered");
         var errors = $("#errorsdebit");
         errors.parent().hide();
@@ -33,7 +33,7 @@
         var paymill_form_id = "payment_mean{$payment_mean.id}";
         $("#basketButton").click(function(event) {
             if ($('#' + paymill_form_id).attr("checked") == "checked") {
-                if (validate()) {
+                if (validateELV()) {
                     try {
                         paymill.createToken({
                             number: $('#paymill_accountnumber').val(),

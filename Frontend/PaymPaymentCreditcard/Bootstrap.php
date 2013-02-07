@@ -290,7 +290,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     public static function logAction($message)
     {
         $logfile = dirname(__FILE__) . '/log.txt';
-        if (is_writable($logfile) && $this->Config()->get("paymillLogging")) {
+        if (is_writable($logfile) && Shopware()->Config()->get("paymillLogging")) {
             $handle = fopen($logfile, 'a'); //
             fwrite($handle, "[" . date(DATE_RFC822) . "] " . $message . "\n");
             fclose($handle);
