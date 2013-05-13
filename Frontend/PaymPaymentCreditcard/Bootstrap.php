@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Shopware 4.0
  * Copyright © 2012 shopware AG
@@ -63,28 +62,20 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function install()
     {
-
-        $this->createPayments();
-
-        $this->createForm();
-
-        $hook = $this->createHook(
-                'Shopware_Controllers_Frontend_Account', 'paymentAction', 'onpaymentAction', Enlight_Hook_HookHandler::TypeAfter, 0
-        );
-        $this->subscribeHook($hook);
-
-        $this->subscribeEvent(
-                'Enlight_Controller_Action_PostDispatch', 'onPostDispatch'
-        );
-        $this->subscribeEvent(
-                'Enlight_Controller_Dispatcher_ControllerPath_Frontend_PaymentPaymill', 'onGetControllerPath'
-        );
-        $this->subscribeEvent(
-                'Enlight_Controller_Action_PreDispatch_Frontend_Checkout', 'onCheckoutConfirm'
-        );
+        try{
+            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManagerShopware::install();
+            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper::install();
+            $this->createPaymentMeans();
+            $this->createForm();
+            $this->createEvents();
+            $this->applyBackendViewModifications();
+        }  
+        catch (Exception $exception){
+            throw new Exception($exception->getMessage());
+        }
         return true;
     }
-
+    
     /**
      * Performs the necessary uninstallation steps
      * @return boolean
@@ -101,6 +92,19 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function enable()
     {
+        try{
+            
+            $payment[0] = 'paymillcc';
+            $payment[1] = 'paymilldebit';
+            
+            foreach ($payment as $key) {
+                $currentPayment = $this->Payments()->findOneBy( array('name' => $key));
+                $currentPayment->setActive(true);
+            }
+        }
+        catch (Exception $exception){
+            throw new Exception("Cannot change payment-activity state: ".$exception->getMessage());
+        }
         return parent::enable();
     }
 
@@ -110,35 +114,58 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function disable()
     {
+        try{
+            
+            $payment[0] = 'paymillcc';
+            $payment[1] = 'paymilldebit';
+            
+            foreach ($payment as $key) {
+                $currentPayment = $this->Payments()->findOneBy( array('name' => $key));
+                $currentPayment->setActive(false);
+            }
+        }
+        catch (Exception $exception){
+            throw new Exception("Cannot change payment-activity state: ".$exception->getMessage());
+        }
+        
         return parent::disable();
+    }
+    
+    /**
+     * Defines the capabilities of the plugin
+     */
+    public function getCapabilities()
+    {
+        return array( 'install' => true, 'update' => false, 'enable' => true);
     }
 
     /**
      * Creates the payment method
      * @return void
      */
-    protected function createPayments()
+    protected function createPaymentMeans()
     {
-        Shopware()->Payments()->createRow(
-                array(
-                    'name' => 'paymillcc',
-                    'description' => 'Kreditkartenzahlung',
-                    'action' => 'payment_paymill',
-                    'active' => 1,
-                    'template' => 'paymillcc.tpl',
-                    'pluginID' => $this->getId()
-                )
-        )->save();
-        Shopware()->Payments()->createRow(
-                array(
-                    'name' => 'paymilldebit',
-                    'description' => 'Lastschrift',
-                    'action' => 'payment_paymill',
-                    'active' => 1,
-                    'template' => 'paymilldebit.tpl',
-                    'pluginID' => $this->getId()
-                )
-        )->save();
+        $paymillcc = array(
+                        'name' => 'paymillcc',
+                        'description' => 'Kreditkartenzahlung',
+                        'action' => 'payment_paymill',
+                        'active' => 1,
+                        'template' => 'paymill.tpl', //'paymillcc.tpl',
+                        'pluginID' => $this->getId()
+                    );
+        
+        Shopware()->Payments()->createRow($paymillcc)->save();
+        
+        $paymilldebit = array(
+                            'name' => 'paymilldebit',
+                            'description' => 'Lastschrift',
+                            'action' => 'payment_paymill',
+                            'active' => 1,
+                            'template' => 'paymill.tpl', //'paymilldebit.tpl',
+                            'pluginID' => $this->getId()
+                        );
+        
+        Shopware()->Payments()->createRow($paymilldebit)->save();
     }
 
     /**
@@ -162,28 +189,33 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $form->setElement('text', 'bridgeUrl', array(
             'label' => 'Bridge URL',
             'required' => true,
-            'value' => 'https://bridge.paymill.de/'
+            'value' => 'https://bridge.paymill.com/'
         ));
 
         $form->setElement('text', 'apiUrl', array(
             'label' => 'API URL',
             'required' => true,
-            'value' => 'https://api.paymill.de/v2/'
+            'value' => 'https://api.paymill.com/v2/'
         ));
 
         $form->setElement('checkbox', 'paymillDebugging', array(
             'label' => 'Debugging aktivieren',
-            'value' => '0'
+            'value' => false
+        ));
+       
+        $form->setElement('checkbox', 'paymillFastCheckout', array(
+            'label' => 'Daten für Fast Checkout speichern',
+            'value' => false
         ));
 
         $form->setElement('checkbox', 'paymillLogging', array(
             'label' => 'Logging aktivieren',
-            'value' => '0'
+            'value' => false
         ));
 
         $form->setElement('checkbox', 'paymillShowLabel', array(
             'label' => 'Paymill Label anzeigen',
-            'value' => '0'
+            'value' => false
         ));
 
         $form->save();
@@ -193,10 +225,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      * Returns the controller path
      * @return string
      */
-    public static function onGetControllerPath(Enlight_Event_EventArgs $args)
+    public static function onGetControllerPath()
     {
-        Shopware()->Template()->addTemplateDir(dirname(__FILE__) . '/Views/');
-        return dirname(__FILE__) . '/Controllers/frontend/Paymill.php';
+        Shopware()->Template()->addTemplateDir( Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Path() . '/Views/');
+        return Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Path() . '/Controllers/frontend/Paymill.php';
     }
 
     /**
@@ -205,73 +237,73 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public static function onPostDispatch(Enlight_Event_EventArgs $args)
     {
-
         $request = $args->getSubject()->Request();
         $response = $args->getSubject()->Response();
         $view = $args->getSubject()->View();
 
-        Shopware()->Template()->addTemplateDir(dirname(__FILE__) . '/Views/');
+        Shopware()->Template()->addTemplateDir( Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Path() . '/Views/');
 
         if (!$request->isDispatched() || $response->isException() || $request->getModuleName() != 'frontend' || !$view->hasTemplate()) {
             return;
         }
 
-        if ($request->get("controller") == "checkout" && self::isPaymillPayment()) {
-            $view->sRegisterFinished = "false";
-        }
-
         // if there is a token in the request save it for later use
         if ($request->get("paymillToken")) {
             Shopware()->Session()->paymillTransactionToken = $request->get("paymillToken");
-            self::logAction("Token " . $request->get("paymillToken") . " stored to session");
         }
-    }
-
-    /**
-     * Payment action that is triggered on a payment update
-     * @return void
-     */
-    public static function onpaymentAction(Enlight_Event_EventArgs $args)
-    {
-        $config = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
-        $args->getSubject()->View()->publicKey = $config->publicKey;
-        $args->getSubject()->View()->bridgeUrl = $config->bridgeUrl;
-        $args->getSubject()->View()->paymillError = $args->getSubject()->Request()->paymill_error;
-        $args->getSubject()->View()->paymillShowLabel = $config->paymillShowLabel;
+        
+        if (self::isPaymillPayment()) {
+            $view->sRegisterFinished = 'false';
+            if(self::isFcReady()){
+                $view->sRegisterFinished = null;
+                Shopware()->Session()->paymillTransactionToken = "NoTokenRequired";
+            }
+            
+        }
     }
 
     /**
      * Extends the confirmationpage with an Errorbox, if there is an error.
-     *
+     * Saves the Amount into the Session and passes it to the Template
      * @param Enlight_Event_EventArgs $arguments
      * @return null
      */
     public function onCheckoutConfirm(Enlight_Event_EventArgs $arguments)
     {
         $params = $arguments->getRequest()->getParams();
-        $arguments->getSubject()->View()->debug = $this->Config()->paymillDebugging;
+        $arguments->getSubject()->View()->ccHasFcData = $this->isFcReady("paymillcc");
+        $arguments->getSubject()->View()->elvHasFcData = $this->isFcReady("paymilldebit");
+        if (self::isPaymillPayment()) {
+            $view->sRegisterFinished = 'false';
+            if(self::isFcReady()){
+                $view->sRegisterFinished = null;
+                Shopware()->Session()->paymillTransactionToken = "NoTokenRequired";
+            }
+           
+        }
+        $this->saveAmount($arguments);
+        
         if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
             return;
         }
+        
+        
         $pigmbhErrorMessage = Shopware()->Session()->pigmbhErrorMessage;
         unset(Shopware()->Session()->pigmbhErrorMessage);
         $view = $arguments->getSubject()->View();
-        $content = '{if $pigmbhErrorMessage}' .
-                '<div class="grid_20">' .
-                '<div class="error">' .
-                '<div class="center">' .
-                '<strong>' .
-                '{$pigmbhErrorMessage}' .
-                '</strong>' .
-                '</div>' .
-                '</div>' .
-                '</div>' .
-                '{/if}';
+        $content = '{if $pigmbhErrorMessage} <div class="grid_20">' .
+                   '<div class="error">' .
+                   '<div class="center">' . '<strong> {$pigmbhErrorMessage} </strong>' . '</div>' .
+                   '</div>' .
+                   '</div> {/if}';
+        
         $view->extendsBlock("frontend_index_content_top", $content, "append");
         $view->setScope(Enlight_Template_Manager::SCOPE_PARENT);
         $view->pigmbhErrorMessage = $pigmbhErrorMessage;
+        
     }
-
+    
+    
     /**
      * Returns whether the current user did choose paymillcc as
      * payment method
@@ -282,18 +314,74 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
         return in_array($user['additional']['payment']['name'], array("paymillcc", "paymilldebit"));
     }
+    
+    
+    public static function isFcReady($paymentNameArg = null){
+        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
+        if(in_array($user['additional']['payment']['name'], array("paymillcc", "paymilldebit"))){
+            $userId = $user['billingaddress']['userID'];
+            if($paymentNameArg === null){
+                $paymentName = $user['additional']['payment']['name'];
+            }
+            else{
+                $paymentName = $paymentNameArg;
+            }
+            
+            $payment = $paymentName == 'paymillcc'? 'ccPaymentId': 'elvPaymentId';
+            $sql = "SELECT count(`$payment`) FROM `paymill_fastCheckout` WHERE `userId` = $userId AND `$payment` IS NOT null";
+            $fcEnabled = Shopware()->Db()->fetchOne($sql);
+            $log = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManagerShopware();
+            return $fcEnabled == 1;
+        }
+        return false;
+    }
+
 
     /**
-     * Logger for events
-     * @return void
+     * Creates all Events for the plugins
      */
-    public static function logAction($message)
+    private function createEvents()
     {
-        $logfile = dirname(__FILE__) . '/log.txt';
-        if (is_writable($logfile) && Shopware()->Config()->get("paymillLogging")) {
-            $handle = fopen($logfile, 'a'); //
-            fwrite($handle, "[" . date(DATE_RFC822) . "] " . $message . "\n");
-            fclose($handle);
+        $this->subscribeEvent( 'Enlight_Controller_Action_PostDispatch', 'onPostDispatch');
+        $this->subscribeEvent( 'Enlight_Controller_Dispatcher_ControllerPath_Frontend_PaymentPaymill', 'onGetControllerPath' );
+        $this->subscribeEvent( 'Enlight_Controller_Action_PreDispatch_Frontend_Checkout', 'onCheckoutConfirm');
+        $this->subscribeEvent( 'Enlight_Controller_Dispatcher_ControllerPath_Backend_PaymillLogging', 'paymillBackendControllerLogging');
+    }
+    
+    private function applyBackendViewModifications()
+    {
+        try {
+            $parent = $this->Menu()->findOneBy('label', 'logfile');
+            $this->createMenuItem(array(
+                'label' => 'Paymill',
+                'class' => 'sprite-cards-stack',
+                'active' => 1,
+                'controller' => 'PaymillLogging',
+                'action' => 'index',
+                'parent' => $parent
+                ));
+        } catch (Exception $exception) {
+            throw new Exception("can not create menuentry." . $exception->getMessage());
         }
     }
+    
+    public function paymillBackendControllerLogging()
+    {
+        Shopware()->Template()->addTemplateDir(Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Path() . 'Views/');
+        return Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Path() . "/Controllers/backend/PaymillLogging.php";
+    }
+    
+    /**
+     * Saves the Amount to the session, passes it to the current Template
+     * @param Enlight_Event_EventArgs $arguments
+     */
+    private function saveAmount(Enlight_Event_EventArgs $arguments){
+        //Save amount into session to allow 3Ds
+        $basket = Shopware()->Session()->sOrderVariables['sBasket'];
+        $totalAmount = (round((float)$basket['sAmount'] * 100, 2));
+        
+        Shopware()->Session()->paymillTotalAmount = $totalAmount;
+        $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
+    }
+    
 }

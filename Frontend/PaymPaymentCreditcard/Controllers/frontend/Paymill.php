@@ -36,196 +36,102 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
      */
     public function indexAction()
     {
-
         // read transaction token from session
         $paymillToken = Shopware()->Session()->paymillTransactionToken;
 
         // check if token present
         if (empty($paymillToken)) {
-            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap::logAction("No paymill token was provided. Redirect to payments page.");
-            $url = $this->Front()->Router()->assemble(array(
-                'action' => 'payment',
-                'sTarget' => 'checkout',
-                'sViewport' => 'account',
-                'appendSession' => true,
-                'forceSecure' => true
-                    ));
+            $this->log("No paymill token was provided. Redirect to payments page.", null);
+            
+            $url = $this->Front()->Router()->assemble( array( 'action' => 'payment', 
+                                                             'sTarget' => 'checkout',
+                                                           'sViewport' => 'account', 
+                                                       'appendSession' => true,
+                                                         'forceSecure' => true));
+            
             $this->redirect($url . '&paymill_error=1');
-        } else {
-
-            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap::logAction("Start processing payment with token " . $paymillToken);
-
-            $config = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
-            $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
-
-            if (preg_match("/\/v2\//", $config->apiUrl)) {
-                $libBase = dirname(dirname(dirname(__FILE__))) . '/paymill/v2/lib/';
-                $libVersion = 'v2';
-            } else {
-                $libBase = dirname(dirname(dirname(__FILE__))) . '/paymill/v2/lib/';
-                $libVersion = 'v1';
-            }
-
-            $shopname = Shopware()->Config()->get('shopname');
-
-            // process the payment
-            $result = $this->processPayment(array(
-                'libVersion' => $libVersion,
-                'token' => $paymillToken,
-                'amount' => $this->getAmount() * 100,
-                'currency' => $this->getCurrencyShortName(),
-                'name' => $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname'],
-                'email' => $user['additional']['user']['email'],
-                'description' => $shopname . " " . $user['additional']['user']['email'],
-                'libBase' => $libBase,
-                'privateKey' => $config->privateKey,
-                'apiUrl' => $config->apiUrl,
-                'loggerCallback' => array('Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap', 'logAction')
-                    ));
-            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap::logAction(
-                    "Payment processing resulted in: "
-                    . ($result ? "Success" : "Fail")
-            );
-
-            // finish the order if payment was sucessfully processed
-            if ($result === true) {
-
-                Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap::logAction("Finish order.");
-                $this->saveOrder($paymillToken, md5($paymillToken));
-
-                // reset the session field
-                Shopware()->Session()->paymillTransactionToken = null;
-                return $this->forward('finish', 'checkout', null, array('sUniqueID' => md5(microtime())));
-            } else {
-                Shopware()->Session()->paymillTransactionToken = null;
-                Shopware()->Session()->pigmbhErrorMessage = "An error occured while processing your payment";
-                return $this->forward('error');
-            }
         }
-    }
+        
+        $this->log("Start processing payment with token.", $paymillToken);
 
-    /**
-     * Processes the payment against the paymill API
-     * @param $params array The settings array
-     * @return boolean
-     */
-    private function processPayment($params)
-    {
+        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
+        
 
-        // setup the logger
-        $logger = $params['loggerCallback'];
-
-        // reformat paramters
-        $params['currency'] = strtolower($params['currency']);
-
-        // setup client params
-        $clientParams = array(
-            'email' => $params['email'],
-            'description' => $params['name']
-        );
-
-        // setup credit card params
-        $creditcardParams = array(
-            'token' => $params['token']
-        );
-
-        // setup transaction params
-        $transactionParams = array(
-            'amount' => $params['amount'],
-            'currency' => $params['currency'],
-            'description' => $params['description']
-        );
-
-        require_once $params['libBase'] . 'Services/Paymill/Transactions.php';
-        require_once $params['libBase'] . 'Services/Paymill/Clients.php';
-
-        $clientsObject = new Services_Paymill_Clients(
-                        $params['privateKey'], $params['apiUrl']
-        );
-        $transactionsObject = new Services_Paymill_Transactions(
-                        $params['privateKey'], $params['apiUrl']
-        );
-
-        // In the PHP-Wrapper version v1 an explicit creditcard object exists.
-        // This was replaced by a payments object in v2.
-        if ($params['libVersion'] == 'v1') {
-            require_once $params['libBase'] . 'Services/Paymill/Creditcards.php';
-            $creditcardsObject = new Services_Paymill_Creditcards(
-                            $params['privateKey'], $params['apiUrl']
-            );
-        } elseif ($params['libVersion'] == 'v2') {
-            require_once $params['libBase'] . 'Services/Paymill/Payments.php';
-            $creditcardsObject = new Services_Paymill_Payments(
-                            $params['privateKey'], $params['apiUrl']
-            );
+        // process the payment
+        $swConfig   = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+        $userId = $user['billingaddress']['userID'];
+        $paymentShortcut = $this->getPaymentShortName() == 'paymillcc'? 'cc': 'elv';
+        $privateKey = $swConfig->get("privateKey");
+        $apiUrl = $swConfig->get("apiUrl");
+        $params = array(
+                'token'            => $paymillToken,
+                'authorizedAmount' => (int)Shopware()->Session()->paymillTotalAmount,
+                'amount'           => (int)(round($this->getAmount() * 100,0)),
+                'currency'         => $this->getCurrencyShortName(),
+                'name'             => $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname'],
+                'email'            => $user['additional']['user']['email'],
+                'description'      => Shopware()->Config()->get('shopname') . " " . $user['additional']['user']['email'],
+                'payment'          => $paymentShortcut
+                );
+        
+        $paymentProcessor = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor($privateKey, $apiUrl, null, $params, $this);
+        
+        //Fast Checkout data exists
+        $fcHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, $paymentShortcut);
+        
+        if($fcHelper->loadClientId()){
+           $clientId = $fcHelper->clientId;
+           $paymentProcessor->setClientId($clientId);
         }
-
-        // perform conection to the Paymill API and trigger the payment
-        try {
-
-            // create card
-            $creditcard = $creditcardsObject->create($creditcardParams);
-            if (!isset($creditcard['id'])) {
-                call_user_func_array($logger, array("No creditcard created: " . var_export($creditcard, true)));
-                return false;
-            } else {
-                call_user_func_array($logger, array("Creditcard created: " . $creditcard['id']));
-            }
-
-            // create client
-            $clientParams['creditcard'] = $creditcard['id'];
-            $client = $clientsObject->create($clientParams);
-            if (!isset($client['id'])) {
-                call_user_func_array($logger, array("No client created" . var_export($client, true)));
-                return false;
-            } else {
-                call_user_func_array($logger, array("Client created: " . $client['id']));
-            }
-
-            // create transaction
-            $transactionParams['client'] = $client['id'];
-            if ($params['libVersion'] == 'v2') {
-                $transactionParams['payment'] = $creditcard['id'];
-            }
-            $transaction = $transactionsObject->create($transactionParams);
-            if(isset($transaction['data']['response_code'])){
-                call_user_func_array($logger, array("An Error occured: " . var_export($transaction, true)));
-                return false;
-            }
-
-            if (!isset($transaction['id'])) {
-                call_user_func_array($logger, array("No transaction created" . var_export($transaction, true)));
-                return false;
-            } else {
-                call_user_func_array($logger, array("Transaction created: " . $transaction['id']));
-            }
-
-            // check result
-            if (is_array($transaction) && array_key_exists('status', $transaction)) {
-                if ($transaction['status'] == "closed") {
-                    // transaction was successfully issued
-                    return true;
-                } elseif ($transaction['status'] == "open") {
-                    // transaction was issued but status is open for any reason
-                    call_user_func_array($logger, array("Status is open."));
-                    return false;
-                } else {
-                    // another error occured
-                    call_user_func_array($logger, array("Unknown error." . var_export($transaction, true)));
-                    return false;
-                }
-            } else {
-                // another error occured
-                call_user_func_array($logger, array("Transaction could not be issued."));
-                return false;
-            }
-        } catch (Services_Paymill_Exception $ex) {
-            // paymill wrapper threw an exception
-            call_user_func_array($logger, array("Exception thrown from paymill wrapper: " . $ex->getMessage()));
-            return false;
+        
+        
+        if($fcHelper->entryExists()){
+            $paymentId = $fcHelper->paymentId;
+            $paymentProcessor->setPaymentId($paymentId);
+            $this->log("Processing Payment with Parameters", print_r($params, true), "Additional Parameters given. \n"." User Id: ".$userId."\n Client Id: ".$clientId."\n PaymentId: ".$paymentId);
         }
-
-        return true;
+        
+        else{
+            $this->log("Processing Payment with Parameters", print_r($params, true));
+        }
+        
+        $result = $paymentProcessor->processPayment();
+        
+        $this->log("Payment processing resulted in: ". ($result ? "Success" : "Failure"), print_r($result, true));
+        
+        // finish the order if payment was sucessfully processed
+        if ($result !== true) {
+            Shopware()->Session()->paymillTransactionToken = null;
+            Shopware()->Session()->pigmbhErrorMessage = "An error occured while processing your payment";
+            return $this->forward('error');
+            
+        }
+        
+        //Save Fast Checkout Data
+        $isFastCheckoutEnabled = $swConfig->get("paymillFastCheckout");
+        if($isFastCheckoutEnabled){
+            $clientId = $paymentProcessor->getClientId();
+            $paymentId = $paymentProcessor->getPaymentId();
+            $this->log("Saving FC Data for User: $userId with the payment: $paymentShortcut", $clientId, $paymentId);
+            $fcHelper->saveClientId($clientId); 
+            $fcHelper->savePaymentId($paymentId) ;
+        }
+        
+        //Create the order
+        $finalPaymillToken = $paymillToken === "NoTokenRequired" ? $this->createPaymentUniqueId(): $paymillToken;
+        $ordernumber = $this->saveOrder($finalPaymillToken, md5($finalPaymillToken));
+        $this->log("Finish order.", "Ordernumber: ". $ordernumber, "using Token: ". $finalPaymillToken);
+        
+        // reset the session field
+        Shopware()->Session()->paymillTransactionToken = null;
+        
+        $this->redirect(
+                array(
+                    "controller" => "checkout",
+                    "action" => "finish",
+                    "forceSecure" => 1
+                )
+        );
     }
 
     /**
@@ -248,4 +154,15 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         );
     }
 
+    /**
+     * Uses the LoggingManager to insert a new entry into the Log
+     * @param String $merchantInfo      Information of use to the merchant
+     * @param String $devInfo           Information of use to developers
+     * @param String $devInfoAdditional Can be null
+     */
+    public function log($merchantInfo, $devInfo, $devInfoAdditional = null)
+    {
+        $loggingManager = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManagerShopware();
+        $loggingManager->write($merchantInfo, $devInfo, $devInfoAdditional);
+    }
 }
