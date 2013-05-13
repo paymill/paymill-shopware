@@ -85,12 +85,9 @@ class PaymentProcessor
                         'description' => $this->_description
                     )
             );
-            try{
-               $this->_validateResult($client, 'Client'); 
-            }catch(Exception $exception){
-               throw new Exception($exception->getMessage());
-            }
             
+            $this->_validateResult($client, 'Client'); 
+                        
             $this->_clientId = $client['id'];
         }
         return $this->_clientId;
@@ -113,11 +110,8 @@ class PaymentProcessor
                         'client' => $this->_clientId
                     )
             );
-            try{
-               $this->_validateResult($payment, 'Payment'); 
-            }catch(Exception $exception){
-               throw new Exception($exception->getMessage());
-            }
+            $this->_validateResult($payment, 'Payment'); 
+            
             $this->_paymentId = $payment['id'];
         }
         return true;
@@ -159,11 +153,8 @@ class PaymentProcessor
                     'client' => $this->_clientId
                 )
         );
-        try{
-            $this->_validateResult($transaction, 'Transaction'); 
-         }catch(Exception $exception){
-            throw new Exception($exception->getMessage());
-         }
+        $this->_validateResult($transaction, 'Transaction'); 
+         
         $this->_transactionId = $transaction['id'];
         return true;
     }
@@ -270,44 +261,41 @@ class PaymentProcessor
      */
     final private function _validateResult($transaction, $type)
     {
-        try{
-            if (isset($transaction['data']['response_code']) && $transaction['data']['response_code'] !== 20000) {
-                $this->_log("An Error occured: " . $transaction['data']['response_code'], var_export($transaction, true));
-                throw new Exception("Invalid Result Exception: Invalid ResponseCode");
-            }
+        
+        if (isset($transaction['data']['response_code']) && $transaction['data']['response_code'] !== 20000) {
+            $this->_log("An Error occured: " . $transaction['data']['response_code'], var_export($transaction, true));
+            throw new Exception("Invalid Result Exception: Invalid ResponseCode");
+        }
 
-            if (!isset($transaction['id']) && !isset($transaction['data']['id'])) {
-                $this->_log("No $type created.", var_export($transaction, true));
-                throw new Exception("Invalid Result Exception: Invalid Id");
-            } else {
-                $this->_log("$type created.", $transaction['id']);
-            }
+        if (!isset($transaction['id']) && !isset($transaction['data']['id'])) {
+            $this->_log("No $type created.", var_export($transaction, true));
+            throw new Exception("Invalid Result Exception: Invalid Id");
+        } else {
+            $this->_log("$type created.", $transaction['id']);
+        }
 
-            // check result
-            if ($type == 'Transaction') {
-                if (is_array($transaction) && array_key_exists('status', $transaction)) {
-                    if ($transaction['status'] == "closed") {
-                        // transaction was successfully issued
-                        return true;
-                    } elseif ($transaction['status'] == "open") {
-                        // transaction was issued but status is open for any reason
-                        $this->_log("Status is open.", var_export($transaction, true));
-                        throw new Exception("Invalid Result Exception: Invalid Orderstate");
-                    } else {
-                        // another error occured
-                        $this->_log("Unknown error." . var_export($transaction, true));
-                        throw new Exception("Invalid Result Exception: Unknown Error");
-                    }
+        // check result
+        if ($type == 'Transaction') {
+            if (is_array($transaction) && array_key_exists('status', $transaction)) {
+                if ($transaction['status'] == "closed") {
+                    // transaction was successfully issued
+                    return true;
+                } elseif ($transaction['status'] == "open") {
+                    // transaction was issued but status is open for any reason
+                    $this->_log("Status is open.", var_export($transaction, true));
+                    throw new Exception("Invalid Result Exception: Invalid Orderstate");
                 } else {
                     // another error occured
-                    $this->_log("$type could not be issued.", var_export($transaction, true));
-                    throw new Exception("Invalid Result Exception: $type could not be issued.");
+                    $this->_log("Unknown error." . var_export($transaction, true));
+                    throw new Exception("Invalid Result Exception: Unknown Error");
                 }
             } else {
-                return true;
+                // another error occured
+                $this->_log("$type could not be issued.", var_export($transaction, true));
+                throw new Exception("Invalid Result Exception: $type could not be issued.");
             }
-        }  catch (Exception $e){
-            return false;
+        } else {
+            return true;
         }
     }
     
@@ -336,7 +324,7 @@ class PaymentProcessor
             }
                         
             return true;
-        } catch (Services_Paymill_Exception $ex) {
+        } catch (Exception $ex) {
             // paymill wrapper threw an exception
             $this->_log("Exception thrown from paymill wrapper.", $ex->getMessage());
             return false;
