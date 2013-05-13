@@ -474,7 +474,7 @@ class PaymentProcessor
      */
     public function setLibBase($path = null)
     {
-        $this->_libBase =  path == null ? dirname(__FILE__) . "/" : $path;
+        $this->_libBase =  $path == null ? dirname(__FILE__) . "/" : $path;
     }
     
     /**
