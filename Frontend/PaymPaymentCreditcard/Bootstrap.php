@@ -35,7 +35,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function getVersion()
     {
-        return "1.0.1";
+        return "1.0.2";
     }
     /**
      * Get Info for the Pluginmanager
