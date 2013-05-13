@@ -24,7 +24,7 @@
  * @category   Shopware
  * @package    Shopware_Plugins
  * @subpackage Paymill
- * @author     Paymill
+ * @author     Paymill 
  */
 class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
@@ -384,4 +384,4 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
     }
     
-}
+} 
