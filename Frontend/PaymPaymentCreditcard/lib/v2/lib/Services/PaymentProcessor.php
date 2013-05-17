@@ -23,7 +23,6 @@ class PaymentProcessor
     private $_authorizedAmount;     //Amount the Token was generated with
     private $_amount;               //Current Amount
     private $_currency;             //Currency (of both amounts)
-    private $_payment;              //String contaning the current payment type (either cc or elv)
     private $_name;                 //Customername
     private $_email;                //Customer Email Adress
     private $_description;          
@@ -41,10 +40,9 @@ class PaymentProcessor
     * @param String <b>$libBase</b> Path to the lib Base (Can be null, Default Path will be used)
     * @param array <b>$params</b>( <br />
     *    <b>token</b>,               generated Token <br />
-    *    <b>authorizedAmount</b>,    Tokenamount <br />
+    *    <b>authorizedAmount</b>,    Tokenamount (Can be left unset if not needed)<br />
     *    <b>amount</b>,              Basketamount <br />
     *    <b>currency</b>,            Transaction currency <br />
-    *    <b>payment</b>,             The chosen payment (cc | elv) <br />
     *    <b>name</b>,                Customer name <br />
     *    <b>email</b>,               Customer emailaddress <br />
     *    <b>description</b>,         Description for transactions <br />
@@ -60,7 +58,6 @@ class PaymentProcessor
         $this->_authorizedAmount        = $params['authorizedAmount'];
         $this->_amount                  = $params['amount'];   
         $this->_currency                = $params['currency'];   
-        $this->_payment                 = $params['payment'];    
         $this->_name                    = $params['name'];      
         $this->_email                   = $params['email'];
         $this->_description             = $params['description'];
@@ -129,7 +126,7 @@ class PaymentProcessor
                 array(
                     'transactionId' => $this->_transactionId,
                     'params' => array(
-                        'amount' => $this->_amount
+                        'amount' => $this->_authorizedAmount
                     )
                 )
         );
@@ -146,7 +143,7 @@ class PaymentProcessor
     {
         $transaction = $this->_transactionsObject->create(
                 array(
-                    'amount' => $this->_amount,
+                    'amount' => $this->_authorizedAmount,
                     'currency' => $this->_currency,
                     'description' => $this->_description,
                     'payment' => $this->_paymentId,
@@ -199,13 +196,16 @@ class PaymentProcessor
      */
     final private function _validateParameter()
     {
+        if(!(isset($this->_authorizedAmount))){
+            $this->_authorizedAmount = $this->_amount;
+        }
+        
         $validation = true;
         $parameter = array(
             "token"             => $this->_token,
             "authorizedAmount"  => $this->_authorizedAmount,
             "amount"            => $this->_amount,
             "currency"          => $this->_currency,
-            "payment"           => $this->_payment,
             "name"              => $this->_name,
             "email"             => $this->_email,
             "description"       => $this->_description);
@@ -215,7 +215,6 @@ class PaymentProcessor
             "authorizedAmount"  => 'integer',
             "amount"            => 'integer',
             "currency"          => 'string',
-            "payment"           => 'string',
             "name"              => 'string',
             "email"             => 'string',
             "description"       => 'string');
@@ -316,10 +315,10 @@ class PaymentProcessor
                         
             if ($this->_authorizedAmount > $this->_amount) {
                 // basketamount is lower than the authorized amount
-                $this->_amount = $this->_authorizedAmount - $this->_amount;
+                $this->_authorizedAmount = $this->_authorizedAmount - $this->_amount;
                 $this->_createRefund();
             } elseif($this->_authorizedAmount < $this->_amount) {
-                $this->_amount = $this->_amount - $this->_authorizedAmount;
+                $this->_authorizedAmount = $this->_amount - $this->_authorizedAmount;
                 $this->_createTransaction();
             }
                         
@@ -412,15 +411,6 @@ class PaymentProcessor
     public function setCurrency($arg)
     {
         $this->_currency = $arg;
-    }
-    
-    /**
-     * Sets the payment string
-     * @param String $arg
-     */
-    public function setPayment($arg)
-    {
-        $this->_payment = $arg;
     }
     
     /**
