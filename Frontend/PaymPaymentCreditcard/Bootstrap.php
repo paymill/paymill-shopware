@@ -186,18 +186,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             'required' => true
         ));
 
-        $form->setElement('text', 'bridgeUrl', array(
-            'label' => 'Bridge URL',
-            'required' => true,
-            'value' => 'https://bridge.paymill.com/'
-        ));
-
-        $form->setElement('text', 'apiUrl', array(
-            'label' => 'API URL',
-            'required' => true,
-            'value' => 'https://api.paymill.com/v2/'
-        ));
-
         $form->setElement('checkbox', 'paymillDebugging', array(
             'label' => 'Debugging aktivieren',
             'value' => false

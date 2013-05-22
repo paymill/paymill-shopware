@@ -2,7 +2,7 @@
 <script type="text/javascript">
   var PAYMILL_PUBLIC_KEY = '{config name=publicKey}';
 </script>
-<script type="text/javascript" src="{config name=bridgeUrl}"></script>
+<script type="text/javascript" src="https://bridge.paymill.com/"></script>
 <script type="text/javascript">
     function debug(message){
         {if $debug}
