@@ -46,7 +46,12 @@ class Services_Paymill_Refunds extends Services_Paymill_Base
     }
 
     /**
-     * {@inheritDoc}
+     * General REST PUT verb
+     * Update resource item
+     *
+     * @param array $itemData
+     *
+     * @return array item updated or null
      */
     public function update(array $itemData = array())
     {

@@ -1,5 +1,6 @@
 <?php
 /**
+ * This class acts as an easy to use gateway for the paymill phph wrapper.
  * @version    1.0.0
  * @category   PayIntelligent
  * @copyright  Copyright (c) 2013 PayIntelligent GmbH (http://payintelligent.de)
@@ -34,7 +35,7 @@ class PaymentProcessor
     private $_paymentId = null;
     
    /**
-    * Constructor
+    * Creates an object of the PaymentProcessor class.
     * @param String <b>$privateKey</b> Paymill-PrivateKey
     * @param String <b>$apiUrl</b> Paymill-Api Url
     * @param String <b>$libBase</b> Path to the lib Base (Can be null, Default Path will be used)
@@ -378,7 +379,7 @@ class PaymentProcessor
     }
     
     /**
-     * Sets the token
+     * This method sets the token
      * @param String $arg
      */
     public function setToken($arg)
@@ -396,7 +397,7 @@ class PaymentProcessor
     }
     
     /**
-     * Sets the amount
+     * This method sets the amount
      * @param String $arg
      */
     public function setAmount($arg)

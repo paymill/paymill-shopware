@@ -123,7 +123,11 @@ abstract class LoggingManagerAbstract
     }
     
     /**
-     * 
+     * write(string, string, string [can be null])<br />
+     * Uses the abstract method insertOne() to insert the arguments into the db log
+     * @param String $merchantInfo      Log Message for the Merchant to understand. <b>Keep this one easy.</b>
+     * @param String $devInfo           Log information for the dev in here. If you like to log an array, this is the place.
+     * @param String $devInfoAdditional Log information for the dev in here. This field is optional but will be displayed near the first info. If you want something to be inspected seperately, log it here.
      */
     public function write($merchantInfo, $devInfo, $devInfoAdditional = null)
     {

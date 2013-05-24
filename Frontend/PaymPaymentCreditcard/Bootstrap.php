@@ -303,7 +303,11 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         return in_array($user['additional']['payment']['name'], array("paymillcc", "paymilldebit"));
     }
     
-    
+    /**
+     * Checks if there is saved Data for FastCheckout associated with the current user
+     * @param   String    $paymentNameArg
+     * @return  boolean success
+     */
     public static function isFcReady($paymentNameArg = null){
         $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
         if(in_array($user['additional']['payment']['name'], array("paymillcc", "paymilldebit"))){
@@ -336,6 +340,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $this->subscribeEvent( 'Enlight_Controller_Dispatcher_ControllerPath_Backend_PaymillLogging', 'paymillBackendControllerLogging');
     }
     
+    /**
+     * Modifies the Backendmenu by adding a PaymillLogging Label as a child element of the shopware logging
+     * @throws Exception "can not create menuentry"
+     */
     private function applyBackendViewModifications()
     {
         try {
@@ -353,6 +361,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         }
     }
     
+    /**
+     * Return the path of the backendcontroller
+     * @return String backend controller path
+     */
     public function paymillBackendControllerLogging()
     {
         Shopware()->Template()->addTemplateDir(Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Path() . 'Views/');

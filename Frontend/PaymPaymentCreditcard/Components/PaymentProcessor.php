@@ -1,6 +1,6 @@
 <?php
 /**
- * PaymentProcessor
+ * This class stub allows the shop compliant usage of the paymill libs PaymentProcessor class
  *
  * @category   Shopware
  * @package    Shopware_Plugins
