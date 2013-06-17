@@ -83,7 +83,7 @@
                                 exp_month: $('#card-expiry-month').val(),
                                 exp_year: $('#card-expiry-year').val(),
                                 cvc: $('#card-cvc').val(),
-                                amount_int: {$tokenAmount} ,
+                                amount_int: '{$tokenAmount}' ,
                                 currency: '{config name=currency|upper}'
                             }, PaymillResponseHandler);
                         }
