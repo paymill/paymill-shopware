@@ -42,22 +42,22 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
             width:'100%',
             columns: [
             {
-                text: 'Datum',
+                text: '{s namespace=Paymill name=date}Datum{/s}',
                 dataIndex: 'entryDate',
                 width:50
             },
             {
-                text: 'Version',
+                text: '{s namespace=Paymill name=version}Version{/s}',
                 dataIndex: 'version',
                 width:50
             },
             {
-                text: 'H&auml;ndlerinformation',
+                text: '{s namespace=Paymill name=merchantinfo}H&auml;ndlerinformation{/s}',
                 dataIndex: 'merchantInfo',
                 width:350
             },{
                         xtype: 'actioncolumn',
-                        header: 'actions',
+                        header: '{s namespace=Paymill name=action}Actions{/s}',
                         width: 60,
                         items: [
                             {
@@ -108,7 +108,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                                 defaultType: 'displayfield',
                                 items: [
                                 {
-                                    fieldLabel  : 'Date',
+                                    fieldLabel  : '{s namespace=Paymill name=date}Datum{/s}',
                                     value   : record.get('entryDate'),
                                     fieldStyle:{ margin:'0 0 0 50px' }
                                 }
@@ -119,11 +119,11 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                                 margin: '0 0 0 50px',
                                 items: [
                                 {
-                                    fieldLabel  : 'Version',
+                                    fieldLabel  : '{s namespace=Paymill name=version}Version{/s}',
                                     value       : record.get('version'),
                                     fieldStyle:{ margin:'0 0 0 50px' }
                                 }]}]}),
-                
+
                 Ext.create('Ext.panel.Panel',{
                             layout: 'column',
                             items:[
@@ -131,7 +131,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                                 xtype:'panel',
                                 border: false,
                                 layout:'fit',
-                                title:'Developer Information',
+                                title:'{s namespace=Paymill name=devinfo}Entwicklerinformation{/s}',
                                 html: record.get('devInfo'),
                                 autoScroll:true,
                                 width:'50%',
@@ -140,7 +140,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                                 xtype:'panel',
                                 border: false,
                                 layout:'fit',
-                                title:'Additional Developer Information',
+                                title:'{s namespace=Paymill name=additionaldevinfo}zus&auml;tzliche Entwicklerinformation{/s}',
                                 html: record.get('devInfoAdditional'),
                                 autoScroll:true,
                                 width:'50%',
@@ -150,7 +150,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                         })
                             ]
                 }
-                        
+
                 ]})
             ]
         }).show();
