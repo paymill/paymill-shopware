@@ -42,20 +42,20 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         // check if token present
         if (empty($paymillToken)) {
             $this->log("No paymill token was provided. Redirect to payments page.", null);
-            
-            $url = $this->Front()->Router()->assemble( array( 'action' => 'payment', 
+
+            $url = $this->Front()->Router()->assemble( array( 'action' => 'payment',
                                                              'sTarget' => 'checkout',
-                                                           'sViewport' => 'account', 
+                                                           'sViewport' => 'account',
                                                        'appendSession' => true,
                                                          'forceSecure' => true));
-            
+
             $this->redirect($url . '&paymill_error=1');
         }
-        
+
         $this->log("Start processing payment with token.", $paymillToken);
 
         $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
-        
+
 
         // process the payment
         $swConfig   = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
@@ -73,58 +73,63 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
                 'description'      => Shopware()->Config()->get('shopname') . " " . $user['additional']['user']['email'],
                 'payment'          => $paymentShortcut
                 );
-        
+
+
+        $source = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->getVersion();
+        $source .= "_shopware";
+        $source .= "_".Shopware()->Config()->get('version');
+
         $paymentProcessor = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor($privateKey, $apiUrl, null, $params, $this);
-        
+        $paymentProcessor->setSource($source);
         //Fast Checkout data exists
         $fcHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, $paymentShortcut);
-        
+
         if($fcHelper->loadClientId()){
            $clientId = $fcHelper->clientId;
            $paymentProcessor->setClientId($clientId);
         }
-        
-        
+
+
         if($fcHelper->entryExists()){
             $paymentId = $fcHelper->paymentId;
             $paymentProcessor->setPaymentId($paymentId);
             $this->log("Processing Payment with Parameters", print_r($params, true), "Additional Parameters given. \n"." User Id: ".$userId."\n Client Id: ".$clientId."\n PaymentId: ".$paymentId);
         }
-        
+
         else{
             $this->log("Processing Payment with Parameters", print_r($params, true));
         }
-        
+
         $result = $paymentProcessor->processPayment();
-        
+
         $this->log("Payment processing resulted in: ". ($result ? "Success" : "Failure"), print_r($result, true));
-        
+
         // finish the order if payment was sucessfully processed
         if ($result !== true) {
             Shopware()->Session()->paymillTransactionToken = null;
             Shopware()->Session()->pigmbhErrorMessage = "An error occured while processing your payment";
             return $this->forward('error');
-            
+
         }
-        
+
         //Save Fast Checkout Data
         $isFastCheckoutEnabled = $swConfig->get("paymillFastCheckout");
         if($isFastCheckoutEnabled){
             $clientId = $paymentProcessor->getClientId();
             $paymentId = $paymentProcessor->getPaymentId();
             $this->log("Saving FC Data for User: $userId with the payment: $paymentShortcut", $clientId, $paymentId);
-            $fcHelper->saveClientId($clientId); 
+            $fcHelper->saveClientId($clientId);
             $fcHelper->savePaymentId($paymentId) ;
         }
-        
+
         //Create the order
         $finalPaymillToken = $paymillToken === "NoTokenRequired" ? $this->createPaymentUniqueId(): $paymillToken;
         $ordernumber = $this->saveOrder($finalPaymillToken, md5($finalPaymillToken));
         $this->log("Finish order.", "Ordernumber: ". $ordernumber, "using Token: ". $finalPaymillToken);
-        
+
         // reset the session field
         Shopware()->Session()->paymillTransactionToken = null;
-        
+
         $this->redirect(
                 array(
                     "controller" => "checkout",
