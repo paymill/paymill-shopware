@@ -1,7 +1,7 @@
-Paymill-Shopware-4
+Paymill-Shopware
 ==================
 
-Payment plugin for Shopware Version 4.
+Payment plugin for Shopware Version 4.0 - 4.1
 
     https://github.com/Paymill/Zahlungsformular/archive/master.zip
 
