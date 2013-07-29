@@ -61,7 +61,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $swConfig   = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $userId = $user['billingaddress']['userID'];
         $paymentShortcut = $this->getPaymentShortName() == 'paymillcc'? 'cc': 'elv';
-        $privateKey = $swConfig->get("privateKey");
+        $privateKey = trim($swConfig->get("privateKey"));
         $apiUrl = "https://api.paymill.com/v2/";
         $params = array(
                 'token'            => $paymillToken,
