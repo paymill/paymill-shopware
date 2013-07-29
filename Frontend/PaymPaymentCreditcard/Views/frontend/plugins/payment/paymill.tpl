@@ -73,6 +73,15 @@
         var paymill_form_id = "payment_mean{$payment_mean.id}";
         $("#basketButton").click(function(event) {
             if ($('#' + paymill_form_id).attr("checked") == "checked") {
+                if($("input[type='checkbox'][name='sAGB']").length){
+                    if($("input[type='checkbox'][name='sAGB']").attr('checked') !== "checked"){
+                        $("input[type='checkbox'][name='sAGB']").next('label').addClass('instyle_error');
+                        $('html, body').animate({
+                            scrollTop: $("input[type='checkbox'][name='sAGB']").offset().top - 100
+                        }, 1000);
+                        return false;
+                    }
+                }
                 if (validate()) {
                     try {
                         if(isCC()){ //If CC
@@ -97,12 +106,16 @@
                         alert("Ein Fehler ist aufgetreten: " + e);
                     }
                 }else{
-                    $('html, body').animate({
-                        scrollTop: $("#errorsCc").offset().top - 100
-                    }, 1000);
-                    $('html, body').animate({
-                        scrollTop: $("#errorsElv").offset().top - 100
-                    }, 1000);
+                    if(isCC()){
+                        $('html, body').animate({
+                            scrollTop: $("#errorsCc").offset().top - 100
+                        }, 1000);
+                    }
+                    if(isELV()){
+                        $('html, body').animate({
+                            scrollTop: $("#errorsElv").offset().top - 100
+                        }, 1000);
+                    }
                 }
                 return false;
             }
@@ -167,7 +180,7 @@
             {if $payment_mean.name == 'paymilldebit' }
                 <p class="none">
                     <label>{s namespace=Paymill name=form_accountholder}Kontoinhaber *{/s}</label>
-                    <input id="paymill_accountholder" type="text" size="20" class="text" />
+                    <input id="paymill_accountholder" type="text" size="20" class="text" value="{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
                 </p>
                 <p class="none">
                     <label>{s namespace=Paymill name=form_accountnumber}Kontonummer *{/s}</label>
@@ -190,7 +203,7 @@
                         {if $payment_mean.name == 'paymillcc'}
                             {s namespace=Paymill name=form_paymilllabel_cc}Sichere Kreditkartenzahlung powered by{/s}
                         {else}
-                            {s namespace=Paymill name=form_paymilllabel_debit}Sicheres Lastschriftverfahren powered by{/s}
+                            {s namespace=Paymill name=form_paymilllabel_debit}Lastschriftverfahren powered by{/s}
                         {/if}
                         <a href="http://www.paymill.de" target="_blank">Paymill</a>
                     </div>

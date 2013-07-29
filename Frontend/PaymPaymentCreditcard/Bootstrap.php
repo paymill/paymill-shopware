@@ -36,7 +36,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function getVersion()
     {
-        return "1.0.3";
+        return "1.0.4";
     }
 
     /**
@@ -184,7 +184,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 . "('Paymill', 'form_bankcode', 'Bankcode *', '2', '%SHOPID%', NOW(), NOW()), "
                 . "('Paymill', 'form_info', 'Fields marked with a * are required.', '2', '%SHOPID%', NOW(), NOW()), "
                 . "('Paymill', 'form_paymilllabel_cc', 'Secure creditcardpayment powered by', '2', '%SHOPID%', NOW(), NOW()), "
-                . "('Paymill', 'form_paymilllabel_debit', 'Secure directdebitpayment powered by', '2', '%SHOPID%', NOW(), NOW());";
+                . "('Paymill', 'form_paymilllabel_debit', 'directdebitpayment powered by', '2', '%SHOPID%', NOW(), NOW());";
         try {
             $shopIDs = Shopware()->Db()->fetchAll($sql_shop_ids);
             $sql = "";
