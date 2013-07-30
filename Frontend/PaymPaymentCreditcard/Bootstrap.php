@@ -157,6 +157,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         }
     }
 
+    /**
+     * Adds the Translationsnippets into the database.
+     * Returns true or throws an execption in case of an error
+     *
+     * @return true
+     * @throws Exception
+     */
     private function addTranslationSnippets()
     {
         $sql_shop_ids = "SELECT `id` FROM `s_core_shops` WHERE `locale_id`= 2";
