@@ -136,7 +136,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             foreach ($translations as $locale => $snippets) {
                 $localeModel = $shopRepository->findOneBy(array(
                     'locale' => $locale
-                        ));
+                ));
                 foreach ($snippets as $element => $snippet) {
                     if ($localeModel === null) {
                         continue;
@@ -194,11 +194,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 . "('Paymill', 'form_paymilllabel_debit', 'directdebitpayment powered by', '2', '%SHOPID%', NOW(), NOW());";
         try {
             $shopIDs = Shopware()->Db()->fetchAll($sql_shop_ids);
-            $sql = "";
-            foreach ($shopIDs as $row) {
-                $sql .= preg_replace("/%SHOPID%/", $row['id'], $sql_snippets);
+
+            if (!empty($shopIDs)) {
+                $sql = "";
+                foreach ($shopIDs as $row) {
+                    $sql .= preg_replace("/%SHOPID%/", $row['id'], $sql_snippets);
+                }
+                Shopware()->Db()->exec($sql);
             }
-            Shopware()->Db()->exec($sql);
             return true;
         } catch (Exception $exception) {
             $this->uninstall();
