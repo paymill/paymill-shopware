@@ -108,6 +108,9 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         if ($result !== true) {
             Shopware()->Session()->paymillTransactionToken = null;
             Shopware()->Session()->pigmbhErrorMessage = "An error occured while processing your payment";
+            if(Shopware()->Locale()->getLanguage() === 'de'){
+                Shopware()->Session()->pigmbhErrorMessage = 'W&auml;hrend Ihrer Zahlung ist ein Fehler aufgetreten.';
+            }
             return $this->forward('error');
 
         }
