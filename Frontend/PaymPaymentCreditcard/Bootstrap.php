@@ -50,8 +50,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             'version' => $this->getVersion(),
             'autor' => 'PayIntelligent GmbH',
             'source' => $this->getSource(),
-            'support' => 'http://www.payintelligent.de',
-            'link' => 'http://www.payintelligent.de',
+            'supplier' => 'PAYMILL GmbH',
+            'support' => 'support@paymill.com',
+            'link' => 'https://www.paymill.com',
             'copyright' => 'Copyright (c) 2013, PayIntelligent GmbH',
             'label' => 'Paymill',
             'description' => ''
