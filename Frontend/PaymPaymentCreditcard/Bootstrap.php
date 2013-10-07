@@ -49,7 +49,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function getVersion()
     {
-        return "1.0.6";
+        return "1.0.7";
     }
 
     /**
@@ -151,7 +151,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $payment = $paymentName == 'paymillcc' ? 'ccPaymentId' : 'elvPaymentId';
             $sql = "SELECT count(`$payment`) FROM `paymill_fastCheckout` WHERE `userId` = $userId AND `$payment` IS NOT null";
             $fcEnabled = Shopware()->Db()->fetchOne($sql);
-            $log = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManagerShopware();
 
             return $fcEnabled == 1;
         }
@@ -225,7 +224,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         if (self::isPaymillPayment()) {
             $view->sRegisterFinished = 'false';
             if (self::isFcReady()) {
-                $view->sRegisterFinished = null;
                 Shopware()->Session()->paymillTransactionToken = "NoTokenRequired";
             }
         }
@@ -448,8 +446,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $form->setElement('checkbox', 'paymillLogging', array('label' => 'Logging aktivieren', 'value' => false));
 
         $form->setElement('checkbox', 'paymillShowLabel', array('label' => 'Paymill Label anzeigen', 'value' => false));
-
-        $form->save();
     }
 
     /**
