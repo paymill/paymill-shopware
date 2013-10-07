@@ -118,6 +118,7 @@
             var brand = paymill.cardType($('#card-number').val());
             brand = brand.toLowerCase();
             $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
+            $('#card-cvc').val("");
             if (brand !== 'unknown') {
                 $('#card-number').addClass("paymill-card-number-" + brand);
             }
