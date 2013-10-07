@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__FILE__) . '/../lib/Services/PaymentProcessor.php';
+require_once dirname(__FILE__) . '/../lib/Services/Paymill/PaymentProcessor.php';
 
 /**
  * This class stub allows the shop compliant usage of the paymill libs PaymentProcessor class
@@ -10,6 +10,6 @@ require_once dirname(__FILE__) . '/../lib/Services/PaymentProcessor.php';
  * @subpackage Paymill
  * @author     Paymill
  */
-class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor extends PaymentProcessor
+class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor extends Services_Paymill_PaymentProcessor
 {
 }
