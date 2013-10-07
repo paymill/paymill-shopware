@@ -49,7 +49,12 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             $this->redirect($url . '&paymill_error=1');
         }
 
-        $this->log("Start processing payment with token.", $paymillToken);
+        if($paymillToken === "NoTokenRequired"){
+            $this->log("Start processing payment without token.", $paymillToken);
+        } else{
+            $this->log("Start processing payment with token.", $paymillToken);
+        }
+
 
         $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
 
@@ -69,6 +74,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
 
         $paymentProcessor = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor($privateKey, $apiUrl, null, $params, $this);
         $paymentProcessor->setSource($source);
+
         //Fast Checkout data exists
         $fcHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, $paymentShortcut);
 
@@ -78,9 +84,11 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         }
 
         if ($fcHelper->entryExists()) {
-            $paymentId = $fcHelper->paymentId;
-            $paymentProcessor->setPaymentId($paymentId);
-            $this->log("Processing Payment with Parameters", print_r($params, true), "Additional Parameters given. \n" . " User Id: " . $userId . "\n Client Id: " . $clientId . "\n PaymentId: " . $paymentId);
+            if($paymillToken === "NoTokenRequired"){
+                $paymentId = $fcHelper->paymentId;
+                $paymentProcessor->setPaymentId($paymentId);
+                $this->log("Processing Payment with Parameters", print_r($params, true), "Additional Parameters given. \n" . " User Id: " . $userId . "\n Client Id: " . $clientId . "\n PaymentId: " . $paymentId);
+            }
         } else {
             $this->log("Processing Payment with Parameters", print_r($params, true));
         }
