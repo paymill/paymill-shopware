@@ -77,7 +77,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
         if (self::isPaymillPayment()) {
             $view->sRegisterFinished = 'false';
-            if (self::isFcReady()) {
+            if (self::isFcReady() && empty(Shopware()->Session()->paymillTransactionToken)) {
                 $view->sRegisterFinished = null;
                 Shopware()->Session()->paymillTransactionToken = "NoTokenRequired";
             }
@@ -182,8 +182,46 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     public function onCheckoutConfirm(Enlight_Event_EventArgs $arguments)
     {
         $params = $arguments->getRequest()->getParams();
-        $arguments->getSubject()->View()->ccHasFcData = $this->isFcReady("paymillcc");
-        $arguments->getSubject()->View()->elvHasFcData = $this->isFcReady("paymilldebit");
+        $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
+        $userId = $user['billingaddress']['userID'];
+        $privateKey = trim($swConfig->get("privateKey"));
+        $apiUrl = "https://api.paymill.com/v2/";
+
+        $view = $arguments->getSubject()->View();
+
+        if(self::isFcReady("paymillcc")){
+            require_once dirname(__FILE__) . '/lib/Services/Paymill/Payments.php';
+            $helper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, 'cc');
+            $helper->loadPaymentId();
+            $paymentId = $helper->paymentId;
+            $ccPayment = new Services_Paymill_Payments($privateKey, $apiUrl);
+            $paymentObject = $ccPayment->getOne($paymentId);
+            $arguments->getSubject()->View()->paymillCardNumber = "..." . $paymentObject['last4'];
+            $arguments->getSubject()->View()->paymillCvc = "***";
+            $arguments->getSubject()->View()->paymillMonth = $paymentObject['expire_month'];
+            $arguments->getSubject()->View()->paymillYear = $paymentObject['expire_year'];
+        }else{
+            $arguments->getSubject()->View()->paymillCardNumber = "";
+            $arguments->getSubject()->View()->paymillCvc = "";
+            $arguments->getSubject()->View()->paymillMonth = "";
+            $arguments->getSubject()->View()->paymillYear = "";
+        }
+
+        if(self::isFcReady("paymilldebit")){
+            require_once dirname(__FILE__) . '/lib/Services/Paymill/Payments.php';
+            $helper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, 'elv');
+            $helper->loadPaymentId();
+            $paymentId = $helper->paymentId;
+            $elvPayment = new Services_Paymill_Payments($privateKey, $apiUrl);
+            $paymentObject = $elvPayment->getOne($paymentId);
+            $arguments->getSubject()->View()->paymillAccountNumber =  $paymentObject['account'];
+            $arguments->getSubject()->View()->paymillBankCode = $paymentObject['code'];
+        }else{
+            $arguments->getSubject()->View()->paymillAccountNumber = "";
+            $arguments->getSubject()->View()->paymillBankCode = "";
+        }
+
         if (self::isPaymillPayment()) {
             $view->sRegisterFinished = 'false';
             if (self::isFcReady()) {
@@ -199,7 +237,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
         $pigmbhErrorMessage = Shopware()->Session()->pigmbhErrorMessage;
         unset(Shopware()->Session()->pigmbhErrorMessage);
-        $view = $arguments->getSubject()->View();
         $content = '{if $pigmbhErrorMessage} <div class="grid_20">' . '<div class="error">' . '<div class="center">' . '<strong> {$pigmbhErrorMessage} </strong>' . '</div>' . '</div>' . '</div> {/if}';
 
         $view->extendsBlock("frontend_index_content_top", $content, "append");
