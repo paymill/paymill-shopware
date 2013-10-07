@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__FILE__) . '/../lib/v2/lib/Services/PaymentProcessor.php';
+require_once dirname(__FILE__) . '/../lib/Services/PaymentProcessor.php';
 
 /**
  * This class stub allows the shop compliant usage of the paymill libs PaymentProcessor class

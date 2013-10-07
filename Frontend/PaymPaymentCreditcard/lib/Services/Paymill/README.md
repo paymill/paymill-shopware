@@ -1,6 +1,10 @@
-# Paymill-PHP
+Paymill-PHP
+===========
 
-# Getting started with Paymill
+[![Build Status](https://travis-ci.org/paymill/paymill-php.png?branch=master)](https://travis-ci.org/paymill/paymill-php)
+
+Getting started with Paymill
+----------------------------
 
 1.  Include the required PHP file from the paymill PHP library. For example via: 
 
@@ -18,10 +22,8 @@
 
         $transactionsObject->create($params);
 
-# Since Version X there is a new interface allowing easier usage of the lib regarding payment processes.
-# This class called paymentProcessor is located in the Services directory.
-
-# API versions
+API versions
+--------------
 
 The master branch reflects the newest API version, which is v2 for now. In order to use an older version just checkout the corresponding tag.
 	
