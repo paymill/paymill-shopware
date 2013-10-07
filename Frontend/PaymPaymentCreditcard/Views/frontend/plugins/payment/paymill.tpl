@@ -1,24 +1,29 @@
-<link rel="stylesheet" type="text/css" href="{link file='frontend/_resources/paymill_styles.css'}" />
-<script type="text/javascript">
+<link rel = "stylesheet" type = "text/css" href = "{link file='frontend/_resources/paymill_styles.css'}" />
+<script type = "text/javascript" >
     var PAYMILL_PUBLIC_KEY = '{config name=publicKey|replace:' ':''}';
-</script>
-<script type="text/javascript" src="https://bridge.paymill.com/"></script>
-<script type="text/javascript">
-    function debug(message) {
-    {if $debug}
+</script >
+<script type = "text/javascript" src = "https://bridge.paymill.com/" ></script >
+<script type = "text/javascript" >
+    function debug(message)
+    {
+        {if $debug}
         console.log("[" + getPayment() + "] " + message);
-    {/if}
+        {/if}
     }
-    function isCC() {
+    function isCC()
+    {
         return getPayment() === 'paymillcc';
     }
-    function isELV() {
+    function isELV()
+    {
         return getPayment() === 'paymilldebit';
     }
-    function getPayment() {
+    function getPayment()
+    {
         return "{$sPayment.name}";
     }
-    function validate() {
+    function validate()
+    {
         debug("Paymill handler triggered");
         var errorsCc = $("#errorsCc");
         errorsCc.parent().hide();
@@ -69,10 +74,12 @@
         }
         return result;
     }
-    $(document).ready(function() {
+    $(document).ready(function ()
+    {
         var paymill_form_id = "payment_mean{$payment_mean.id}";
 
-        $('#card-number').keyup(function() {
+        $('#card-number').keyup(function ()
+        {
             var brand = paymill.cardType($('#card-number').val());
             brand = brand.toLowerCase();
             $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
@@ -81,7 +88,8 @@
             }
         });
 
-        $("#basketButton").click(function(event) {
+        $("#basketButton").click(function (event)
+        {
             if ($('#' + paymill_form_id).attr("checked") === "checked") {
                 if ($("input[type='checkbox'][name='sAGB']").length) {
                     if ($("input[type='checkbox'][name='sAGB']").attr('checked') !== "checked") {
@@ -96,19 +104,19 @@
                     try {
                         if (isCC()) { //If CC
                             paymill.createToken({
-                                number: $('#card-number').val(),
+                                number:     $('#card-number').val(),
                                 cardholder: $('#account-holder').val(),
-                                exp_month: $('#card-expiry-month').val(),
-                                exp_year: $('#card-expiry-year').val(),
-                                cvc: $('#card-cvc').val(),
+                                exp_month:  $('#card-expiry-month').val(),
+                                exp_year:   $('#card-expiry-year').val(),
+                                cvc:        $('#card-cvc').val(),
                                 amount_int: '{$tokenAmount}',
-                                currency: '{config name=currency|upper}'
+                                currency:   '{config name=currency|upper}'
                             }, PaymillResponseHandler);
                         }
                         if (isELV()) { //If ELV
                             paymill.createToken({
-                                number: $('#paymill_accountnumber').val(),
-                                bank: $('#paymill_banknumber').val(),
+                                number:        $('#paymill_accountnumber').val(),
+                                bank:          $('#paymill_banknumber').val(),
                                 accountholder: $('#paymill_accountholder').val()
                             }, PaymillResponseHandler);
                         }
@@ -131,7 +139,8 @@
             }
         });
     });
-    function PaymillResponseHandler(error, result) {
+    function PaymillResponseHandler(error, result)
+    {
         debug("Started Paymill response handler");
         if (error) {
             debug("API returned error:" + error.apierror);
@@ -144,76 +153,80 @@
             form.get(0).submit();
         }
     }
-</script>
+</script >
 
-<div class="error" style="display: none">
+<div class = "error" style = "display: none" >
     {if $payment_mean.name == 'paymillcc'}
-        <li>{s namespace=Paymill name=invalid_error_creditcard}Bitte geben Sie Ihre Kreditkartendaten ein. Aus Sicherheitsgr&uuml;nden speichern wir diese Nicht auf unserem Server.{/s}</li>
-        <ul id="errorsCc"> </ul>
+        <li >{s namespace=Paymill name=invalid_error_creditcard}Bitte geben Sie Ihre Kreditkartendaten ein. Aus Sicherheitsgr&uuml;nden speichern wir diese Nicht auf unserem Server.{/s}</li >
+        <ul id = "errorsCc" ></ul >
     {/if}
 
     {if $payment_mean.name == 'paymilldebit'}
-        <li>{s namespace=Paymill name=invalid_error_debit}Bitte geben Sie Ihre Bankdaten ein. Aus Sicherheitsgr&uuml;nden speichern wir diese Nicht auf unserem Server.{/s}</li>
-        <ul id="errorsElv"> </ul>
+        <li >{s namespace=Paymill name=invalid_error_debit}Bitte geben Sie Ihre Bankdaten ein. Aus Sicherheitsgr&uuml;nden speichern wir diese Nicht auf unserem Server.{/s}</li >
+        <ul id = "errorsElv" ></ul >
     {/if}
 
-</div>
+</div >
 {if $Controller != "account"}
-    <div class="debit">
+    <div class = "debit" >
         {if $ccHasFcData != 1}
             {if $payment_mean.name == 'paymillcc'}
-                <p class="none">
-                    <label>{s namespace=Paymill name=form_cardholder}Karteninhaber *{/s}</label>
-                    <input id="account-holder" type="text" size="20" class="text" value="{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}"/>
-                </p>
-                <p class="none">
-                    <label>{s namespace=Paymill name=form_cardnumber}Kreditkarten-nummer *{/s}</label>
-                    <input id="card-number" type="text" size="20" class="text" />
-                </p>
-                <p class="none">
-                    <label>{s namespace=Paymill name=form_cvc}CVC*{/s}</label>
-                    <input id="card-cvc" type="text" size="4" class="text" />
-                </p>
-                <p class="none">
-                    <label>{s namespace=Paymill name=form_expirydate}G&uuml;ltig bis (MM/YYYY) *{/s}</label>
-                    <input id="card-expiry-month" type="text" style="width: 30px; display: inline-block;" class="text" />
-                    <input id="card-expiry-year" type="text" style="width: 60px; display: inline-block;" class="text" />
-                </p>
+                <p class = "none" >
+                    <label >{s namespace=Paymill name=form_cardholder}Karteninhaber *{/s}</label >
+                    <input id = "account-holder" type = "text" size = "20" class = "text"
+                           value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
+                </p >
+                <p class = "none" >
+                    <label >{s namespace=Paymill name=form_cardnumber}Kreditkarten-nummer *{/s}</label >
+                    <input id = "card-number" type = "text" size = "20" class = "text" />
+                </p >
+                <p class = "none" >
+                    <label >{s namespace=Paymill name=form_cvc}CVC*{/s}</label >
+                    <input id = "card-cvc" type = "text" size = "4" class = "text" />
+                </p >
+                <p class = "none" >
+                    <label >{s namespace=Paymill name=form_expirydate}G&uuml;ltig bis (MM/YYYY) *{/s}</label >
+                    <input id = "card-expiry-month" type = "text" style = "width: 30px; display: inline-block;"
+                           class = "text" />
+                    <input id = "card-expiry-year" type = "text" style = "width: 60px; display: inline-block;"
+                           class = "text" />
+                </p >
             {/if}
         {/if}
         {if $elvHasFcData != 1}
             {if $payment_mean.name == 'paymilldebit' }
-                <p class="none">
-                    <label>{s namespace=Paymill name=form_accountholder}Kontoinhaber *{/s}</label>
-                    <input id="paymill_accountholder" type="text" size="20" class="text" value="{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
-                </p>
-                <p class="none">
-                    <label>{s namespace=Paymill name=form_accountnumber}Kontonummer *{/s}</label>
-                    <input id="paymill_accountnumber" type="text" size="4" class="text" />
-                </p>
-                <p class="none">
-                    <label>{s namespace=Paymill name=form_bankcode}Bankleitzahl *{/s}</label>
-                    <input id="paymill_banknumber" type="text" size="4" class="text" />
-                </p>
+                <p class = "none" >
+                    <label >{s namespace=Paymill name=form_accountholder}Kontoinhaber *{/s}</label >
+                    <input id = "paymill_accountholder" type = "text" size = "20" class = "text"
+                           value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
+                </p >
+                <p class = "none" >
+                    <label >{s namespace=Paymill name=form_accountnumber}Kontonummer *{/s}</label >
+                    <input id = "paymill_accountnumber" type = "text" size = "4" class = "text" />
+                </p >
+                <p class = "none" >
+                    <label >{s namespace=Paymill name=form_bankcode}Bankleitzahl *{/s}</label >
+                    <input id = "paymill_banknumber" type = "text" size = "4" class = "text" />
+                </p >
             {/if}
-                {/if}
+        {/if}
 
-                    {if ($payment_mean.name == 'paymilldebit' && $elvHasFcData != 1) || ($payment_mean.name == 'paymillcc' && $ccHasFcData != 1)}
-         <p class="description">{s namespace=Paymill name=form_info}Die mit einem * markierten Felder sind Pflichtfelder.{/s}</p>
+        {if ($payment_mean.name == 'paymilldebit' && $elvHasFcData != 1) || ($payment_mean.name == 'paymillcc' && $ccHasFcData != 1)}
+            <p class = "description" >{s namespace=Paymill name=form_info}Die mit einem * markierten Felder sind Pflichtfelder.{/s}</p >
+        {/if}
+        {if {config name=paymillShowLabel}}
+            <p >
+            <div class = "paymill_powered" >
+                <div class = "paymill_credits" >
+                    {if $payment_mean.name == 'paymillcc'}
+                        {s namespace=Paymill name=form_paymilllabel_cc}Sichere Kreditkartenzahlung powered by{/s}
+                    {else}
+                        {s namespace=Paymill name=form_paymilllabel_debit}Lastschriftverfahren powered by{/s}
                     {/if}
-                    {if {config name=paymillShowLabel}}
-            <p>
-                <div class="paymill_powered">
-                    <div class="paymill_credits">
-                        {if $payment_mean.name == 'paymillcc'}
-                            {s namespace=Paymill name=form_paymilllabel_cc}Sichere Kreditkartenzahlung powered by{/s}
-                        {else}
-                            {s namespace=Paymill name=form_paymilllabel_debit}Lastschriftverfahren powered by{/s}
-                        {/if}
-                        <a href="http://www.paymill.de" target="_blank">Paymill</a>
-                    </div>
-                </div>
+                    <a href = "http://www.paymill.de" target = "_blank" >Paymill</a >
+                </div >
+            </div >
             </p>
-                    {/if}
-   </div>
-                    {/if}
+        {/if}
+    </div >
+{/if}

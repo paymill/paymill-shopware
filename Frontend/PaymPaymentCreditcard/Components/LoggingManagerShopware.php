@@ -13,9 +13,9 @@ require_once dirname(__FILE__) . '/Parents/LoggingManagerAbstract.php';
  */
 class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManagerShopware extends LoggingManagerAbstract
 {
-
     /**
      * Returns the Version of the Plugin as a String
+     *
      * @return String
      */
     public function getPluginVersion()
@@ -42,28 +42,35 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManagerS
 
     /**
      * Executes the sql passed as an argument returning an array of multiple results
+     *
      * @param String $query
+     *
      * @return array
      */
     public function selectAll($query)
     {
         $result = Shopware()->Db()->fetchAll($query);
+
         return $result;
     }
 
     /**
      * Executes the sql passed as an argument returning an array of a single result
+     *
      * @param type $query
+     *
      * @return type
      */
     public function selectOne($query)
     {
         $result = Shopware()->Db()->fetchOne($query);
+
         return $result;
     }
 
     /**
      * This method is meant to be called during the installation of the plugin to allow use of the LoggingManager.
+     *
      * @throws Exception "There was an Error creating the Log-Table:"
      */
     public static function install()
@@ -80,12 +87,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManagerS
 
     /**
      * Returns the state of the logging option from the backend as a boolean
+     *
      * @return Boolean
      */
     public function getLoggingMode()
     {
         $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+
         return $swConfig->get('paymillLogging');
     }
-
 }

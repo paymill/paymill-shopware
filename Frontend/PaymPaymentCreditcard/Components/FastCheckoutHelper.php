@@ -12,9 +12,9 @@ require_once dirname(__FILE__) . '/Parents/FastCheckoutHelperAbstract.php';
  */
 class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper extends FastCheckoutHelperAbstract
 {
-
     /**
      * This method is meant to be called during the installation of the plugin to allow use of the FastCheckout Helper.
+     *
      * @throws Exception "Can not create FastCheckout Table"
      */
     public static function install()
@@ -31,6 +31,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
     /**
      * Loads the clientId associated with the current userId from the fc - Table and saves it in the clientId class property.
      * Returns an indicator of success.
+     *
      * @return boolean success
      */
     public function loadClientId()
@@ -48,12 +49,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
         } catch (Exception $e) {
             return false;
         }
+
         return true;
     }
 
     /**
      * Loads the paymentId associated with the current userId from the fc - Table and saves it in the paymentId class property.
      * Returns an indicator of success.
+     *
      * @return boolean success
      */
     public function loadPaymentId()
@@ -71,13 +74,16 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
         } catch (Exception $e) {
             return false;
         }
+
         return true;
     }
 
     /**
      * Checks if there is a clientId saved for the current userId.
      * If there is none, the clientId passed as the argument will be saved in the table.
+     *
      * @param String $arg
+     *
      * @return boolean success
      */
     public function saveClientId($arg)
@@ -90,13 +96,16 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
                 return false;
             }
         }
+
         return true;
     }
 
     /**
      * Checks if there is a paymentId saved for the current userId.
      * If there is none, the paymentId passed as the argument will be saved in the table.
+     *
      * @param String $arg
+     *
      * @return boolean success
      */
     public function savePaymentId($arg)
@@ -108,11 +117,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
         } catch (Exception $e) {
             return false;
         }
+
         return true;
     }
 
     /**
      * Creates an object of the FastCheckoutHelper class.
+     *
      * @param string $userId            Make sure this is the Id of the current user. Any operations of this class base on this ID
      * @param string $paymentName       Make sure this the paymentCode of the current payment. Otherwise payment data might get lost due to overwriting.
      */
@@ -121,5 +132,4 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
         $this->userId = $userId;
         $this->paymentName = $paymentName;
     }
-
 }

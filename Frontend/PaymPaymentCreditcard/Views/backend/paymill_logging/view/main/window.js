@@ -6,152 +6,161 @@
  * @copyright  Copyright (c) 2013 PayIntelligent GmbH (http://payintelligent.de)
  */
 
-//{namespace name=backend/order/main}
+    //{namespace name=backend/order/main}
 Ext.require([
-    'Ext.grid.*',
-    'Ext.data.*',
-    'Ext.panel.*'
-    ]);
+    'Ext.grid.*', 'Ext.data.*', 'Ext.panel.*'
+]);
 Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
-    extend: 'Enlight.app.Window',
-    title: 'Paymill Logging',
-    alias: 'widget.paymill_logging-main-window',
-    border: false,
-    autoShow: true,
+    extend:    'Enlight.app.Window',
+    title:     'Paymill Logging',
+    alias:     'widget.paymill_logging-main-window',
+    border:    false,
+    autoShow:  true,
     resizable: true,
-    layout: {
-        type:'fit'
+    layout:    {
+        type: 'fit'
     },
-    height: 520,
-    width: 800,
+    height:    520,
+    width:     800,
 
-    initComponent: function() {
+    initComponent:   function ()
+    {
         var me = this;
         me.store = me.listStore;
         me.items = [
-        me.createMainGrid(me)
+            me.createMainGrid(me)
         ];
         me.callParent(arguments);
     },
-    createMainGrid: function(me){
+    createMainGrid:  function (me)
+    {
         return Ext.create('Ext.grid.Panel', {
-            store: me.store,
-            forceFit:true,
-            border: false,
-            height: '100%',
-            width:'100%',
-            columns: [
-            {
-                text: '{s namespace=Paymill name=date}Datum{/s}',
-                dataIndex: 'entryDate',
-                width:50
-            },
-            {
-                text: '{s namespace=Paymill name=version}Version{/s}',
-                dataIndex: 'version',
-                width:50
-            },
-            {
-                text: '{s namespace=Paymill name=merchantinfo}H&auml;ndlerinformation{/s}',
-                dataIndex: 'merchantInfo',
-                width:350
-            },{
-                        xtype: 'actioncolumn',
-                        header: '{s namespace=Paymill name=action}Actions{/s}',
-                        width: 60,
-                        items: [
+            store:       me.store,
+            forceFit:    true,
+            border:      false,
+            height:      '100%',
+            width:       '100%',
+            columns:     [
+                {
+                    text:      '{s namespace=Paymill name=date}Datum{/s}',
+                    dataIndex: 'entryDate',
+                    width:     50
+                },
+                {
+                    text:      '{s namespace=Paymill name=version}Version{/s}',
+                    dataIndex: 'version',
+                    width:     50
+                },
+                {
+                    text:      '{s namespace=Paymill name=merchantinfo}H&auml;ndlerinformation{/s}',
+                    dataIndex: 'merchantInfo',
+                    width:     350
+                },
+                {
+                    xtype:  'actioncolumn',
+                    header: '{s namespace=Paymill name=action}Actions{/s}',
+                    width:  60,
+                    items:  [
+                        {
+                            iconCls: 'sprite-question-button',
+                            action:  'Details',
+                            scope:   me,
+                            handler: function (grid, rowIndex, colIndex, item, eOpts, record)
                             {
-                                iconCls: 'sprite-question-button',
-                                action: 'Details',
-                                scope: me,
-                                handler: function(grid, rowIndex, colIndex, item, eOpts, record){
-                                    me.openDetailPopup(record);
-                                }
+                                me.openDetailPopup(record);
                             }
-                        ]
-                    }
+                        }
+                    ]
+                }
             ],
-            dockedItems: [{
-                xtype: 'pagingtoolbar',
-                store: me.store,
-                dock: 'bottom',
-                displayInfo: true
-            }]
-            });
+            dockedItems: [
+                {
+                    xtype:       'pagingtoolbar',
+                    store:       me.store,
+                    dock:        'bottom',
+                    displayInfo: true
+                }
+            ]
+        });
     },
-    openDetailPopup: function(record){
+    openDetailPopup: function (record)
+    {
         Ext.create('Ext.window.Window', {
-            title: "Details",
-            layout: 'fit',
+            title:     "Details",
+            layout:    'fit',
             draggable: true,
             resizable: false,
-            width: '60%',
-            items: [
-                Ext.create('Ext.panel.Panel',{
-                width:'100%',
-                height:'100%',
-                layout: 'fit',
-                bodyStyle: {
-                    background: '#F0F2F4'
-                },
-                items:[
-                {
-                    xtype:'fieldset',
-                    collapsible: false,
-                    items :[
-                        Ext.create('Ext.panel.Panel',{
-                            width:'100%',
-                            layout:'column',
-                            items:[
-                            {
-                                xtype: 'fieldcontainer',
-                                defaultType: 'displayfield',
-                                items: [
-                                {
-                                    fieldLabel  : '{s namespace=Paymill name=date}Datum{/s}',
-                                    value   : record.get('entryDate'),
-                                    fieldStyle:{ margin:'0 0 0 50px' }
-                                }
-                                ]
-                            },{
-                                xtype: 'fieldcontainer',
-                                defaultType: 'displayfield',
-                                margin: '0 0 0 50px',
-                                items: [
-                                {
-                                    fieldLabel  : '{s namespace=Paymill name=version}Version{/s}',
-                                    value       : record.get('version'),
-                                    fieldStyle:{ margin:'0 0 0 50px' }
-                                }]}]}),
+            width:     '60%',
+            items:     [
+                Ext.create('Ext.panel.Panel', {
+                    width:     '100%',
+                    height:    '100%',
+                    layout:    'fit',
+                    bodyStyle: {
+                        background: '#F0F2F4'
+                    },
+                    items:     [
+                        {
+                            xtype:       'fieldset',
+                            collapsible: false,
+                            items:       [
+                                Ext.create('Ext.panel.Panel', {
+                                    width:  '100%',
+                                    layout: 'column',
+                                    items:  [
+                                        {
+                                            xtype:       'fieldcontainer',
+                                            defaultType: 'displayfield',
+                                            items:       [
+                                                {
+                                                    fieldLabel: '{s namespace=Paymill name=date}Datum{/s}',
+                                                    value:      record.get('entryDate'),
+                                                    fieldStyle: { margin: '0 0 0 50px' }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            xtype:       'fieldcontainer',
+                                            defaultType: 'displayfield',
+                                            margin:      '0 0 0 50px',
+                                            items:       [
+                                                {
+                                                    fieldLabel: '{s namespace=Paymill name=version}Version{/s}',
+                                                    value:      record.get('version'),
+                                                    fieldStyle: { margin: '0 0 0 50px' }
+                                                }
+                                            ]}
+                                    ]}),
 
-                Ext.create('Ext.panel.Panel',{
-                            layout: 'column',
-                            items:[
-                            {
-                                xtype:'panel',
-                                border: false,
-                                layout:'fit',
-                                title:'{s namespace=Paymill name=devinfo}Entwicklerinformation{/s}',
-                                html: record.get('devInfo'),
-                                autoScroll:true,
-                                width:'50%',
-                                height: '100%'
-                            },{
-                                xtype:'panel',
-                                border: false,
-                                layout:'fit',
-                                title:'{s namespace=Paymill name=additionaldevinfo}zus&auml;tzliche Entwicklerinformation{/s}',
-                                html: record.get('devInfoAdditional'),
-                                autoScroll:true,
-                                width:'50%',
-                                height: '100%'
-                            }
+                                Ext.create('Ext.panel.Panel', {
+                                    layout: 'column',
+                                    items:  [
+                                        {
+                                            xtype:      'panel',
+                                            border:     false,
+                                            layout:     'fit',
+                                            title:      '{s namespace=Paymill name=devinfo}Entwicklerinformation{/s}',
+                                            html:       record.get('devInfo'),
+                                            autoScroll: true,
+                                            width:      '50%',
+                                            height:     '100%'
+                                        },
+                                        {
+                                            xtype:      'panel',
+                                            border:     false,
+                                            layout:     'fit',
+                                            title:      '{s namespace=Paymill name=additionaldevinfo}zus&auml;tzliche Entwicklerinformation{/s}',
+                                            html:       record.get('devInfoAdditional'),
+                                            autoScroll: true,
+                                            width:      '50%',
+                                            height:     '100%'
+                                        }
+                                    ]
+                                })
                             ]
-                        })
-                            ]
-                }
+                        }
 
-                ]})
+                    ]})
             ]
         }).show();
     }

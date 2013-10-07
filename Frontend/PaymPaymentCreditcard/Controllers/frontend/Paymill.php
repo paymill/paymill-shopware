@@ -29,9 +29,9 @@
  */
 class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_Frontend_Payment
 {
-
     /**
      * Frontend index action controller
+     *
      * @return void
      */
     public function indexAction()
@@ -43,11 +43,8 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         if (empty($paymillToken)) {
             $this->log("No paymill token was provided. Redirect to payments page.", null);
 
-            $url = $this->Front()->Router()->assemble( array( 'action' => 'payment',
-                                                             'sTarget' => 'checkout',
-                                                           'sViewport' => 'account',
-                                                       'appendSession' => true,
-                                                         'forceSecure' => true));
+            $url = $this->Front()->Router()
+                   ->assemble(array('action' => 'payment', 'sTarget' => 'checkout', 'sViewport' => 'account', 'appendSession' => true, 'forceSecure' => true));
 
             $this->redirect($url . '&paymill_error=1');
         }
@@ -56,90 +53,72 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
 
         $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
 
-
         // process the payment
-        $swConfig   = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+        $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $userId = $user['billingaddress']['userID'];
-        $paymentShortcut = $this->getPaymentShortName() == 'paymillcc'? 'cc': 'elv';
+        $paymentShortcut = $this->getPaymentShortName() == 'paymillcc' ? 'cc' : 'elv';
         $privateKey = trim($swConfig->get("privateKey"));
         $apiUrl = "https://api.paymill.com/v2/";
-        $params = array(
-                'token'            => $paymillToken,
-                'authorizedAmount' => (int)Shopware()->Session()->paymillTotalAmount,
-                'amount'           => (int)(round($this->getAmount() * 100,0)),
-                'currency'         => $this->getCurrencyShortName(),
-                'name'             => $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname'],
-                'email'            => $user['additional']['user']['email'],
-                'description'      => Shopware()->Config()->get('shopname') . " " . $user['additional']['user']['email'],
-                'payment'          => $paymentShortcut
-                );
-
+        $params = array('token' => $paymillToken, 'authorizedAmount' => (int)Shopware()->Session()->paymillTotalAmount, 'amount' => (int)(round($this->getAmount() * 100, 0)), 'currency' => $this->getCurrencyShortName(), 'name' => $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname'], 'email' => $user['additional']['user']['email'], 'description' => Shopware()
+                                                                                                                                                                                                                                                                                                                                                                                               ->Config()
+                                                                                                                                                                                                                                                                                                                                                                                           ->get('shopname') . " " . $user['additional']['user']['email'], 'payment' => $paymentShortcut);
 
         $source = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->getVersion();
         $source .= "_shopware";
-        $source .= "_".Shopware()->Config()->get('version');
+        $source .= "_" . Shopware()->Config()->get('version');
 
         $paymentProcessor = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor($privateKey, $apiUrl, null, $params, $this);
         $paymentProcessor->setSource($source);
         //Fast Checkout data exists
         $fcHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, $paymentShortcut);
 
-        if($fcHelper->loadClientId()){
-           $clientId = $fcHelper->clientId;
-           $paymentProcessor->setClientId($clientId);
+        if ($fcHelper->loadClientId()) {
+            $clientId = $fcHelper->clientId;
+            $paymentProcessor->setClientId($clientId);
         }
 
-
-        if($fcHelper->entryExists()){
+        if ($fcHelper->entryExists()) {
             $paymentId = $fcHelper->paymentId;
             $paymentProcessor->setPaymentId($paymentId);
-            $this->log("Processing Payment with Parameters", print_r($params, true), "Additional Parameters given. \n"." User Id: ".$userId."\n Client Id: ".$clientId."\n PaymentId: ".$paymentId);
-        }
-
-        else{
+            $this->log("Processing Payment with Parameters", print_r($params, true), "Additional Parameters given. \n" . " User Id: " . $userId . "\n Client Id: " . $clientId . "\n PaymentId: " . $paymentId);
+        } else {
             $this->log("Processing Payment with Parameters", print_r($params, true));
         }
 
         $result = $paymentProcessor->processPayment();
 
-        $this->log("Payment processing resulted in: ". ($result ? "Success" : "Failure"), print_r($result, true));
+        $this->log("Payment processing resulted in: " . ($result ? "Success" : "Failure"), print_r($result, true));
 
         // finish the order if payment was sucessfully processed
         if ($result !== true) {
             Shopware()->Session()->paymillTransactionToken = null;
             Shopware()->Session()->pigmbhErrorMessage = "An error occured while processing your payment";
-            if(Shopware()->Locale()->getLanguage() === 'de'){
+            if (Shopware()->Locale()->getLanguage() === 'de') {
                 Shopware()->Session()->pigmbhErrorMessage = 'W&auml;hrend Ihrer Zahlung ist ein Fehler aufgetreten.';
             }
-            return $this->forward('error');
 
+            return $this->forward('error');
         }
 
         //Save Fast Checkout Data
         $isFastCheckoutEnabled = $swConfig->get("paymillFastCheckout");
-        if($isFastCheckoutEnabled){
+        if ($isFastCheckoutEnabled) {
             $clientId = $paymentProcessor->getClientId();
             $paymentId = $paymentProcessor->getPaymentId();
             $this->log("Saving FC Data for User: $userId with the payment: $paymentShortcut", $clientId, $paymentId);
             $fcHelper->saveClientId($clientId);
-            $fcHelper->savePaymentId($paymentId) ;
+            $fcHelper->savePaymentId($paymentId);
         }
 
         //Create the order
-        $finalPaymillToken = $paymillToken === "NoTokenRequired" ? $this->createPaymentUniqueId(): $paymillToken;
+        $finalPaymillToken = $paymillToken === "NoTokenRequired" ? $this->createPaymentUniqueId() : $paymillToken;
         $ordernumber = $this->saveOrder($finalPaymillToken, md5($finalPaymillToken));
-        $this->log("Finish order.", "Ordernumber: ". $ordernumber, "using Token: ". $finalPaymillToken);
+        $this->log("Finish order.", "Ordernumber: " . $ordernumber, "using Token: " . $finalPaymillToken);
 
         // reset the session field
         Shopware()->Session()->paymillTransactionToken = null;
 
-        $this->redirect(
-                array(
-                    "controller" => "checkout",
-                    "action" => "finish",
-                    "forceSecure" => 1
-                )
-        );
+        $this->redirect(array("controller" => "checkout", "action" => "finish", "forceSecure" => 1));
     }
 
     /**
@@ -152,18 +131,12 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             $errorMessage = 1;
         }
 
-        $this->redirect(
-                array(
-                    "controller" => "checkout",
-                    "action" => "confirm",
-                    "forceSecure" => 1,
-                    "errorMessage" => $errorMessage
-                )
-        );
+        $this->redirect(array("controller" => "checkout", "action" => "confirm", "forceSecure" => 1, "errorMessage" => $errorMessage));
     }
 
     /**
      * Uses the LoggingManager to insert a new entry into the Log
+     *
      * @param String $merchantInfo      Information of use to the merchant
      * @param String $devInfo           Information of use to developers
      * @param String $devInfoAdditional Can be null
