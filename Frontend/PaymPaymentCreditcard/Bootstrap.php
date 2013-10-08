@@ -43,16 +43,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * Returns the version
-     *
-     * @return string
-     */
-    public function getVersion()
-    {
-        return "1.0.7";
-    }
-
-    /**
      * Triggered on every request
      *
      * @return void
@@ -85,13 +75,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * Get Info for the Pluginmanager
+     * Returns the version
      *
-     * @return array
+     * @return string
      */
-    public function getInfo()
+    public function getVersion()
     {
-        return array('version' => $this->getVersion(), 'autor' => 'PayIntelligent GmbH', 'source' => $this->getSource(), 'supplier' => 'PAYMILL GmbH', 'support' => 'support@paymill.com', 'link' => 'https://www.paymill.com', 'copyright' => 'Copyright (c) 2013, PayIntelligent GmbH', 'label' => 'Paymill', 'description' => '');
+        return "1.0.7";
     }
 
     /**
@@ -105,29 +95,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
 
         return in_array($user['additional']['payment']['name'], array("paymillcc", "paymilldebit"));
-    }
-
-    /**
-     * Performs the necessary installation steps
-     *
-     * @return boolean
-     */
-    public function install()
-    {
-        try {
-            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManagerShopware::install();
-            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper::install();
-            $this->createPaymentMeans();
-            $this->createForm();
-            $this->_createPluginConfigTranslation();
-            $this->addTranslationSnippets();
-            $this->createEvents();
-            $this->applyBackendViewModifications();
-        } catch (Exception $exception) {
-            throw new Exception($exception->getMessage());
-        }
-
-        return true;
     }
 
     /**
@@ -159,15 +126,16 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * Performs the necessary uninstallation steps
+     * Get Info for the Pluginmanager
      *
-     * @return boolean
+     * @return array
      */
-    public function uninstall()
+    public function getInfo()
     {
-        Shopware()->Db()->delete("s_core_paymentmeans", "name in('paymillcc','paymilldebit')");
-
-        return parent::uninstall();
+        return array('version'  => $this->getVersion(), 'autor' => 'PayIntelligent GmbH',
+                     'source'   => $this->getSource(), 'supplier' => 'PAYMILL GmbH', 'support' => 'support@paymill.com',
+                     'link'     => 'https://www.paymill.com', 'copyright' => 'Copyright (c) 2013, PayIntelligent GmbH',
+                     'label'    => 'Paymill', 'description' => '');
     }
 
     /**
@@ -189,7 +157,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
         $view = $arguments->getSubject()->View();
 
-        if(self::isFcReady("paymillcc")){
+        if (self::isFcReady("paymillcc")) {
             require_once dirname(__FILE__) . '/lib/Services/Paymill/Payments.php';
             $helper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, 'cc');
             $helper->loadPaymentId();
@@ -200,23 +168,23 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $arguments->getSubject()->View()->paymillCvc = "***";
             $arguments->getSubject()->View()->paymillMonth = $paymentObject['expire_month'];
             $arguments->getSubject()->View()->paymillYear = $paymentObject['expire_year'];
-        }else{
+        } else {
             $arguments->getSubject()->View()->paymillCardNumber = "";
             $arguments->getSubject()->View()->paymillCvc = "";
             $arguments->getSubject()->View()->paymillMonth = "";
             $arguments->getSubject()->View()->paymillYear = "";
         }
 
-        if(self::isFcReady("paymilldebit")){
+        if (self::isFcReady("paymilldebit")) {
             require_once dirname(__FILE__) . '/lib/Services/Paymill/Payments.php';
             $helper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, 'elv');
             $helper->loadPaymentId();
             $paymentId = $helper->paymentId;
             $elvPayment = new Services_Paymill_Payments($privateKey, $apiUrl);
             $paymentObject = $elvPayment->getOne($paymentId);
-            $arguments->getSubject()->View()->paymillAccountNumber =  $paymentObject['account'];
+            $arguments->getSubject()->View()->paymillAccountNumber = $paymentObject['account'];
             $arguments->getSubject()->View()->paymillBankCode = $paymentObject['code'];
-        }else{
+        } else {
             $arguments->getSubject()->View()->paymillAccountNumber = "";
             $arguments->getSubject()->View()->paymillBankCode = "";
         }
@@ -243,6 +211,70 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
+     * Saves the Amount to the session, passes it to the current Template
+     *
+     * @param Enlight_Event_EventArgs $arguments
+     */
+    private function saveAmount(Enlight_Event_EventArgs $arguments)
+    {
+        //Save amount into session to allow 3Ds
+        $basket = Shopware()->Session()->sOrderVariables['sBasket'];
+        $totalAmount = (round((float)$basket['sAmount'] * 100, 2));
+
+        Shopware()->Session()->paymillTotalAmount = $totalAmount;
+        $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
+    }
+
+    /**
+     * Performs the necessary installation steps
+     *
+     * @return boolean
+     */
+    public function install()
+    {
+        try {
+            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManagerShopware::install();
+            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper::install();
+            $this->createPaymentMeans();
+            $this->createForm();
+            $this->_createPluginConfigTranslation();
+            $this->addTranslationSnippets();
+            $this->createEvents();
+            $this->applyBackendViewModifications();
+        } catch (Exception $exception) {
+            throw new Exception($exception->getMessage());
+        }
+
+        return true;
+    }
+
+    /**
+     * Return the path of the backendcontroller
+     *
+     * @return String backend controller path
+     */
+    public function paymillBackendControllerLogging()
+    {
+        Shopware()->Template()->addTemplateDir(Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()
+                                               ->Path() . 'Views/');
+
+        return Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()
+               ->Path() . "/Controllers/backend/PaymillLogging.php";
+    }
+
+    /**
+     * Performs the necessary uninstallation steps
+     *
+     * @return boolean
+     */
+    public function uninstall()
+    {
+        Shopware()->Db()->delete("s_core_paymentmeans", "name in('paymillcc','paymilldebit')");
+
+        return parent::uninstall();
+    }
+
+    /**
      * Updates the Plugin and its components
      *
      * @param string $oldversion
@@ -261,28 +293,22 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * Saves the Amount to the session, passes it to the current Template
-     *
-     * @param Enlight_Event_EventArgs $arguments
-     */
-    private function saveAmount(Enlight_Event_EventArgs $arguments)
-    {
-        //Save amount into session to allow 3Ds
-        $basket = Shopware()->Session()->sOrderVariables['sBasket'];
-        $totalAmount = (round((float)$basket['sAmount'] * 100, 2));
-
-        Shopware()->Session()->paymillTotalAmount = $totalAmount;
-        $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
-    }
-
-    /**
      * Creates the Translation for the Pluginconfiguration
      */
     private function _createPluginConfigTranslation()
     {
         try {
             $form = $this->Form();
-            $translations = array('de_DE' => array('publicKey' => 'Public Key', 'privateKey' => 'Privat Key', 'paymillDebugging' => 'Debugging aktivieren', 'paymillFastCheckout' => 'Daten für Fast Checkout speichern', 'paymillLogging' => 'Logging aktivieren', 'paymillShowLabel' => 'Paymill Label anzeigen'), 'en_GB' => array('publicKey' => 'Public Key', 'privateKey' => 'Private Key', 'paymillDebugging' => 'Activate debugging', 'paymillFastCheckout' => 'Save data for FastCheckout', 'paymillLogging' => 'Activate logging', 'paymillShowLabel' => 'Show Paymill-label'));
+            $translations = array('de_DE' => array('publicKey'           => 'Public Key', 'privateKey' => 'Privat Key',
+                                                   'paymillDebugging'    => 'Debugging aktivieren',
+                                                   'paymillFastCheckout' => 'Daten für Fast Checkout speichern',
+                                                   'paymillLogging'      => 'Logging aktivieren',
+                                                   'paymillShowLabel'    => 'Paymill Label anzeigen'),
+                                  'en_GB' => array('publicKey'           => 'Public Key', 'privateKey' => 'Private Key',
+                                                   'paymillDebugging'    => 'Activate debugging',
+                                                   'paymillFastCheckout' => 'Save data for FastCheckout',
+                                                   'paymillLogging'      => 'Activate logging',
+                                                   'paymillShowLabel'    => 'Show Paymill-label'));
 
             $shopRepository = Shopware()->Models()->getRepository('\Shopware\Models\Shop\Locale');
             foreach ($translations as $locale => $snippets) {
@@ -305,20 +331,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $this->uninstall();
             throw new Exception("Can not create translation." . $exception->getMessage());
         }
-    }
-
-    /**
-     * Return the path of the backendcontroller
-     *
-     * @return String backend controller path
-     */
-    public function paymillBackendControllerLogging()
-    {
-        Shopware()->Template()->addTemplateDir(Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()
-                                               ->Path() . 'Views/');
-
-        return Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()
-               ->Path() . "/Controllers/backend/PaymillLogging.php";
     }
 
     /**
@@ -415,12 +427,16 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     protected function createPaymentMeans()
     {
-        $paymillcc = array('name'     => 'paymillcc', 'description' => 'Kreditkartenzahlung', 'action' => 'payment_paymill', 'active' => 1, 'template' => 'paymill.tpl', //'paymillcc.tpl',
+        $paymillcc = array('name'     => 'paymillcc', 'description' => 'Kreditkartenzahlung',
+                           'action'   => 'payment_paymill', 'active' => 1, 'template' => 'paymill.tpl',
+            //'paymillcc.tpl',
                            'pluginID' => $this->getId());
 
         Shopware()->Payments()->createRow($paymillcc)->save();
 
-        $paymilldebit = array('name'     => 'paymilldebit', 'description' => 'Lastschrift', 'action' => 'payment_paymill', 'active' => 1, 'template' => 'paymill.tpl', //'paymilldebit.tpl',
+        $paymilldebit = array('name'     => 'paymilldebit', 'description' => 'Lastschrift',
+                              'action'   => 'payment_paymill', 'active' => 1, 'template' => 'paymill.tpl',
+            //'paymilldebit.tpl',
                               'pluginID' => $this->getId());
 
         Shopware()->Payments()->createRow($paymilldebit)->save();
@@ -441,7 +457,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
         $form->setElement('checkbox', 'paymillDebugging', array('label' => 'Debugging aktivieren', 'value' => false));
 
-        $form->setElement('checkbox', 'paymillFastCheckout', array('label' => 'Daten für Fast Checkout speichern', 'value' => false));
+        $form->setElement('checkbox', 'paymillFastCheckout', array('label' => 'Daten für Fast Checkout speichern',
+                                                                   'value' => false));
 
         $form->setElement('checkbox', 'paymillLogging', array('label' => 'Logging aktivieren', 'value' => false));
 
@@ -468,7 +485,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     {
         try {
             $parent = $this->Menu()->findOneBy('label', 'logfile');
-            $this->createMenuItem(array('label' => 'Paymill', 'class' => 'sprite-cards-stack', 'active' => 1, 'controller' => 'PaymillLogging', 'action' => 'index', 'parent' => $parent));
+            $this->createMenuItem(array('label'      => 'Paymill', 'class' => 'sprite-cards-stack', 'active' => 1,
+                                        'controller' => 'PaymillLogging', 'action' => 'index', 'parent' => $parent));
         } catch (Exception $exception) {
             throw new Exception("can not create menuentry." . $exception->getMessage());
         }
