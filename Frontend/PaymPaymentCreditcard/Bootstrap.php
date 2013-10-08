@@ -44,7 +44,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
     /**
      * Triggered on every request
-     *
+     * @param $args
      * @return void
      */
     public static function onPostDispatch(Enlight_Event_EventArgs $args)
@@ -65,9 +65,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             Shopware()->Session()->paymillTransactionToken = $request->get("paymillToken");
         }
 
-        if (self::isPaymillPayment()) {
+        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
+        $userId = $user['billingaddress']['userID'];
+        $paymentName = $user['additional']['payment']['name'];
+        $helper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, $paymentName);
+        if (in_array($user['additional']['payment']['name'], array("paymillcc", "paymilldebit"))) {
             $view->sRegisterFinished = 'false';
-            if (self::isFcReady() && empty(Shopware()->Session()->paymillTransactionToken)) {
+
+            if ($helper->isFcReady() && empty(Shopware()->Session()->paymillTransactionToken)) {
                 $view->sRegisterFinished = null;
                 Shopware()->Session()->paymillTransactionToken = "NoTokenRequired";
             }
@@ -85,19 +90,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * Returns whether the current user did choose paymillcc as
-     * payment method
-     *
-     * @return boolean
-     */
-    public static function isPaymillPayment()
-    {
-        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
-
-        return in_array($user['additional']['payment']['name'], array("paymillcc", "paymilldebit"));
-    }
-
-    /**
      * Checks if there is saved Data for FastCheckout associated with the current user
      *
      * @param   String $paymentNameArg
@@ -106,23 +98,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public static function isFcReady($paymentNameArg = null)
     {
-        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
-        if (in_array($user['additional']['payment']['name'], array("paymillcc", "paymilldebit"))) {
-            $userId = $user['billingaddress']['userID'];
-            if ($paymentNameArg === null) {
-                $paymentName = $user['additional']['payment']['name'];
-            } else {
-                $paymentName = $paymentNameArg;
-            }
 
-            $payment = $paymentName == 'paymillcc' ? 'ccPaymentId' : 'elvPaymentId';
-            $sql = "SELECT count(`$payment`) FROM `paymill_fastCheckout` WHERE `userId` = $userId AND `$payment` IS NOT null";
-            $fcEnabled = Shopware()->Db()->fetchOne($sql);
-
-            return $fcEnabled == 1;
-        }
-
-        return false;
     }
 
     /**
@@ -139,7 +115,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * Extends the confirmationpage with an Errorbox, if there is an error.
+     * Extends the confirmation page with an error box, if there is an error.
      * Saves the Amount into the Session and passes it to the Template
      *
      * @param Enlight_Event_EventArgs $arguments
@@ -149,47 +125,15 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     public function onCheckoutConfirm(Enlight_Event_EventArgs $arguments)
     {
         $params = $arguments->getRequest()->getParams();
-        $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
         $userId = $user['billingaddress']['userID'];
-        $privateKey = trim($swConfig->get("privateKey"));
-        $apiUrl = "https://api.paymill.com/v2/";
-
+        $helper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, 'cc');
         $view = $arguments->getSubject()->View();
 
-        if (self::isFcReady("paymillcc")) {
-            require_once dirname(__FILE__) . '/lib/Services/Paymill/Payments.php';
-            $helper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, 'cc');
-            $helper->loadPaymentId();
-            $paymentId = $helper->paymentId;
-            $ccPayment = new Services_Paymill_Payments($privateKey, $apiUrl);
-            $paymentObject = $ccPayment->getOne($paymentId);
-            $arguments->getSubject()->View()->paymillCardNumber = "..." . $paymentObject['last4'];
-            $arguments->getSubject()->View()->paymillCvc = "***";
-            $arguments->getSubject()->View()->paymillMonth = $paymentObject['expire_month'];
-            $arguments->getSubject()->View()->paymillYear = $paymentObject['expire_year'];
-        } else {
-            $arguments->getSubject()->View()->paymillCardNumber = "";
-            $arguments->getSubject()->View()->paymillCvc = "";
-            $arguments->getSubject()->View()->paymillMonth = "";
-            $arguments->getSubject()->View()->paymillYear = "";
-        }
+        $helper->assignDisplayData($view);
 
-        if (self::isFcReady("paymilldebit")) {
-            require_once dirname(__FILE__) . '/lib/Services/Paymill/Payments.php';
-            $helper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, 'elv');
-            $helper->loadPaymentId();
-            $paymentId = $helper->paymentId;
-            $elvPayment = new Services_Paymill_Payments($privateKey, $apiUrl);
-            $paymentObject = $elvPayment->getOne($paymentId);
-            $arguments->getSubject()->View()->paymillAccountNumber = $paymentObject['account'];
-            $arguments->getSubject()->View()->paymillBankCode = $paymentObject['code'];
-        } else {
-            $arguments->getSubject()->View()->paymillAccountNumber = "";
-            $arguments->getSubject()->View()->paymillBankCode = "";
-        }
-
-        if (self::isPaymillPayment()) {
+        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
+        if (in_array($user['additional']['payment']['name'], array("paymillcc", "paymilldebit"))) {
             $view->sRegisterFinished = 'false';
             if (self::isFcReady()) {
                 Shopware()->Session()->paymillTransactionToken = "NoTokenRequired";
@@ -227,7 +171,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
     /**
      * Performs the necessary installation steps
-     *
+     * @throws Exception
      * @return boolean
      */
     public function install()
@@ -249,7 +193,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * Return the path of the backendcontroller
+     * Return the path of the backend controller
      *
      * @return String backend controller path
      */
@@ -263,7 +207,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * Performs the necessary uninstallation steps
+     * Performs the necessary uninstall steps
      *
      * @return boolean
      */
@@ -277,12 +221,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     /**
      * Updates the Plugin and its components
      *
-     * @param string $oldversion
+     * @param string $oldVersion
+     * @return boolean
      */
-    public function update($oldversion)
+    public function update($oldVersion)
     {
         $result = false;
-        switch ($oldversion) {
+        switch ($oldVersion) {
             case '1.0.0':
             case '1.0.1':
             case '1.0.2':
@@ -293,7 +238,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * Creates the Translation for the Pluginconfiguration
+     * Creates the Translation for the plugin configuration
      */
     private function _createPluginConfigTranslation()
     {
@@ -334,8 +279,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * Adds the Translationsnippets into the database.
-     * Returns true or throws an execption in case of an error
+     * Adds the translation snippets into the database.
+     * Returns true or throws an exception in case of an error
      *
      * @return true
      * @throws Exception
@@ -365,6 +310,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     /**
      * Enables the plugin
      *
+     * @throws Exception
      * @return boolean
      */
     public function enable()
@@ -390,6 +336,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     /**
      * Disables the plugin
      *
+     * @throws Exception
      * @return boolean
      */
     public function disable()
@@ -417,7 +364,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function getCapabilities()
     {
-        return array('install' => true, 'update' => false, 'enable' => true);
+        return array('install' => true, 'update' => true, 'enable' => true);
     }
 
     /**

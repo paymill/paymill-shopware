@@ -29,6 +29,68 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
     }
 
     /**
+     * Returns whether there is data for a fast checkout with the given payment or not.
+     * If no Payment is given the current payment is being used.
+     * @param String|null $paymentNameArg (paymillcc or paymilldebit)
+     *
+     * @return bool
+     */
+    public function isFcReady($paymentNameArg = null)
+    {
+        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
+        $paymentName = $paymentNameArg === null ? $user['additional']['payment']['name']: $paymentNameArg;
+        $userId = $user['billingaddress']['userID'];
+
+        if (in_array($paymentName, array("paymillcc", "paymilldebit"))) {
+            $payment = $paymentName == 'paymillcc' ? 'ccPaymentId' : 'elvPaymentId';
+            $sql = "SELECT count(`$payment`) FROM `paymill_fastCheckout` WHERE `userId` = $userId AND `$payment` IS NOT null";
+            $fcEnabled = Shopware()->Db()->fetchOne($sql);
+            return $fcEnabled == 1;
+        }
+
+        return false;
+    }
+
+    public function assignDisplayData($view)
+    {
+        $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+        $privateKey = trim($swConfig->get("privateKey"));
+        $apiUrl = "https://api.paymill.com/v2/";
+
+        if ($this->isFcReady("paymillcc")) {
+            require_once dirname(__FILE__) . '/lib/Services/Paymill/Payments.php';
+            $this->loadPaymentId();
+            $paymentId = $this->paymentId;
+            $ccPayment = new Services_Paymill_Payments($privateKey, $apiUrl);
+            $paymentObject = $ccPayment->getOne($paymentId);
+            $view->paymillCardNumber = "..." . $paymentObject['last4'];
+            $view->paymillCvc = "***";
+            $view->paymillMonth = $paymentObject['expire_month'];
+            $view->paymillYear = $paymentObject['expire_year'];
+        } else {
+            $view->paymillCardNumber = "";
+            $view->paymillCvc = "";
+            $view->paymillMonth = "";
+            $view->paymillYear = "";
+        }
+
+
+        if ($this->isFcReady("paymilldebit")) {
+            require_once dirname(__FILE__) . '/lib/Services/Paymill/Payments.php';
+            $this->setPaymentName('elv');
+            $this->loadPaymentId();
+            $paymentId = $this->paymentId;
+            $elvPayment = new Services_Paymill_Payments($privateKey, $apiUrl);
+            $paymentObject = $elvPayment->getOne($paymentId);
+            $view->paymillAccountNumber = $paymentObject['account'];
+            $view->paymillBankCode = $paymentObject['code'];
+        } else {
+            $view->paymillAccountNumber = "";
+            $view->paymillBankCode = "";
+        }
+    }
+
+    /**
      * Loads the clientId associated with the current userId from the fc - Table and saves it in the clientId class property.
      * Returns an indicator of success.
      *
