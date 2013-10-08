@@ -113,13 +113,16 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             return $this->forward('error');
         }
 
+
+        //Save Client Id
+        $clientId = $paymentProcessor->getClientId();
+        $fcHelper->saveClientId($clientId);
+
         //Save Fast Checkout Data
         $isFastCheckoutEnabled = $swConfig->get("paymillFastCheckout");
         if ($isFastCheckoutEnabled) {
-            $clientId = $paymentProcessor->getClientId();
             $paymentId = $paymentProcessor->getPaymentId();
-            $this->log("Saving FC Data for User: $userId with the payment: $paymentShortcut", $clientId, $paymentId);
-            $fcHelper->saveClientId($clientId);
+            $this->log("Saving FC Data for User: $userId with the payment: $paymentShortcut", $paymentId);
             $fcHelper->savePaymentId($paymentId);
         }
 
