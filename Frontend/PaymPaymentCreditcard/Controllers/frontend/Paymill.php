@@ -64,9 +64,16 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $paymentShortcut = $this->getPaymentShortName() == 'paymillcc' ? 'cc' : 'elv';
         $privateKey = trim($swConfig->get("privateKey"));
         $apiUrl = "https://api.paymill.com/v2/";
-        $params = array('token' => $paymillToken, 'authorizedAmount' => (int)Shopware()->Session()->paymillTotalAmount, 'amount' => (int)(round($this->getAmount() * 100, 0)), 'currency' => $this->getCurrencyShortName(), 'name' => $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname'], 'email' => $user['additional']['user']['email'], 'description' => Shopware()
-                                                                                                                                                                                                                                                                                                                                                                                               ->Config()
-                                                                                                                                                                                                                                                                                                                                                                                           ->get('shopname') . " " . $user['additional']['user']['email'], 'payment' => $paymentShortcut);
+        $params = array(
+            'token' => $paymillToken,
+            'authorizedAmount' => (int)Shopware()->Session()->paymillTotalAmount,
+            'amount' => (int)(round($this->getAmount() * 100, 0)),
+            'currency' => $this->getCurrencyShortName(),
+            'name' => $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname'],
+            'email' => $user['additional']['user']['email'],
+            'description' => $user['additional']['user']['email'] . " " . Shopware()->Config()->get('shopname'),
+            'payment' => $paymentShortcut
+        );
 
         $source = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->getVersion();
         $source .= "_shopware";
@@ -97,7 +104,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
 
         $this->log("Payment processing resulted in: " . ($result ? "Success" : "Failure"), print_r($result, true));
 
-        // finish the order if payment was sucessfully processed
+        // finish the order if payment was successfully processed
         if ($result !== true) {
             Shopware()->Session()->paymillTransactionToken = null;
             Shopware()->Session()->pigmbhErrorMessage = "An error occured while processing your payment";
@@ -120,8 +127,22 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
 
         //Create the order
         $finalPaymillToken = $paymillToken === "NoTokenRequired" ? $this->createPaymentUniqueId() : $paymillToken;
-        $ordernumber = $this->saveOrder($finalPaymillToken, md5($finalPaymillToken));
-        $this->log("Finish order.", "Ordernumber: " . $ordernumber, "using Token: " . $finalPaymillToken);
+        $orderNumber = $this->saveOrder($finalPaymillToken, md5($finalPaymillToken));
+        $this->log("Finish order.", "Ordernumber: " . $orderNumber, "using Token: " . $finalPaymillToken);
+
+        //Update Transaction
+        require_once dirname(__FILE__) . '/../../lib/Services/Paymill/Transactions.php';
+        $privateKey = trim($swConfig->get("privateKey"));
+        $apiUrl = "https://api.paymill.com/v2/";
+        $transaction = new Services_Paymill_Transactions($privateKey, $apiUrl);
+        $description = $orderNumber . " " . $user['additional']['user']['email'] . " " . Shopware()->Config()->get('shopname');
+        $updateResponse = $transaction->update(array(id => $paymentProcessor->getTransactionId(), description => $description));
+
+        if($updateResponse['response_code'] === 20000){
+            $this->log("Successfully updated the description of " . $paymentProcessor->getTransactionId(), $description);
+        } else {
+            $this->log("There was an error updating the description of " . $paymentProcessor->getTransactionId(), $description);
+        }
 
         // reset the session field
         Shopware()->Session()->paymillTransactionToken = null;
