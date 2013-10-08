@@ -90,18 +90,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * Checks if there is saved Data for FastCheckout associated with the current user
-     *
-     * @param   String $paymentNameArg
-     *
-     * @return  boolean success
-     */
-    public static function isFcReady($paymentNameArg = null)
-    {
-
-    }
-
-    /**
      * Get Info for the Pluginmanager
      *
      * @return array
@@ -135,7 +123,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
         if (in_array($user['additional']['payment']['name'], array("paymillcc", "paymilldebit"))) {
             $view->sRegisterFinished = 'false';
-            if (self::isFcReady()) {
+            if ($helper->isFcReady()) {
                 Shopware()->Session()->paymillTransactionToken = "NoTokenRequired";
             }
         }
@@ -204,6 +192,29 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
         return Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()
                ->Path() . "/Controllers/backend/PaymillLogging.php";
+    }
+
+    /**
+     * @param $arguments event arguments
+     */
+    public function onUpdateCustomerEmail($arguments)
+    {
+        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
+        $helper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper();
+        //If there is a client for the customer
+        if($helper->loadClientId()){
+            $clientId = $helper->clientId;
+            $email = $arguments['email'];
+            $description = Shopware()->Config()->get('shopname') . " " . $user['billingaddress']['customernumber'];
+
+            //Update the client
+            $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+            $privateKey = trim($swConfig->get("privateKey"));
+            $apiUrl = "https://api.paymill.com/v2/";
+            require_once dirname(__FILE__) . '/lib/Services/Paymill/Clients.php';
+            $client = new Services_Paymill_Clients($privateKey, $apiUrl);
+            $result = $client->update(array('id' => $clientId, 'email' => $email, 'description' => $description));
+        }
     }
 
     /**
@@ -421,6 +432,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Frontend_PaymentPaymill', 'onGetControllerPath');
         $this->subscribeEvent('Enlight_Controller_Action_PreDispatch_Frontend_Checkout', 'onCheckoutConfirm');
         $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Backend_PaymillLogging', 'paymillBackendControllerLogging');
+        $this->subscribeEvent('Shopware_Modules_Admin_UpdateAccount_FilterEmailSql', 'onUpdateCustomerEmail');
     }
 
     /**

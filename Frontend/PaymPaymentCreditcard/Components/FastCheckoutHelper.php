@@ -42,9 +42,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
         $userId = $user['billingaddress']['userID'];
 
         if (in_array($paymentName, array("paymillcc", "paymilldebit"))) {
-            $payment = $paymentName == 'paymillcc' ? 'ccPaymentId' : 'elvPaymentId';
+            $payment = $paymentName === 'paymillcc' ? 'ccPaymentId' : 'elvPaymentId';
             $sql = "SELECT count(`$payment`) FROM `paymill_fastCheckout` WHERE `userId` = $userId AND `$payment` IS NOT null";
-            $fcEnabled = Shopware()->Db()->fetchOne($sql);
+            try{
+                $fcEnabled = Shopware()->Db()->fetchOne($sql);
+            } catch (Exception $exception){
+                $fcEnabled = 0;
+            }
+
             return $fcEnabled == 1;
         }
 
@@ -53,12 +58,12 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
 
     public function assignDisplayData($view)
     {
+        require_once dirname(__FILE__) . '/../lib/Services/Paymill/Payments.php';
         $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $privateKey = trim($swConfig->get("privateKey"));
         $apiUrl = "https://api.paymill.com/v2/";
 
         if ($this->isFcReady("paymillcc")) {
-            require_once dirname(__FILE__) . '/lib/Services/Paymill/Payments.php';
             $this->loadPaymentId();
             $paymentId = $this->paymentId;
             $ccPayment = new Services_Paymill_Payments($privateKey, $apiUrl);
@@ -76,7 +81,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
 
 
         if ($this->isFcReady("paymilldebit")) {
-            require_once dirname(__FILE__) . '/lib/Services/Paymill/Payments.php';
             $this->setPaymentName('elv');
             $this->loadPaymentId();
             $paymentId = $this->paymentId;
@@ -189,9 +193,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
      * @param string $userId            Make sure this is the Id of the current user. Any operations of this class base on this ID
      * @param string $paymentName       Make sure this the paymentCode of the current payment. Otherwise payment data might get lost due to overwriting.
      */
-    public function __construct($userId, $paymentName)
+    public function __construct($userId = null, $paymentName = null)
     {
-        $this->userId = $userId;
-        $this->paymentName = $paymentName;
+        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
+        $this->userId = $userId === null ?  $user['additional']['user']['id']: $userId;
+        $this->paymentName = $paymentName === null ? $user['additional']['payment']['name']: $paymentName;
     }
 }
