@@ -127,7 +127,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 Shopware()->Session()->paymillTransactionToken = "NoTokenRequired";
             }
         }
-        $this->saveAmount($arguments);
+
+        //Save amount into session to allow 3Ds
+        $basket = Shopware()->Session()->sOrderVariables['sBasket'];
+        $totalAmount = (round((float)$basket['sAmount'] * 100, 2));
+
+        Shopware()->Session()->paymillTotalAmount = $totalAmount;
+        $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
 
         if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
             return;
@@ -140,21 +146,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $view->extendsBlock("frontend_index_content_top", $content, "append");
         $view->setScope(Enlight_Template_Manager::SCOPE_PARENT);
         $view->pigmbhErrorMessage = $pigmbhErrorMessage;
-    }
-
-    /**
-     * Saves the Amount to the session, passes it to the current Template
-     *
-     * @param Enlight_Event_EventArgs $arguments
-     */
-    private function saveAmount(Enlight_Event_EventArgs $arguments)
-    {
-        //Save amount into session to allow 3Ds
-        $basket = Shopware()->Session()->sOrderVariables['sBasket'];
-        $totalAmount = (round((float)$basket['sAmount'] * 100, 2));
-
-        Shopware()->Session()->paymillTotalAmount = $totalAmount;
-        $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
     }
 
     /**
