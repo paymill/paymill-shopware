@@ -255,12 +255,16 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     {
         try {
             $form = $this->Form();
-            $translations = array('de_DE' => array('publicKey'           => 'Public Key', 'privateKey' => 'Privat Key',
+            $translations = array('de_DE' => array('publicKey'           => 'Public Key',
+                                                   'privateKey' => 'Privat Key',
+                                                   'paymillPreAuth' => 'Kreditkarten Transaktionen im Checkout authorisieren, Buchung manuell durchführen',
                                                    'paymillDebugging'    => 'Debugging aktivieren',
                                                    'paymillFastCheckout' => 'Daten für Fast Checkout speichern',
                                                    'paymillLogging'      => 'Logging aktivieren',
                                                    'paymillShowLabel'    => 'Paymill Label anzeigen'),
-                                  'en_GB' => array('publicKey'           => 'Public Key', 'privateKey' => 'Private Key',
+                                  'en_GB' => array('publicKey'           => 'Public Key',
+                                                   'privateKey' => 'Private Key',
+                                                   'paymillPreAuth' => 'Authorize credit card transactions during checkout and capture manually',
                                                    'paymillDebugging'    => 'Activate debugging',
                                                    'paymillFastCheckout' => 'Save data for FastCheckout',
                                                    'paymillLogging'      => 'Activate logging',
@@ -412,6 +416,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $form->setElement('text', 'publicKey', array('label' => 'Public Key', 'required' => true));
 
         $form->setElement('text', 'privateKey', array('label' => 'Private Key', 'required' => true));
+
+        $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Kreditkarten Transaktionen im Checkout authorisieren, Buchung manuell durchführen', 'value' => false));
 
         $form->setElement('checkbox', 'paymillDebugging', array('label' => 'Debugging aktivieren', 'value' => false));
 
