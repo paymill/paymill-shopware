@@ -400,7 +400,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      *
      * @return void
      */
-    public function createForm()
+    private function _createForm()
     {
         $form = $this->Form();
 
@@ -423,7 +423,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     /**
      * Creates all Events for the plugins
      */
-    private function createEvents()
+    private function _createEvents()
     {
         $this->subscribeEvent('Enlight_Controller_Action_PostDispatch', 'onPostDispatch');
         $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Frontend_PaymentPaymill', 'onGetControllerPath');
@@ -437,7 +437,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      *
      * @throws Exception "can not create menuentry"
      */
-    private function applyBackendViewModifications()
+    private function _applyBackendViewModifications()
     {
         try {
             $parent = $this->Menu()->findOneBy('label', 'logfile');
