@@ -466,7 +466,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $models = Shopware()->Models();
 
             //Add Order Properties
-            $models->addAttribute( 's_order_attributes', 'paymill', 'paymill_pre_auth', 'tinyint(1)', false, 0);
+            $models->addAttribute( 's_order_attributes', 'paymill', 'pre_auth', 'tinyint(1)', false, 0);
         } catch(Exception $e) { }
         //Persist changes
         $this->Application()->Models()->generateAttributeModels( array( 's_user_attributes' ) );
