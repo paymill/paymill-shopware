@@ -98,7 +98,8 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             $this->log("Processing Payment with Parameters", print_r($params, true));
         }
 
-        $result = $paymentProcessor->processPayment();
+        $preAuth = $swConfig->get("paymillPreAuth");
+        $result = $paymentProcessor->processPayment($preAuth);
 
         $this->log("Payment processing resulted in: " . ($result ? "Success" : "Failure"), print_r($result, true));
 
@@ -130,6 +131,15 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $finalPaymillToken = $paymillToken === "NoTokenRequired" ? $this->createPaymentUniqueId() : $paymillToken;
         $orderNumber = $this->saveOrder($finalPaymillToken, md5($finalPaymillToken));
         $this->log("Finish order.", "Ordernumber: " . $orderNumber, "using Token: " . $finalPaymillToken);
+
+        if($preAuth){
+            $manager = Shopware()->Models();
+            $orderId = Shopware()->Modules()->Order()->getIdFromNumber($orderNumber);;
+            $model = $manager->getRepository( 'Shopware\Models\Order\Order' )->findOneById( $orderId );
+            $model->getAttribute()->setPaymillPreAuth(1);
+            $manager->persist($model);
+            $manager->flush();
+        }
 
         //Update Transaction
         require_once dirname(__FILE__) . '/../../lib/Services/Paymill/Transactions.php';
