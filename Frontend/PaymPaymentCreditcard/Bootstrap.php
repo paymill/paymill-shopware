@@ -155,18 +155,15 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function install()
     {
-        try {
-            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManagerShopware::install();
-            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper::install();
-            $this->createPaymentMeans();
-            $this->createForm();
-            $this->_createPluginConfigTranslation();
-            $this->addTranslationSnippets();
-            $this->createEvents();
-            $this->applyBackendViewModifications();
-        } catch (Exception $exception) {
-            throw new Exception($exception->getMessage());
-        }
+        Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManagerShopware::install();
+        Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper::install();
+        $this->createPaymentMeans();
+        $this->_createForm();
+        $this->_createPluginConfigTranslation();
+        $this->addTranslationSnippets();
+        $this->_createEvents();
+        $this->_applyBackendViewModifications();
+        $this->_modifyShopwareModels();
 
         return true;
     }
@@ -216,6 +213,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     public function uninstall()
     {
         Shopware()->Db()->delete("s_core_paymentmeans", "name in('paymillcc','paymilldebit')");
+        try {
+            $this->Application()->Models()->removeAttribute(
+                's_order_attributes',
+                'paymill',
+                'paymill_pre_auth'
+            );
+            $this->Application()->Models()->generateAttributeModels(array('s_order_attributes'));
+        } catch(Exception $e) { }
 
         return parent::uninstall();
     }
@@ -234,6 +239,12 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             case '1.0.1':
             case '1.0.2':
                 $result = $this->addTranslationSnippets();
+                break;
+            case '1.0.3':
+            case '1.0.3':
+            case '1.0.4':
+            case '1.0.5':
+                $this->_modifyShopwareModels();
         }
 
         return $result;
@@ -446,5 +457,19 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         } catch (Exception $exception) {
             throw new Exception("can not create menuentry." . $exception->getMessage());
         }
+    }
+
+    private function _modifyShopwareModels()
+    {
+        //Edit Properties
+        try {
+            $models = Shopware()->Models();
+
+            //Add Order Properties
+            $models->addAttribute( 's_order_attributes', 'paymill', 'paymill_pre_auth', 'tinyint(1)', false, 0);
+        } catch(Exception $e) { }
+        //Persist changes
+        $this->Application()->Models()->generateAttributeModels( array( 's_user_attributes' ) );
+        $this->Application()->Models()->generateAttributeModels( array( 's_order_attributes' ) );
     }
 }
