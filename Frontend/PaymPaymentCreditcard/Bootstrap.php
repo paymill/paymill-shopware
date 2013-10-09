@@ -217,7 +217,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $this->Application()->Models()->removeAttribute(
                 's_order_attributes',
                 'paymill',
-                'paymill_pre_auth'
+                'preAuthorization'
             );
             $this->Application()->Models()->generateAttributeModels(array('s_order_attributes'));
         } catch(Exception $e) { }
@@ -466,10 +466,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $models = Shopware()->Models();
 
             //Add Order Properties
-            $models->addAttribute( 's_order_attributes', 'paymill', 'pre_auth', 'tinyint(1)', false, 0);
+            $models->addAttribute( 's_order_attributes', 'paymill', 'pre_authorization', 'varchar(255)');
         } catch(Exception $e) { }
         //Persist changes
-        $this->Application()->Models()->generateAttributeModels( array( 's_user_attributes' ) );
         $this->Application()->Models()->generateAttributeModels( array( 's_order_attributes' ) );
     }
 }

@@ -98,8 +98,8 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             $this->log("Processing Payment with Parameters", print_r($params, true));
         }
 
-        $preAuth = $swConfig->get("paymillPreAuth");
-        $result = $paymentProcessor->processPayment($preAuth);
+        $preAuth = $swConfig->get("paymillPreAuth") == 1;
+        $result = $paymentProcessor->processPayment(!$preAuth);
 
         $this->log("Payment processing resulted in: " . ($result ? "Success" : "Failure"), print_r($result, true));
 
@@ -134,11 +134,13 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
 
         if($preAuth){
             $manager = Shopware()->Models();
-            $orderId = Shopware()->Modules()->Order()->getIdFromNumber($orderNumber);;
-            $model = $manager->getRepository( 'Shopware\Models\Order\Order' )->findOneById( $orderId );
-            $model->getAttribute()->setPaymillPreAuth(1);
+            $orderId = Shopware()->Db()->fetchOne("SELECT id FROM s_order WHERE ordernumber=?",array($orderNumber));
+            $model = Shopware()->Models()->getRepository( 'Shopware\Models\Order\Order' )->findOneById( $orderId );
+            $model->getAttribute()->setPaymillPreAuthorization($paymentProcessor->getPreauthId());
             $manager->persist($model);
             $manager->flush();
+            $this->log("Saved PreAuth Information for $orderNumber",$paymentProcessor->getPreauthId());
+
         }
 
         //Update Transaction
