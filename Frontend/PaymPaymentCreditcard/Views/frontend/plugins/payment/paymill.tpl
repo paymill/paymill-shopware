@@ -266,7 +266,7 @@
                     {if $payment_mean.name == 'paymillcc'}
                         {s namespace=Paymill name=form_paymilllabel_cc}Sichere Kreditkartenzahlung powered by{/s}
                     {else}
-                        {s namespace=Paymill name=form_paymilllabel_debit}Lastschriftverfahren powered by{/s}
+                        {s namespace=Paymill name=form_paymilllabel_debit}ELV powered by{/s}
                     {/if}
                     <a href = "http://www.paymill.de" target = "_blank" >Paymill</a >
                 </div >
