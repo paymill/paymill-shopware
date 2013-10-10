@@ -65,7 +65,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             Shopware()->Session()->paymillTransactionToken = $request->get("paymillToken");
         }
 
-        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
+        $user = Shopware()->Session()->sOrderVariables['sUserData'];
         $userId = $user['billingaddress']['userID'];
         $paymentName = $user['additional']['payment']['name'];
         $helper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, $paymentName);
@@ -296,6 +296,29 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
+     * Eventhandler for the display of the paymill order operations tab in the order detail view
+     * @param $arguments
+     */
+    public function extendOrderDetailView($arguments)
+    {
+        $arguments->getSubject()->View()->addTemplateDir(
+            $this->Path() . 'Views/'
+        );
+
+        if ($arguments->getRequest()->getActionName() === 'load') {
+            $arguments->getSubject()->View()->extendsTemplate(
+                'backend/paymill_order_operations/view/main/window.js'
+            );
+        }
+
+        if ($arguments->getRequest()->getActionName() === 'index') {
+            $arguments->getSubject()->View()->extendsTemplate(
+                'backend/paymill_order_operations/app.js'
+            );
+        }
+    }
+
+    /**
      * Adds the translation snippets into the database.
      * Returns true or throws an exception in case of an error
      *
@@ -407,6 +430,16 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
+     * Returns the controller path for the backend order operations controller
+     * @return string
+     */
+    public function paymillBackendControllerOperations()
+    {
+        Shopware()->Template()->addTemplateDir($this->Path() . 'Views/');
+        return $this->Path() . "/Controllers/backend/PaymillOrderOperations.php";
+    }
+
+    /**
      * Creates the configuration fields
      *
      * @return void
@@ -440,7 +473,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Frontend_PaymentPaymill', 'onGetControllerPath');
         $this->subscribeEvent('Enlight_Controller_Action_PreDispatch_Frontend_Checkout', 'onCheckoutConfirm');
         $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Backend_PaymillLogging', 'paymillBackendControllerLogging');
+        $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Backend_PaymillOrderOperations', 'paymillBackendControllerOperations');
         $this->subscribeEvent('Shopware_Modules_Admin_UpdateAccount_FilterEmailSql', 'onUpdateCustomerEmail');
+        $this->subscribeEvent('Enlight_Controller_Action_PostDispatch_Backend_Order','extendOrderDetailView');
+
     }
 
     /**

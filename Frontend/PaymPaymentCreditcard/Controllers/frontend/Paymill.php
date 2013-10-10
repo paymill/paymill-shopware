@@ -56,7 +56,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             $this->log("Start processing payment with token.", $paymillToken);
         }
 
-        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
+        $user = Shopware()->Session()->sOrderVariables['sUserData'];
 
         // process the payment
         $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
