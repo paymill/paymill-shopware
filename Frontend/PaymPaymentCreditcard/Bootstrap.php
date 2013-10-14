@@ -65,7 +65,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             Shopware()->Session()->paymillTransactionToken = $request->get("paymillToken");
         }
 
-        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
+        $user = Shopware()->Session()->sOrderVariables['sUserData'];
         $userId = $user['billingaddress']['userID'];
         $paymentName = $user['additional']['payment']['name'];
         $helper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, $paymentName);
@@ -86,7 +86,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function getVersion()
     {
-        return "1.0.7";
+        return "1.1.0";
     }
 
     /**
@@ -127,7 +127,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 Shopware()->Session()->paymillTransactionToken = "NoTokenRequired";
             }
         }
-        $this->saveAmount($arguments);
+
+        //Save amount into session to allow 3Ds
+        $basket = Shopware()->Session()->sOrderVariables['sBasket'];
+        $totalAmount = (round((float)$basket['sAmount'] * 100, 2));
+
+        Shopware()->Session()->paymillTotalAmount = $totalAmount;
+        $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
 
         if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
             return;
@@ -143,39 +149,21 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * Saves the Amount to the session, passes it to the current Template
-     *
-     * @param Enlight_Event_EventArgs $arguments
-     */
-    private function saveAmount(Enlight_Event_EventArgs $arguments)
-    {
-        //Save amount into session to allow 3Ds
-        $basket = Shopware()->Session()->sOrderVariables['sBasket'];
-        $totalAmount = (round((float)$basket['sAmount'] * 100, 2));
-
-        Shopware()->Session()->paymillTotalAmount = $totalAmount;
-        $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
-    }
-
-    /**
      * Performs the necessary installation steps
      * @throws Exception
      * @return boolean
      */
     public function install()
     {
-        try {
-            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManagerShopware::install();
-            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper::install();
-            $this->createPaymentMeans();
-            $this->createForm();
-            $this->_createPluginConfigTranslation();
-            $this->addTranslationSnippets();
-            $this->createEvents();
-            $this->applyBackendViewModifications();
-        } catch (Exception $exception) {
-            throw new Exception($exception->getMessage());
-        }
+        Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManagerShopware::install();
+        Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper::install();
+        $this->createPaymentMeans();
+        $this->_createForm();
+        $this->_createPluginConfigTranslation();
+        $this->addTranslationSnippets();
+        $this->_createEvents();
+        $this->_applyBackendViewModifications();
+        $this->_modifyShopwareModels();
 
         return true;
     }
@@ -225,6 +213,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     public function uninstall()
     {
         Shopware()->Db()->delete("s_core_paymentmeans", "name in('paymillcc','paymilldebit')");
+        try {
+            $this->Application()->Models()->removeAttribute(
+                's_order_attributes',
+                'paymill',
+                'preAuthorization'
+            );
+            $this->Application()->Models()->generateAttributeModels(array('s_order_attributes'));
+        } catch(Exception $e) { }
 
         return parent::uninstall();
     }
@@ -243,6 +239,12 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             case '1.0.1':
             case '1.0.2':
                 $result = $this->addTranslationSnippets();
+                break;
+            case '1.0.3':
+            case '1.0.3':
+            case '1.0.4':
+            case '1.0.5':
+                $this->_modifyShopwareModels();
         }
 
         return $result;
@@ -290,6 +292,29 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         } catch (Exception $exception) {
             $this->uninstall();
             throw new Exception("Can not create translation." . $exception->getMessage());
+        }
+    }
+
+    /**
+     * Eventhandler for the display of the paymill order operations tab in the order detail view
+     * @param $arguments
+     */
+    public function extendOrderDetailView($arguments)
+    {
+        $arguments->getSubject()->View()->addTemplateDir(
+            $this->Path() . 'Views/'
+        );
+
+        if ($arguments->getRequest()->getActionName() === 'load') {
+            $arguments->getSubject()->View()->extendsTemplate(
+                'backend/paymill_order_operations/view/main/window.js'
+            );
+        }
+
+        if ($arguments->getRequest()->getActionName() === 'index') {
+            $arguments->getSubject()->View()->extendsTemplate(
+                'backend/paymill_order_operations/app.js'
+            );
         }
     }
 
@@ -405,11 +430,21 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
+     * Returns the controller path for the backend order operations controller
+     * @return string
+     */
+    public function paymillBackendControllerOperations()
+    {
+        Shopware()->Template()->addTemplateDir($this->Path() . 'Views/');
+        return $this->Path() . "/Controllers/backend/PaymillOrderOperations.php";
+    }
+
+    /**
      * Creates the configuration fields
      *
      * @return void
      */
-    public function createForm()
+    private function _createForm()
     {
         $form = $this->Form();
 
@@ -432,13 +467,16 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     /**
      * Creates all Events for the plugins
      */
-    private function createEvents()
+    private function _createEvents()
     {
         $this->subscribeEvent('Enlight_Controller_Action_PostDispatch', 'onPostDispatch');
         $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Frontend_PaymentPaymill', 'onGetControllerPath');
         $this->subscribeEvent('Enlight_Controller_Action_PreDispatch_Frontend_Checkout', 'onCheckoutConfirm');
         $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Backend_PaymillLogging', 'paymillBackendControllerLogging');
+        $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Backend_PaymillOrderOperations', 'paymillBackendControllerOperations');
         $this->subscribeEvent('Shopware_Modules_Admin_UpdateAccount_FilterEmailSql', 'onUpdateCustomerEmail');
+        $this->subscribeEvent('Enlight_Controller_Action_PostDispatch_Backend_Order','extendOrderDetailView');
+
     }
 
     /**
@@ -446,7 +484,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      *
      * @throws Exception "can not create menuentry"
      */
-    private function applyBackendViewModifications()
+    private function _applyBackendViewModifications()
     {
         try {
             $parent = $this->Menu()->findOneBy('label', 'logfile');
@@ -455,5 +493,18 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         } catch (Exception $exception) {
             throw new Exception("can not create menuentry." . $exception->getMessage());
         }
+    }
+
+    private function _modifyShopwareModels()
+    {
+        //Edit Properties
+        try {
+            $models = Shopware()->Models();
+
+            //Add Order Properties
+            $models->addAttribute( 's_order_attributes', 'paymill', 'pre_authorization', 'varchar(255)');
+        } catch(Exception $e) { }
+        //Persist changes
+        $this->Application()->Models()->generateAttributeModels( array( 's_order_attributes' ) );
     }
 }
