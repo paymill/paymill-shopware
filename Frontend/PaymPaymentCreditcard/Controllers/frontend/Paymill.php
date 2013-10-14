@@ -149,7 +149,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
     }
 
     /**
-     * This method updates the description of the current transaction by adding the ordernumber
+     * This method updates the description of the current transaction by adding the order number
      * @param $orderNumber
      * @param $paymentProcessor
      * @param $loggingManager
@@ -176,7 +176,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
     }
 
     /**
-     * Redirects to the confirmationpage and sets an errormessage.
+     * Redirects to the confirmation page and sets an error message.
      */
     public function errorAction()
     {
