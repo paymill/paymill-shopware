@@ -31,12 +31,12 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
 {
     /**
      * Frontend index action controller
-     *
-     * @return void
      */
     public function indexAction()
     {
-        //Initialise Logger
+        //Initialise variables
+        $user = Shopware()->Session()->sOrderVariables['sUserData'];
+        $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $loggingManager = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
 
         // read transaction token from session
@@ -53,31 +53,24 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             $this->redirect($url . '&paymill_error=1');
         }
 
-        if ($paymillToken === "NoTokenRequired") {
-            $loggingManager->log("Start processing payment without token.", $paymillToken);
-        } else {
-            $loggingManager->log("Start processing payment with token.", $paymillToken);
-        }
-
-        $user = Shopware()->Session()->sOrderVariables['sUserData'];
+        $loggingManager->log("Start processing payment " . $paymillToken === "NoTokenRequired" ? "without" : "with" . " token.", $paymillToken);
 
         // process the payment
-        $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $userId = $user['billingaddress']['userID'];
         $paymentShortcut = $this->getPaymentShortName() == 'paymillcc' ? 'cc' : 'elv';
-        $params = array('token'            => $paymillToken,
-                        'authorizedAmount' => (int)Shopware()->Session()->paymillTotalAmount,
-                        'amount'           => (int)(round($this->getAmount() * 100, 0)),
-                        'currency'         => $this->getCurrencyShortName(),
-                        'name'             => $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname'],
-                        'email'            => $user['additional']['user']['email'],
-                        'description'      => $user['additional']['user']['email'] . " " . Shopware()->Config()->get('shopname'),
-                        'payment'          => $paymentShortcut);
-
+        $params = array(
+            'token'            => $paymillToken,
+            'authorizedAmount' => (int)Shopware()->Session()->paymillTotalAmount,
+            'amount'           => (int)(round($this->getAmount() * 100, 0)),
+            'currency'         => $this->getCurrencyShortName(),
+            'name'             => $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname'],
+            'email'            => $user['additional']['user']['email'],
+            'description'      => $user['additional']['user']['email'] . " " . Shopware()->Config()->get('shopname'),
+            'payment'          => $paymentShortcut
+        );
 
         $paymentProcessor = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor($params);
 
-        //Fast Checkout data exists
         $fcHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, $paymentShortcut);
 
         if ($fcHelper->loadClientId()) {
@@ -89,10 +82,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             if ($paymillToken === "NoTokenRequired") {
                 $paymentId = $fcHelper->paymentId;
                 $paymentProcessor->setPaymentId($paymentId);
-                $loggingManager->log("Processing Payment with Parameters", print_r($params, true), "Additional Parameters given. \n" . " User Id: " . $userId . "\n Client Id: " . $clientId . "\n PaymentId: " . $paymentId);
             }
-        } else {
-            $loggingManager->log("Processing Payment with Parameters", print_r($params, true));
         }
 
         $preAuth = $swConfig->get("paymillPreAuth") == 1;
@@ -111,7 +101,6 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             return $this->forward('error');
         }
 
-
         //Save Client Id
         $clientId = $paymentProcessor->getClientId();
         $fcHelper->saveClientId($clientId);
@@ -129,37 +118,47 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $orderNumber = $this->saveOrder($finalPaymillToken, md5($finalPaymillToken));
         $loggingManager->log("Finish order.", "Ordernumber: " . $orderNumber, "using Token: " . $finalPaymillToken);
 
-        if($preAuth){
+        $this->_savePreAuthId($preAuth, $orderNumber, $paymentProcessor, $loggingManager);
+        $this->_updateTransaction($orderNumber, $paymentProcessor, $loggingManager);
+
+        // reset the session field
+        Shopware()->Session()->paymillTransactionToken = null;
+
+        $this->redirect(array("controller" => "checkout", "action" => "finish", "forceSecure" => 1));
+    }
+
+    private function _savePreAuthId($preAuth, $orderNumber, $paymentProcessor, $loggingManager)
+    {
+        if ($preAuth) {
             $manager = Shopware()->Models();
-            $orderId = Shopware()->Db()->fetchOne("SELECT id FROM s_order WHERE ordernumber=?",array($orderNumber));
-            $model = Shopware()->Models()->getRepository( 'Shopware\Models\Order\Order' )->findOneById( $orderId );
+            $orderId = Shopware()->Db()->fetchOne("SELECT id FROM s_order WHERE ordernumber=?", array($orderNumber));
+            $model = Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneById($orderId);
             $model->getAttribute()->setPaymillPreAuthorization($paymentProcessor->getPreauthId());
             $manager->persist($model);
             $manager->flush();
-            $loggingManager->log("Saved PreAuth Information for $orderNumber",$paymentProcessor->getPreauthId());
-
+            $loggingManager->log("Saved PreAuth Information for $orderNumber", $paymentProcessor->getPreauthId());
         }
+    }
 
+    private function _updateTransaction($orderNumber, $paymentProcessor, $loggingManager)
+    {
         //Update Transaction
         require_once dirname(__FILE__) . '/../../lib/Services/Paymill/Transactions.php';
+        $user = Shopware()->Session()->sOrderVariables['sUserData'];
+        $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $privateKey = trim($swConfig->get("privateKey"));
         $apiUrl = "https://api.paymill.com/v2/";
         $transaction = new Services_Paymill_Transactions($privateKey, $apiUrl);
         $description = $orderNumber . " " . $user['additional']['user']['email'] . " " . Shopware()->Config()
                                                                                          ->get('shopname');
-        $updateResponse = $transaction->update(array(id          => $paymentProcessor->getTransactionId(),
-                                                     description => $description));
+        $updateResponse = $transaction->update(array('id'          => $paymentProcessor->getTransactionId(),
+                                                     'description' => $description));
 
         if ($updateResponse['response_code'] === 20000) {
             $loggingManager->log("Successfully updated the description of " . $paymentProcessor->getTransactionId(), $description);
         } else {
             $loggingManager->log("There was an error updating the description of " . $paymentProcessor->getTransactionId(), $description);
         }
-
-        // reset the session field
-        Shopware()->Session()->paymillTransactionToken = null;
-
-        $this->redirect(array("controller" => "checkout", "action" => "finish", "forceSecure" => 1));
     }
 
     /**

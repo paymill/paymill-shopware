@@ -44,7 +44,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
     /**
      * Triggered on every request
+     *
      * @param $args
+     *
      * @return void
      */
     public static function onPostDispatch(Enlight_Event_EventArgs $args)
@@ -77,29 +79,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 Shopware()->Session()->paymillTransactionToken = "NoTokenRequired";
             }
         }
-    }
-
-    /**
-     * Returns the version
-     *
-     * @return string
-     */
-    public function getVersion()
-    {
-        return "1.1.0";
-    }
-
-    /**
-     * Get Info for the Pluginmanager
-     *
-     * @return array
-     */
-    public function getInfo()
-    {
-        return array('version'  => $this->getVersion(), 'autor' => 'PayIntelligent GmbH',
-                     'source'   => $this->getSource(), 'supplier' => 'PAYMILL GmbH', 'support' => 'support@paymill.com',
-                     'link'     => 'https://www.paymill.com', 'copyright' => 'Copyright (c) 2013, PayIntelligent GmbH',
-                     'label'    => 'Paymill', 'description' => '');
     }
 
     /**
@@ -149,7 +128,86 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
+     * Returns the version
+     *
+     * @return string
+     */
+    public function getVersion()
+    {
+        return "1.1.0";
+    }
+
+    /**
+     * Return the path of the backend controller
+     *
+     * @return String backend controller path
+     */
+    public function paymillBackendControllerLogging()
+    {
+        Shopware()->Template()->addTemplateDir(Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()
+                                               ->Path() . 'Views/');
+
+        return Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()
+               ->Path() . "/Controllers/backend/PaymillLogging.php";
+    }
+
+    /**
+     * Get Info for the Pluginmanager
+     *
+     * @return array
+     */
+    public function getInfo()
+    {
+        return array('version'  => $this->getVersion(), 'autor' => 'PayIntelligent GmbH',
+                     'source'   => $this->getSource(), 'supplier' => 'PAYMILL GmbH', 'support' => 'support@paymill.com',
+                     'link'     => 'https://www.paymill.com', 'copyright' => 'Copyright (c) 2013, PayIntelligent GmbH',
+                     'label'    => 'Paymill', 'description' => '');
+    }
+
+    /**
+     * @param $arguments event arguments
+     */
+    public function onUpdateCustomerEmail($arguments)
+    {
+        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
+        $helper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper();
+        //If there is a client for the customer
+        if ($helper->loadClientId()) {
+            $clientId = $helper->clientId;
+            $email = $arguments['email'];
+            $description = Shopware()->Config()->get('shopname') . " " . $user['billingaddress']['customernumber'];
+
+            //Update the client
+            $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+            $privateKey = trim($swConfig->get("privateKey"));
+            $apiUrl = "https://api.paymill.com/v2/";
+            require_once dirname(__FILE__) . '/lib/Services/Paymill/Clients.php';
+            $client = new Services_Paymill_Clients($privateKey, $apiUrl);
+            $result = $client->update(array('id' => $clientId, 'email' => $email, 'description' => $description));
+        }
+    }
+
+    /**
+     * Eventhandler for the display of the paymill order operations tab in the order detail view
+     *
+     * @param $arguments
+     */
+    public function extendOrderDetailView($arguments)
+    {
+        $arguments->getSubject()->View()->addTemplateDir($this->Path() . 'Views/');
+
+        if ($arguments->getRequest()->getActionName() === 'load') {
+            $arguments->getSubject()->View()->extendsTemplate('backend/paymill_order_operations/view/main/window.js');
+        }
+
+        if ($arguments->getRequest()->getActionName() === 'index') {
+            $arguments->getSubject()->View()->extendsTemplate('backend/paymill_order_operations/app.js');
+        }
+    }
+
+    /**
      * Performs the necessary installation steps
+     *
      * @throws Exception
      * @return boolean
      */
@@ -169,40 +227,15 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * Return the path of the backend controller
+     * Returns the controller path for the backend order operations controller
      *
-     * @return String backend controller path
+     * @return string
      */
-    public function paymillBackendControllerLogging()
+    public function paymillBackendControllerOperations()
     {
-        Shopware()->Template()->addTemplateDir(Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()
-                                               ->Path() . 'Views/');
+        Shopware()->Template()->addTemplateDir($this->Path() . 'Views/');
 
-        return Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()
-               ->Path() . "/Controllers/backend/PaymillLogging.php";
-    }
-
-    /**
-     * @param $arguments event arguments
-     */
-    public function onUpdateCustomerEmail($arguments)
-    {
-        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
-        $helper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper();
-        //If there is a client for the customer
-        if($helper->loadClientId()){
-            $clientId = $helper->clientId;
-            $email = $arguments['email'];
-            $description = Shopware()->Config()->get('shopname') . " " . $user['billingaddress']['customernumber'];
-
-            //Update the client
-            $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
-            $privateKey = trim($swConfig->get("privateKey"));
-            $apiUrl = "https://api.paymill.com/v2/";
-            require_once dirname(__FILE__) . '/lib/Services/Paymill/Clients.php';
-            $client = new Services_Paymill_Clients($privateKey, $apiUrl);
-            $result = $client->update(array('id' => $clientId, 'email' => $email, 'description' => $description));
-        }
+        return $this->Path() . "/Controllers/backend/PaymillOrderOperations.php";
     }
 
     /**
@@ -214,13 +247,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     {
         Shopware()->Db()->delete("s_core_paymentmeans", "name in('paymillcc','paymilldebit')");
         try {
-            $this->Application()->Models()->removeAttribute(
-                's_order_attributes',
-                'paymill',
-                'preAuthorization'
-            );
+            $this->Application()->Models()->removeAttribute('s_order_attributes', 'paymill', 'preAuthorization');
             $this->Application()->Models()->generateAttributeModels(array('s_order_attributes'));
-        } catch(Exception $e) { }
+        } catch (Exception $e) {
+        }
 
         return parent::uninstall();
     }
@@ -229,6 +259,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      * Updates the Plugin and its components
      *
      * @param string $oldVersion
+     *
      * @return boolean
      * @todo Add update Statement regarding log table for the upcomming version 1.1.0
      */
@@ -258,16 +289,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     {
         try {
             $form = $this->Form();
-            $translations = array('de_DE' => array('publicKey'           => 'Public Key',
-                                                   'privateKey' => 'Privat Key',
-                                                   'paymillPreAuth' => 'Kreditkarten Transaktionen im Checkout authorisieren, Buchung manuell durchführen',
+            $translations = array('de_DE' => array('publicKey'           => 'Public Key', 'privateKey' => 'Privat Key',
+                                                   'paymillPreAuth'      => 'Kreditkarten Transaktionen im Checkout authorisieren, Buchung manuell durchführen',
                                                    'paymillDebugging'    => 'Debugging aktivieren',
                                                    'paymillFastCheckout' => 'Daten für Fast Checkout speichern',
                                                    'paymillLogging'      => 'Logging aktivieren',
                                                    'paymillShowLabel'    => 'Paymill Label anzeigen'),
-                                  'en_GB' => array('publicKey'           => 'Public Key',
-                                                   'privateKey' => 'Private Key',
-                                                   'paymillPreAuth' => 'Authorize credit card transactions during checkout and capture manually',
+                                  'en_GB' => array('publicKey'           => 'Public Key', 'privateKey' => 'Private Key',
+                                                   'paymillPreAuth'      => 'Authorize credit card transactions during checkout and capture manually',
                                                    'paymillDebugging'    => 'Activate debugging',
                                                    'paymillFastCheckout' => 'Save data for FastCheckout',
                                                    'paymillLogging'      => 'Activate logging',
@@ -297,32 +326,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * Eventhandler for the display of the paymill order operations tab in the order detail view
-     * @param $arguments
-     */
-    public function extendOrderDetailView($arguments)
-    {
-        $arguments->getSubject()->View()->addTemplateDir(
-            $this->Path() . 'Views/'
-        );
-
-        if ($arguments->getRequest()->getActionName() === 'load') {
-            $arguments->getSubject()->View()->extendsTemplate(
-                'backend/paymill_order_operations/view/main/window.js'
-            );
-        }
-
-        if ($arguments->getRequest()->getActionName() === 'index') {
-            $arguments->getSubject()->View()->extendsTemplate(
-                'backend/paymill_order_operations/app.js'
-            );
-        }
-    }
-
-    /**
      * Adds the translation snippets into the database.
      * Returns true or throws an exception in case of an error
      *
+     * @todo Improve translations and implement a way to load more languages
      * @return true
      * @throws Exception
      */
@@ -422,22 +429,11 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
         Shopware()->Payments()->createRow($paymillcc)->save();
 
-        $paymilldebit = array('name'     => 'paymilldebit', 'description' => 'ELV',
-                              'action'   => 'payment_paymill', 'active' => 1, 'template' => 'paymill.tpl',
-            //'paymilldebit.tpl',
+        $paymilldebit = array('name'     => 'paymilldebit', 'description' => 'ELV', 'action' => 'payment_paymill',
+                              'active'   => 1, 'template' => 'paymill.tpl', //'paymilldebit.tpl',
                               'pluginID' => $this->getId());
 
         Shopware()->Payments()->createRow($paymilldebit)->save();
-    }
-
-    /**
-     * Returns the controller path for the backend order operations controller
-     * @return string
-     */
-    public function paymillBackendControllerOperations()
-    {
-        Shopware()->Template()->addTemplateDir($this->Path() . 'Views/');
-        return $this->Path() . "/Controllers/backend/PaymillOrderOperations.php";
     }
 
     /**
@@ -453,7 +449,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
         $form->setElement('text', 'privateKey', array('label' => 'Private Key', 'required' => true));
 
-        $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Kreditkarten Transaktionen im Checkout authorisieren, Buchung manuell durchführen', 'value' => false));
+        $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Kreditkarten Transaktionen im Checkout authorisieren, Buchung manuell durchführen',
+                                                              'value' => false));
 
         $form->setElement('checkbox', 'paymillDebugging', array('label' => 'Debugging aktivieren', 'value' => false));
 
@@ -476,8 +473,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Backend_PaymillLogging', 'paymillBackendControllerLogging');
         $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Backend_PaymillOrderOperations', 'paymillBackendControllerOperations');
         $this->subscribeEvent('Shopware_Modules_Admin_UpdateAccount_FilterEmailSql', 'onUpdateCustomerEmail');
-        $this->subscribeEvent('Enlight_Controller_Action_PostDispatch_Backend_Order','extendOrderDetailView');
-
+        $this->subscribeEvent('Enlight_Controller_Action_PostDispatch_Backend_Order', 'extendOrderDetailView');
     }
 
     /**
@@ -503,9 +499,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $models = Shopware()->Models();
 
             //Add Order Properties
-            $models->addAttribute( 's_order_attributes', 'paymill', 'pre_authorization', 'varchar(255)');
-        } catch(Exception $e) { }
+            $models->addAttribute('s_order_attributes', 'paymill', 'pre_authorization', 'varchar(255)');
+        } catch (Exception $e) {
+        }
         //Persist changes
-        $this->Application()->Models()->generateAttributeModels( array( 's_order_attributes' ) );
+        $this->Application()->Models()->generateAttributeModels(array('s_order_attributes'));
     }
 }
