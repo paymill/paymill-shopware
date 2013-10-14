@@ -261,7 +261,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      * @param string $oldVersion
      *
      * @return boolean
-     * @todo Add update Statement regarding log table for the upcomming version 1.1.0
      */
     public function update($oldVersion)
     {
@@ -270,13 +269,26 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             case '1.0.0':
             case '1.0.1':
             case '1.0.2':
-                $result = $this->addTranslationSnippets();
-                break;
+                if(!$this->addTranslationSnippets()){
+                    break;
+                }
             case '1.0.3':
             case '1.0.3':
             case '1.0.4':
             case '1.0.5':
-                $this->_modifyShopwareModels();
+                if(!$this->_modifyShopwareModels()){
+                    break;
+                }
+                try{
+                    $dropLogColumn = "ALTER TABLE `pigmbh_paymill_log` DROP `devInfoAdditional`";
+                    Shopware()->Db()->query($dropLogColumn);
+                    $renameLogTable ="RENAME TABLE `pigmbh_paymill_log` TO `paymill_log`";
+                    Shopware()->Db()->query($renameLogTable);
+                } catch (Exception $exception){
+                    break;
+                }
+            case '1.1.0':
+            $result = true;
         }
 
         return $result;
@@ -494,15 +506,19 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
     private function _modifyShopwareModels()
     {
+        $result = false;
         //Edit Properties
         try {
             $models = Shopware()->Models();
 
             //Add Order Properties
             $models->addAttribute('s_order_attributes', 'paymill', 'pre_authorization', 'varchar(255)');
+            $result = true;
         } catch (Exception $e) {
+            $result = false;
         }
         //Persist changes
         $this->Application()->Models()->generateAttributeModels(array('s_order_attributes'));
+        return $result;
     }
 }
