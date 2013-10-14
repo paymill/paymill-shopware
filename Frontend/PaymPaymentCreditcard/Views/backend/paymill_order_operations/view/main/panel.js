@@ -49,7 +49,9 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                                         defaultType: 'displayfield',
                                         width:'50%',
                                         items: [
-
+                                            {
+                                                value       : '{s namespace=paymill name=backend_description_capture}Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.{/s}'
+                                            }
                                         ]
                                     }
                                 ]
@@ -64,8 +66,8 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                                         defaultType: 'displayfield',
                                         width:'50%',
                                         items: [
-                                            Ext.create('Ext.Button', {
-                                                text: 'Capture',
+                                            captureButton = Ext.create('Ext.Button', {
+                                                text: '{s namespace=paymill name=backend_button_capture}Capture{/s}',
                                                 scale: 'medium',
                                                 margin: '0 0 0 10',
                                                 disabled: !(me.canCapture()),
@@ -80,6 +82,15 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                                         defaultType: 'displayfield',
                                         width:'50%',
                                         items: [
+                                            refundButton = Ext.create('Ext.Button', {
+                                                text: '{s namespace=paymill name=backend_button_refund}Refund{/s}',
+                                                scale: 'medium',
+                                                margin: '0 0 0 10',
+                                                disabled: !(me.canRefund()),
+                                                handler: function() {
+                                                    me.refund();
+                                                }
+                                            })
 
                                         ]
                                     }
@@ -107,7 +118,6 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
             success: function(response){
                 var decodedResponse = Ext.decode(response.responseText);
                 success = decodedResponse.success;
-
             }
         });
         return success;
@@ -118,6 +128,44 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
         var me = this;
         Ext.Ajax.request({
             url: '{url controller=PaymillOrderOperations action=capture}',
+            method:'POST',
+            async:false,
+            params: {
+                orderId:id
+            },
+            success: function(response){
+                var decodedResponse = Ext.decode(response.responseText);
+                var success = decodedResponse.success;
+                var messageText = decodedResponse.messageText;
+                alert(messageText);
+            }
+        });
+    },
+
+    canRefund: function(){
+        var id = this.record.get('id');
+        var success = false;
+        Ext.Ajax.request({
+            url: '{url controller=PaymillOrderOperations action=canRefund}',
+            method:'POST',
+            async:false,
+            params: {
+                orderId:id
+            },
+            success: function(response){
+                var decodedResponse = Ext.decode(response.responseText);
+                success = decodedResponse.success;
+
+            }
+        });
+        return success;
+    },
+
+    refund: function(){
+        var id = this.record.get('id');
+        var me = this;
+        Ext.Ajax.request({
+            url: '{url controller=PaymillOrderOperations action=refund}',
             method:'POST',
             async:false,
             params: {

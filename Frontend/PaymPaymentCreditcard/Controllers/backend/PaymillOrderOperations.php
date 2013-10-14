@@ -15,11 +15,24 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
     public function displayTabAction()
     {
         $orderId = $this->Request()->getParam("orderId");
-        $result = false;
-        if (isset($orderId)) {
-            //Determine if order can be captured
-            $result = true;
+        $model = Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneById($orderId);
+        $canCapture = false;
+        $canRefund = false;
+        $orderComplete = false;
+
+        if ($model->getAttribute()->getPaymillCancelled() == 1) {
+            $orderComplete = true;
         }
+
+        if ($model->getAttribute()->getPaymillTransaction() !== null && !$orderComplete) {
+        $canRefund = true;
+        }
+
+        if ($model->getAttribute()->getPaymillPreAuthorization() !== null && !$canRefund) {
+            $canCapture = true;
+        }
+
+        $result = ($canCapture||$canRefund);
 
         $this->View()->assign(array('success' => $result));
     }
@@ -32,12 +45,11 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
         $success = false;
         $orderId = $this->Request()->getParam("orderId");
         $model = Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneById($orderId);
-        if (!function_exists($model->getAttribute()->getPaymillPreAuthorization)) {
-            if ($model->getAttribute()->getPaymillPreAuthorization() !== null) {
-                $success = true;
+        if ($model->getAttribute()->getPaymillPreAuthorization() !== null) {
+            if ($model->getAttribute()->getPaymillTransaction() === null) {
+                    $success = true;
             }
         }
-
         $this->View()->assign(array('success' => $success));
     }
 
@@ -77,12 +89,70 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
             $result = $paymentProcessor->capture();
             if ($result) {
                 $messageText = "Capture has been successful.";
+                $model->getAttribute()->setPaymillTransaction($paymentProcessor->getTransactionId());
             } else {
                 $messageText = "Capture failed.";
             }
         } catch (Exception $exception) {
             $messageText = $exception->getMessage();
         }
+
+        $this->View()->assign(array('success' => $result, 'messageText' => $messageText));
+    }
+
+    /**
+     * Action Listener to determine if an order is applicable for refund
+     */
+    public function canRefundAction()
+    {
+        $success = false;
+        $orderId = $this->Request()->getParam("orderId");
+        $model = Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneById($orderId);
+        if ($model->getAttribute()->getPaymillTransaction() !== null) {
+            $success = true;
+        }
+
+        $this->View()->assign(array('success' => $success));
+    }
+
+    /**
+     * Action Listener to execute the capture for applicable transactions
+     *
+     * @todo Add translations and exception handling for different cases
+     */
+    public function refundAction()
+    {
+        require_once dirname(__FILE__) . '/../../lib/Services/Paymill/Transaction.php';
+        $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+
+        //Gather Data
+        $orderId = $this->Request()->getParam("orderId");
+        $privateKey = trim($swConfig->get("privateKey"));
+        $apiUrl = "https://api.paymill.com/v2/";
+
+        $model = Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneById($orderId);
+        $transactionId = $model->getAttribute()->getPaymillTransaction();
+
+        $transactionObject = new Services_Paymill_Transactions($privateKey, $apiUrl);
+        $transactionObject = $transactionObject->getOne($transactionId);
+
+        $description = $transactionObject['client']['email'] . " " . Shopware()->Config()->get('shopname');
+        $amount = $transactionObject['amount'];
+
+        //Create Transaction
+        $parameter = array('transactionId'   => $transactionId,
+                           'params'          => array(
+                               'amount'      => $amount,
+                               'description' => $description
+                               )
+            );
+
+        $refundObject = new Services_Paymill_Refunds($privateKey, $apiUrl);
+        $refund = $refundObject->create($parameter);
+
+        //Validate Result
+        $result = false;
+        $messageText = "";
 
         $this->View()->assign(array('success' => $result, 'messageText' => $messageText));
     }

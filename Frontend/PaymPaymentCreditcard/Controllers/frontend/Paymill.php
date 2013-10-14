@@ -145,6 +145,14 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             $manager->persist($model);
             $manager->flush();
             $loggingManager->log("Saved PreAuth Information for $orderNumber", $paymentProcessor->getPreauthId());
+        } else {
+            $manager = Shopware()->Models();
+            $orderId = Shopware()->Db()->fetchOne("SELECT id FROM s_order WHERE ordernumber=?", array($orderNumber));
+            $model = Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneById($orderId);
+            $model->getAttribute()->setPaymillTransaction($paymentProcessor->getTransactionId());
+            $manager->persist($model);
+            $manager->flush();
+            $loggingManager->log("Saved Transaction Information for $orderNumber", $paymentProcessor->getTransactionId());
         }
     }
 
