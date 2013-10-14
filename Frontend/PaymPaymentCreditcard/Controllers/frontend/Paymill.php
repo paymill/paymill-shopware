@@ -124,7 +124,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         // reset the session field
         Shopware()->Session()->paymillTransactionToken = null;
 
-        $this->redirect(array("controller" => "checkout", "action" => "finish", "forceSecure" => 1));
+        return $this->forward('finish', 'checkout', null, array('sUniqueID' => md5($finalPaymillToken)));
     }
 
     private function _savePreAuthId($preAuth, $orderNumber, $paymentProcessor, $loggingManager)
