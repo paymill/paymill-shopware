@@ -117,21 +117,17 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
         var id = this.record.get('id');
         var me = this;
         Ext.Ajax.request({
-            url: '{url controller=PaymillOrderOperations action=executeCapture}',
+            url: '{url controller=PaymillOrderOperations action=capture}',
             method:'POST',
             async:false,
             params: {
                 orderId:id
             },
             success: function(response){
-                var message = "{s namespace=paymill name=backend_feedback_title_capture_error}Fehler...{/s}";
                 var decodedResponse = Ext.decode(response.responseText);
                 var success = decodedResponse.success;
                 var messageText = decodedResponse.messageText;
-                if(success){
-                    message = "{s namespace=paymill name=backend_feedback_title_capture_success}Erfolg{/s}";
-                }
-                alert(message + messageText);
+                alert(messageText);
             }
         });
     }

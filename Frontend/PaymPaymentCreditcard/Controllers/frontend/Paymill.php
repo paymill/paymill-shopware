@@ -62,8 +62,6 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $userId = $user['billingaddress']['userID'];
         $paymentShortcut = $this->getPaymentShortName() == 'paymillcc' ? 'cc' : 'elv';
-        $privateKey = trim($swConfig->get("privateKey"));
-        $apiUrl = "https://api.paymill.com/v2/";
         $params = array('token'            => $paymillToken,
                         'authorizedAmount' => (int)Shopware()->Session()->paymillTotalAmount,
                         'amount'           => (int)(round($this->getAmount() * 100, 0)),
@@ -73,12 +71,8 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
                         'description'      => $user['additional']['user']['email'] . " " . Shopware()->Config()->get('shopname'),
                         'payment'          => $paymentShortcut);
 
-        $source = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->getVersion();
-        $source .= "_shopware";
-        $source .= "_" . Shopware()->Config()->get('version');
 
-        $paymentProcessor = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor($privateKey, $apiUrl, null, $params, $this);
-        $paymentProcessor->setSource($source);
+        $paymentProcessor = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor($params);
 
         //Fast Checkout data exists
         $fcHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, $paymentShortcut);
