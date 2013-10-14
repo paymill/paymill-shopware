@@ -76,7 +76,7 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
         try {
             $result = $paymentProcessor->capture();
             if ($result) {
-                $messageText = "Capture has been successfull.";
+                $messageText = "Capture has been successful.";
             } else {
                 $messageText = "Capture failed.";
             }

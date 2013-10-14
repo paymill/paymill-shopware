@@ -93,7 +93,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         // finish the order if payment was successfully processed
         if ($result !== true) {
             Shopware()->Session()->paymillTransactionToken = null;
-            Shopware()->Session()->pigmbhErrorMessage = "An error occured while processing your payment";
+            Shopware()->Session()->pigmbhErrorMessage = "An error occurred while processing your payment";
             if (Shopware()->Locale()->getLanguage() === 'de') {
                 Shopware()->Session()->pigmbhErrorMessage = 'W&auml;hrend Ihrer Zahlung ist ein Fehler aufgetreten.';
             }
@@ -127,6 +127,14 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         return $this->forward('finish', 'checkout', null, array('sUniqueID' => md5($finalPaymillToken)));
     }
 
+    /**
+     * This method saves the PreAuthId into an Attribute of the provided order.
+     *
+     * @param $preAuth
+     * @param $orderNumber
+     * @param $paymentProcessor
+     * @param $loggingManager
+     */
     private function _savePreAuthId($preAuth, $orderNumber, $paymentProcessor, $loggingManager)
     {
         if ($preAuth) {
@@ -140,6 +148,12 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         }
     }
 
+    /**
+     * This method updates the description of the current transaction by adding the ordernumber
+     * @param $orderNumber
+     * @param $paymentProcessor
+     * @param $loggingManager
+     */
     private function _updateTransaction($orderNumber, $paymentProcessor, $loggingManager)
     {
         //Update Transaction

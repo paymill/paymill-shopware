@@ -26,9 +26,9 @@
     {
         debug("Tag");
         if(isCC()){
-            cardNumber = $('#card-number').val();
-            validMonth = $('#card-expiry-month').val();
-            validYear = $('#card-expiry-year').val();
+            var cardNumber = $('#card-number').val();
+            var validMonth = $('#card-expiry-month').val();
+            var validYear = $('#card-expiry-year').val();
 
             debug(cardNumber);
             debug(validMonth);
@@ -45,8 +45,8 @@
         }
 
         if(isELV()){
-            accountNumber = $('#paymill_accountnumber').val();
-            bankCode = $('#paymill_banknumber').val()
+            var accountNumber = $('#paymill_accountnumber').val();
+            var bankCode = $('#paymill_banknumber').val();
             if((accountNumber === "" || bankCode === "") ||
             ("{$paymillAccountNumber}" !== accountNumber) ||
             ("{$paymillBankCode}" !== bankCode)){
@@ -54,7 +54,7 @@
                 return false;
             }
         }
-        debug("Fast Checkout Data found and not altered. Will process with given data. Validation will be skipped.")
+        debug("Fast Checkout Data found and not altered. Will process with given data. Validation will be skipped.");
         return true;
     }
     function validate()
@@ -260,7 +260,7 @@
             <p class = "description" >{s namespace=Paymill name=form_info}Die mit einem * markierten Felder sind Pflichtfelder.{/s}</p >
         {/if}
         {if {config name=paymillShowLabel}}
-            <p >
+            <p class = "none" >
             <div class = "paymill_powered" >
                 <div class = "paymill_credits" >
                     {if $payment_mean.name == 'paymillcc'}
@@ -271,7 +271,7 @@
                     <a href = "http://www.paymill.de" target = "_blank" >Paymill</a >
                 </div >
             </div >
-            </p>
+            </p >
         {/if}
     </div >
 {/if}

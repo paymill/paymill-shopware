@@ -12,7 +12,12 @@ require_once dirname(__FILE__) . '/../lib/Services/Paymill/PaymentProcessor.php'
  */
 class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor extends Services_Paymill_PaymentProcessor
 {
-    public function __construct($params = null)
+    /**
+     * Creates an instance of the paymentProcessor class. This class from the paymill lib allows easier access to most
+     * calls used during the payment process.
+     * @param array $params
+     */
+    public function __construct($params)
     {
         $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $privateKey = trim($swConfig->get("privateKey"));

@@ -111,6 +111,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
         return false;
     }
 
+    /**
+     * This method assigns the masked display data to the provided view.
+     * @param $view
+     */
     public function assignDisplayData($view)
     {
         require_once dirname(__FILE__) . '/../lib/Services/Paymill/Payments.php';

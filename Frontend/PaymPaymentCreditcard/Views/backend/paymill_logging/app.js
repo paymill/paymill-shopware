@@ -18,7 +18,7 @@ Ext.define('Shopware.apps.PaymillLogging', {
     {
         var me = this;
         me.windowTitle = '{$title}';
-        mainController = me.getController('Main');
+        var mainController = me.getController('Main');
         return mainController.mainWindow;
     }
 });

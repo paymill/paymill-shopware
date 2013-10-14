@@ -18,7 +18,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
     extend:'Ext.form.Panel',
     autoScroll:true,
     initComponent: function() {
-        me = this;
+        var me = this;
         me.items = [
             Ext.create('Ext.panel.Panel',{
                 width:'100%',

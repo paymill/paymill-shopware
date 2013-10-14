@@ -165,7 +165,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * @param $arguments event arguments
+     * @param $arguments
      */
     public function onUpdateCustomerEmail($arguments)
     {
@@ -213,7 +213,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function install()
     {
-        Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManagerShopware::install();
+        Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager::install();
         Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper::install();
         $this->createPaymentMeans();
         $this->_createForm();
@@ -272,7 +272,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 if(!$this->addTranslationSnippets()){
                     break;
                 }
-            case '1.0.3':
             case '1.0.3':
             case '1.0.4':
             case '1.0.5':
@@ -342,7 +341,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      * Returns true or throws an exception in case of an error
      *
      * @todo Improve translations and implement a way to load more languages
-     * @return true
+     * @return boolean
      * @throws Exception
      */
     private function addTranslationSnippets()
@@ -500,14 +499,17 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $this->createMenuItem(array('label'      => 'Paymill', 'class' => 'sprite-cards-stack', 'active' => 1,
                                         'controller' => 'PaymillLogging', 'action' => 'index', 'parent' => $parent));
         } catch (Exception $exception) {
-            throw new Exception("can not create menuentry." . $exception->getMessage());
+            throw new Exception("can not create menu entry." . $exception->getMessage());
         }
     }
 
+    /**
+     * This method adds attributes to the shopware models
+     * @return bool
+     */
     private function _modifyShopwareModels()
     {
         $result = false;
-        //Edit Properties
         try {
             $models = Shopware()->Models();
 
