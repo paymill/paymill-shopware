@@ -1,7 +1,5 @@
 <?php
 
-require_once dirname(__FILE__) . '/Parents/FastCheckoutHelperAbstract.php';
-
 /**
  * The FastCheckoutHelper class implements all methods required for the fast checkout.
  *
@@ -10,8 +8,16 @@ require_once dirname(__FILE__) . '/Parents/FastCheckoutHelperAbstract.php';
  * @subpackage Paymill
  * @author     Paymill
  */
-class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper extends FastCheckoutHelperAbstract
+class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper
 {
+    private $_userId = null;
+
+    private $_paymentName = null;
+
+    public $clientId = null;
+
+    public $paymentId = null;
+
     /**
      * This method is meant to be called during the installation of the plugin to allow use of the FastCheckout Helper.
      *
@@ -20,12 +26,61 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
     public static function install()
     {
         try {
-            $sql = parent::getCreateSQL();
+            $sql = "CREATE TABLE IF NOT EXISTS `paymill_fastCheckout` (" .
+                   "`id` int(11) NOT NULL AUTO_INCREMENT," .
+                   "`userId` varchar(250) COLLATE utf8_unicode_ci NOT NULL," .
+                   "`clientId` varchar(250) COLLATE utf8_unicode_ci NOT NULL," .
+                   "`ccPaymentId` varchar(250) COLLATE utf8_unicode_ci NULL," .
+                   "`elvPaymentId` varchar(250) COLLATE utf8_unicode_ci NULL," .
+                   "PRIMARY KEY (`id`)," .
+                   "UNIQUE KEY `userId` (`userId`)" .
+                   ") ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1";
             Shopware()->Db()->query($sql);
         } catch (Exception $exception) {
             Shopware()->Log()->Err("Can not create FastCheckout Table. " . $exception->getMessage());
             throw new Exception("Can not create FastCheckout Table. " . $exception->getMessage());
         }
+    }
+
+    /**Sets the Id used to identify the current user.
+     *
+     * @param String $arg UserId of the current customer.
+     */
+    public function setUserId($arg)
+    {
+        $this->_userId = $arg;
+    }
+
+    /**Sets the Payment name used to Identify the current payment. Can be either cc or elv*/
+    public function setPaymentName($arg)
+    {
+        $this->_paymentName = $arg;
+    }
+
+    /**
+     * Returns a boolean describing if there is FCData for the current Case.
+     * Also Prepares the Ids to be read from the public vars.
+     *
+     * @return boolean Does an entry for the current user and payment exist in the fast checkout table?
+     */
+    public function entryExists()
+    {
+        $hasClientId = $this->loadClientId();
+        $hasPaymentId = $this->loadPaymentId();
+
+        return $hasClientId && $hasPaymentId;
+    }
+
+    /**
+     * Returns true id there already is a ClientId for the current user
+     *
+     * @return Boolean
+     */
+    public function hasClientId()
+    {
+        $hasClientId = $this->loadClientId();
+
+        return $hasClientId;
     }
 
     /**
@@ -105,10 +160,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
         try {
 
             $sql = "SELECT count(`clientID`) FROM `paymill_fastCheckout` WHERE `userID`= ? ;";
-            $hasId = Shopware()->Db()->fetchOne($sql, array($this->userId));
+            $hasId = Shopware()->Db()->fetchOne($sql, array($this->_userId));
             if ($hasId) {
                 $sql = "SELECT `clientID` FROM `paymill_fastCheckout` WHERE `userID`= ? ;";
-                $this->clientId = Shopware()->Db()->fetchOne($sql, array($this->userId));
+                $this->clientId = Shopware()->Db()->fetchOne($sql, array($this->_userId));
             } else {
                 throw new Exception();
             }
@@ -128,12 +183,12 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
     public function loadPaymentId()
     {
         try {
-            $fieldName = $this->paymentName == "cc" ? "ccPaymentId" : "elvPaymentId";
+            $fieldName = $this->_paymentName == "cc" ? "ccPaymentId" : "elvPaymentId";
             $sql = "SELECT count(`$fieldName`) FROM `paymill_fastCheckout` WHERE `userID`= ? ;";
-            $hasId = Shopware()->Db()->fetchOne($sql, array($this->userId));
+            $hasId = Shopware()->Db()->fetchOne($sql, array($this->_userId));
             if ($hasId) {
                 $sql = "SELECT `$fieldName` FROM `paymill_fastCheckout` WHERE `userID`= ? ;";
-                $this->paymentId = Shopware()->Db()->fetchOne($sql, array($this->userId));
+                $this->paymentId = Shopware()->Db()->fetchOne($sql, array($this->_userId));
             } else {
                 throw new Exception();
             }
@@ -157,7 +212,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
         if (!$this->hasClientId()) {
             $insertSQL = "INSERT INTO `paymill_fastCheckout`(`userID`,`clientID`) VALUES( ?, ?);";
             try {
-                Shopware()->Db()->query($insertSQL, array($this->userId, $arg));
+                Shopware()->Db()->query($insertSQL, array($this->_userId, $arg));
             } catch (Exception $e) {
                 return false;
             }
@@ -176,10 +231,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
      */
     public function savePaymentId($arg)
     {
-        $paymentIdName = $this->paymentName == "cc" ? "ccPaymentId" : "elvPaymentId";
+        $paymentIdName = $this->_paymentName == "cc" ? "ccPaymentId" : "elvPaymentId";
         $insertSQL = "UPDATE `paymill_fastCheckout` SET `$paymentIdName` = ? WHERE `userID` = ?;";
         try {
-            Shopware()->Db()->query($insertSQL, array($arg, $this->userId));
+            Shopware()->Db()->query($insertSQL, array($arg, $this->_userId));
         } catch (Exception $e) {
             return false;
         }
@@ -196,7 +251,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHel
     public function __construct($userId = null, $paymentName = null)
     {
         $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
-        $this->userId = $userId === null ?  $user['additional']['user']['id']: $userId;
-        $this->paymentName = $paymentName === null ? $user['additional']['payment']['name']: $paymentName;
+        $this->_userId = $userId === null ?  $user['additional']['user']['id']: $userId;
+        $this->_paymentName = $paymentName === null ? $user['additional']['payment']['name']: $paymentName;
     }
 }
