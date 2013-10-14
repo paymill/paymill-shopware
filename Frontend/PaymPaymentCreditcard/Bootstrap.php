@@ -230,6 +230,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      *
      * @param string $oldVersion
      * @return boolean
+     * @todo Add update Statement regarding log table for the upcomming version 1.1.0
      */
     public function update($oldVersion)
     {

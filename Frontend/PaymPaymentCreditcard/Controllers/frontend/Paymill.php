@@ -36,12 +36,15 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
      */
     public function indexAction()
     {
+        //Initialise Logger
+        $loggingManager = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
+
         // read transaction token from session
         $paymillToken = Shopware()->Session()->paymillTransactionToken;
 
         // check if token present
         if (empty($paymillToken)) {
-            $this->log("No paymill token was provided. Redirect to payments page.", null);
+            $loggingManager->log("No paymill token was provided. Redirect to payments page.", null);
 
             $url = $this->Front()->Router()->assemble(array('action'      => 'payment', 'sTarget' => 'checkout',
                                                             'sViewport'   => 'account', 'appendSession' => true,
@@ -51,9 +54,9 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         }
 
         if ($paymillToken === "NoTokenRequired") {
-            $this->log("Start processing payment without token.", $paymillToken);
+            $loggingManager->log("Start processing payment without token.", $paymillToken);
         } else {
-            $this->log("Start processing payment with token.", $paymillToken);
+            $loggingManager->log("Start processing payment with token.", $paymillToken);
         }
 
         $user = Shopware()->Session()->sOrderVariables['sUserData'];
@@ -86,16 +89,16 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             if ($paymillToken === "NoTokenRequired") {
                 $paymentId = $fcHelper->paymentId;
                 $paymentProcessor->setPaymentId($paymentId);
-                $this->log("Processing Payment with Parameters", print_r($params, true), "Additional Parameters given. \n" . " User Id: " . $userId . "\n Client Id: " . $clientId . "\n PaymentId: " . $paymentId);
+                $loggingManager->log("Processing Payment with Parameters", print_r($params, true), "Additional Parameters given. \n" . " User Id: " . $userId . "\n Client Id: " . $clientId . "\n PaymentId: " . $paymentId);
             }
         } else {
-            $this->log("Processing Payment with Parameters", print_r($params, true));
+            $loggingManager->log("Processing Payment with Parameters", print_r($params, true));
         }
 
         $preAuth = $swConfig->get("paymillPreAuth") == 1;
         $result = $paymentProcessor->processPayment(!$preAuth);
 
-        $this->log("Payment processing resulted in: " . ($result ? "Success" : "Failure"), print_r($result, true));
+        $loggingManager->log("Payment processing resulted in: " . ($result ? "Success" : "Failure"), print_r($result, true));
 
         // finish the order if payment was successfully processed
         if ($result !== true) {
@@ -117,14 +120,14 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $isFastCheckoutEnabled = $swConfig->get("paymillFastCheckout");
         if ($isFastCheckoutEnabled) {
             $paymentId = $paymentProcessor->getPaymentId();
-            $this->log("Saving FC Data for User: $userId with the payment: $paymentShortcut", $paymentId);
+            $loggingManager->log("Saving FC Data for User: $userId with the payment: $paymentShortcut", $paymentId);
             $fcHelper->savePaymentId($paymentId);
         }
 
         //Create the order
         $finalPaymillToken = $paymillToken === "NoTokenRequired" ? $this->createPaymentUniqueId() : $paymillToken;
         $orderNumber = $this->saveOrder($finalPaymillToken, md5($finalPaymillToken));
-        $this->log("Finish order.", "Ordernumber: " . $orderNumber, "using Token: " . $finalPaymillToken);
+        $loggingManager->log("Finish order.", "Ordernumber: " . $orderNumber, "using Token: " . $finalPaymillToken);
 
         if($preAuth){
             $manager = Shopware()->Models();
@@ -133,7 +136,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             $model->getAttribute()->setPaymillPreAuthorization($paymentProcessor->getPreauthId());
             $manager->persist($model);
             $manager->flush();
-            $this->log("Saved PreAuth Information for $orderNumber",$paymentProcessor->getPreauthId());
+            $loggingManager->log("Saved PreAuth Information for $orderNumber",$paymentProcessor->getPreauthId());
 
         }
 
@@ -148,28 +151,15 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
                                                      description => $description));
 
         if ($updateResponse['response_code'] === 20000) {
-            $this->log("Successfully updated the description of " . $paymentProcessor->getTransactionId(), $description);
+            $loggingManager->log("Successfully updated the description of " . $paymentProcessor->getTransactionId(), $description);
         } else {
-            $this->log("There was an error updating the description of " . $paymentProcessor->getTransactionId(), $description);
+            $loggingManager->log("There was an error updating the description of " . $paymentProcessor->getTransactionId(), $description);
         }
 
         // reset the session field
         Shopware()->Session()->paymillTransactionToken = null;
 
         $this->redirect(array("controller" => "checkout", "action" => "finish", "forceSecure" => 1));
-    }
-
-    /**
-     * Uses the LoggingManager to insert a new entry into the Log
-     *
-     * @param String $merchantInfo      Information of use to the merchant
-     * @param String $devInfo           Information of use to developers
-     * @param String $devInfoAdditional Can be null
-     */
-    public function log($merchantInfo, $devInfo, $devInfoAdditional = null)
-    {
-        $loggingManager = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManagerShopware();
-        $loggingManager->write($merchantInfo, $devInfo, $devInfoAdditional);
     }
 
     /**
