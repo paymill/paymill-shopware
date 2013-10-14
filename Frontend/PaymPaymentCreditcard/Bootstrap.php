@@ -137,6 +137,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         return "1.1.0";
     }
 
+
+
     /**
      * Return the path of the backend controller
      *
@@ -215,13 +217,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     {
         Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager::install();
         Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper::install();
+        Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
         $this->createPaymentMeans();
         $this->_createForm();
         $this->_createPluginConfigTranslation();
         $this->addTranslationSnippets();
         $this->_createEvents();
         $this->_applyBackendViewModifications();
-        $this->_modifyShopwareModels();
 
         return true;
     }
@@ -248,6 +250,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         Shopware()->Db()->delete("s_core_paymentmeans", "name in('paymillcc','paymilldebit')");
         try {
             $this->Application()->Models()->removeAttribute('s_order_attributes', 'paymill', 'preAuthorization');
+            $this->Application()->Models()->removeAttribute('s_order_attributes', 'paymill', 'transaction');
+            $this->Application()->Models()->removeAttribute('s_order_attributes', 'paymill', 'cancelled');
             $this->Application()->Models()->generateAttributeModels(array('s_order_attributes'));
         } catch (Exception $e) {
         }
@@ -275,9 +279,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             case '1.0.3':
             case '1.0.4':
             case '1.0.5':
-                if(!$this->_modifyShopwareModels()){
+                if(!Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this)){
                     break;
                 }
+                $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
+                if(!$modelHelper->updateFromLegacyVersion()){
+                    break;
+                }
+
                 try{
                     $dropLogColumn = "ALTER TABLE `pigmbh_paymill_log` DROP `devInfoAdditional`";
                     Shopware()->Db()->query($dropLogColumn);
@@ -501,26 +510,5 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         } catch (Exception $exception) {
             throw new Exception("can not create menu entry." . $exception->getMessage());
         }
-    }
-
-    /**
-     * This method adds attributes to the shopware models
-     * @return bool
-     */
-    private function _modifyShopwareModels()
-    {
-        $result = false;
-        try {
-            $models = Shopware()->Models();
-
-            //Add Order Properties
-            $models->addAttribute('s_order_attributes', 'paymill', 'pre_authorization', 'varchar(255)');
-            $result = true;
-        } catch (Exception $e) {
-            $result = false;
-        }
-        //Persist changes
-        $this->Application()->Models()->generateAttributeModels(array('s_order_attributes'));
-        return $result;
     }
 }
