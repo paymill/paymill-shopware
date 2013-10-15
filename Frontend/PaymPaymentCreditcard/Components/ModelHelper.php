@@ -117,7 +117,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
      *
      * @param $orderId
      *
-     * @return mixed
+     * @return bool
      */
     public function getPaymillCancelled($orderId)
     {
@@ -132,7 +132,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             $hasBeenCancelled = null;
         }
 
-        return $hasBeenCancelled;
+        return $hasBeenCancelled === '1';
     }
 
     /**
@@ -202,7 +202,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
     /**
      * Returns the PreAuthorization Id for the given order
      *
-     * @param $orderId
+     * @param string $orderId
      *
      * @return mixed
      */
@@ -250,13 +250,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
 
     /**
      * Sets the payment cancelled flag for the given order. This flag is used to mark transaction completely refunded
-     * @param $orderNumber
-     * @param $paymillCancelled
+     * @param string $orderNumber
+     * @param bool $paymillCancelled
      *
      * @return bool
      */
     public function setPaymillCancelled($orderNumber, $paymillCancelled)
     {
+        $paymillCancelled = $paymillCancelled ? '1': '0';
         $sql = "INSERT INTO s_order_attributes(orderID,paymill_cancelled)
                 VALUES ( ?, ?)
                 ON DUPLICATE KEY
