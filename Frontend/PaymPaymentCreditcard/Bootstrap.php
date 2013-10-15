@@ -274,17 +274,18 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             case '1.0.1':
             case '1.0.2':
                 if(!$this->addTranslationSnippets()){
-                    break;
+                    return false;
                 }
+
             case '1.0.3':
             case '1.0.4':
             case '1.0.5':
                 if(!Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this)){
-                    break;
+                    return false;
                 }
                 $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
                 if(!$modelHelper->updateFromLegacyVersion()){
-                    break;
+                    return false;
                 }
 
                 try{
@@ -293,10 +294,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                     $renameLogTable ="RENAME TABLE `pigmbh_paymill_log` TO `paymill_log`";
                     Shopware()->Db()->query($renameLogTable);
                 } catch (Exception $exception){
-                    break;
+                    return false;
                 }
             case '1.1.0':
-            $result = true;
+                return $result;
         }
 
         return $result;
