@@ -85,8 +85,10 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             }
         }
 
-        $preAuth = $swConfig->get("paymillPreAuth");
-        $result = $paymentProcessor->processPayment(!$preAuth);
+        $preAuthOption = $swConfig->get("paymillPreAuth");
+        $isCCPayment = $paymentShortcut === 'cc';
+        $captureNow = !($preAuthOption && $isCCPayment);
+        $result = $paymentProcessor->processPayment($captureNow);
 
         $loggingManager->log("Payment processing resulted in: " . ($result ? "Success" : "Failure"), print_r($result, true));
 
