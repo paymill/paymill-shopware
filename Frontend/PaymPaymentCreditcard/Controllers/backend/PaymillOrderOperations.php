@@ -15,26 +15,24 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
     public function displayTabAction()
     {
         $orderId = $this->Request()->getParam("orderId");
-        $model = Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneById($orderId);
-        $canCapture = false;
-        $canRefund = false;
-        $orderComplete = false;
-
-        if ($model->getAttribute()->getPaymillCancelled() == 1) {
-            $orderComplete = true;
-        }
-
-        if ($model->getAttribute()->getPaymillTransaction() !== null && !$orderComplete) {
-        $canRefund = true;
-        }
-
-        if ($model->getAttribute()->getPaymillPreAuthorization() !== null && !$canRefund) {
-            $canCapture = true;
-        }
-
-        $result = ($canCapture||$canRefund);
-
+        $result = $this->_isPaymillPayment($orderId);
         $this->View()->assign(array('success' => $result));
+    }
+
+    /**
+     * Returns if the payment mean is a paymill payment mean
+     * @param $orderId
+     *
+     * @return bool
+     */
+    private function _isPaymillPayment($orderId){
+        $sql = "SELECT count(name) FROM s_core_paymentmeans payment, s_order o
+                WHERE o.paymentID = payment.id
+                AND (payment.name = 'paymilldebit' OR payment.name = 'paymillcc')
+                AND o.id = ?";
+        $isPaymillPayment = Shopware()->Db()->fetchOne($sql, array($orderId));
+
+        return $isPaymillPayment == '1';
     }
 
     /**
@@ -42,14 +40,12 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
      */
     public function canCaptureAction()
     {
-        $success = false;
+        $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
         $orderId = $this->Request()->getParam("orderId");
-        $model = Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneById($orderId);
-        if ($model->getAttribute()->getPaymillPreAuthorization() !== null) {
-            if ($model->getAttribute()->getPaymillTransaction() === null) {
-                    $success = true;
-            }
-        }
+        $orderNumber = $modelHelper->getOrderNumberById($orderId);
+        $isPreAuth = $modelHelper->getPaymillPreAuthorization($orderNumber) !== "";
+        $notCaptured = $modelHelper->getPaymillTransactionId($orderNumber) === "";
+        $success = $isPreAuth && $notCaptured;
         $this->View()->assign(array('success' => $success));
     }
 
@@ -57,6 +53,7 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
      * Action Listener to execute the capture for applicable transactions
      *
      * @todo Add translations and exception handling for different cases
+     * @todo Add logging
      */
     public function captureAction()
     {
@@ -69,8 +66,9 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
         $privateKey = trim($swConfig->get("privateKey"));
         $apiUrl = "https://api.paymill.com/v2/";
 
-        $model = Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneById($orderId);
-        $preAuthId = $model->getAttribute()->getPaymillPreAuthorization();
+        $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
+        $orderNumber = $modelHelper->getOrderNumberById($orderId);
+        $preAuthId = $modelHelper->getPaymillPreAuthorization($orderNumber);
 
         $preAuthObject = new Services_Paymill_Preauthorizations($privateKey, $apiUrl);
         $preAuthObject = $preAuthObject->getOne($preAuthId);
@@ -89,7 +87,7 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
             $result = $paymentProcessor->capture();
             if ($result) {
                 $messageText = "Capture has been successful.";
-                $model->getAttribute()->setPaymillTransaction($paymentProcessor->getTransactionId());
+                $modelHelper->setPaymillTransactionId($orderNumber, $paymentProcessor->getTransactionId());
             } else {
                 $messageText = "Capture failed.";
             }
@@ -105,12 +103,12 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
      */
     public function canRefundAction()
     {
-        $success = false;
+        $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
         $orderId = $this->Request()->getParam("orderId");
-        $model = Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneById($orderId);
-        if ($model->getAttribute()->getPaymillTransaction() !== null) {
-            $success = true;
-        }
+        $orderNumber = $modelHelper->getOrderNumberById($orderId);
+        $isTransaction = $modelHelper->getPaymillTransactionId($orderNumber) !== "";
+        $notCanceled = !($modelHelper->getPaymillCancelled($orderNumber));
+        $success = $isTransaction && $notCanceled;
 
         $this->View()->assign(array('success' => $success));
     }
@@ -119,19 +117,21 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
      * Action Listener to execute the capture for applicable transactions
      *
      * @todo Add translations and exception handling for different cases
+     * @todo Add logging
      */
     public function refundAction()
     {
-        require_once dirname(__FILE__) . '/../../lib/Services/Paymill/Transaction.php';
+        require_once dirname(__FILE__) . '/../../lib/Services/Paymill/Transactions.php';
+        require_once dirname(__FILE__) . '/../../lib/Services/Paymill/Refunds.php';
         $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+        $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
 
         //Gather Data
         $orderId = $this->Request()->getParam("orderId");
+        $orderNumber = $modelHelper->getOrderNumberById($orderId);
+        $transactionId = $modelHelper->getPaymillTransactionId($orderNumber);
         $privateKey = trim($swConfig->get("privateKey"));
         $apiUrl = "https://api.paymill.com/v2/";
-
-        $model = Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneById($orderId);
-        $transactionId = $model->getAttribute()->getPaymillTransaction();
 
         $transactionObject = new Services_Paymill_Transactions($privateKey, $apiUrl);
         $transactionObject = $transactionObject->getOne($transactionId);
@@ -151,8 +151,12 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
         $refund = $refundObject->create($parameter);
 
         //Validate Result
-        $result = false;
         $messageText = "";
+        $result = true;
+
+        if($result){
+            $modelHelper->setPaymillCancelled($orderNumber, true);
+        }
 
         $this->View()->assign(array('success' => $result, 'messageText' => $messageText));
     }
