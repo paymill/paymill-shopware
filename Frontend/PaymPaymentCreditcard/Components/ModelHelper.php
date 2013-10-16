@@ -110,7 +110,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             $transactionId = "";
         }
 
-        return ($transactionId === null) ? "" : $transactionId;
+        return $transactionId ? $transactionId : "";
     }
 
     /**
@@ -134,7 +134,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             $hasBeenCancelled = null;
         }
 
-        return $hasBeenCancelled === '1';
+        return $hasBeenCancelled == '1';
     }
 
     /**
@@ -157,7 +157,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             $clientId = "";
         }
 
-        return isset($clientId) ? $clientId : "";
+        return $clientId ? $clientId : "";
     }
 
     /**
@@ -188,8 +188,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
                     AND u.id = ?
                     AND a.paymill_payment_id_elv IS NOT NULL";
                 break;
-            default:
-                return "";
         }
 
         try {
@@ -198,7 +196,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             $paymentId = "";
         }
 
-        return isset($paymentId) ? $paymentId : "";
+        return $paymentId ? $paymentId : "";
     }
 
     /**
@@ -222,7 +220,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             $preAuthorizationId = "";
         }
 
-        return isset($preAuthorizationId) ? $preAuthorizationId : "";
+        return $preAuthorizationId ? $preAuthorizationId : "";
     }
 
     /**

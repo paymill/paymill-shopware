@@ -119,10 +119,10 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $orderNumber = $this->saveOrder($finalPaymillToken, md5($finalPaymillToken));
         $loggingManager->log("Finish order.", "Ordernumber: " . $orderNumber, "using Token: " . $finalPaymillToken);
 
-        if ($preAuth) {
-            $modelHelper->setPaymillPreAuthorization($orderNumber, $paymentProcessor->getPreauthId());
+        if ($captureNow) {
+            $modelHelper->setPaymillTransactionId($orderNumber, $paymentProcessor->getTransactionId());
         } else {
-            $modelHelper->setPaymillPreAuthorization($orderNumber, $paymentProcessor->getTransactionId());
+            $modelHelper->setPaymillPreAuthorization($orderNumber, $paymentProcessor->getPreauthId());
         }
 
         $this->_updateTransaction($orderNumber, $paymentProcessor, $loggingManager);
