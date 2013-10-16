@@ -71,21 +71,21 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
 
         $paymentProcessor = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor($params);
 
-        $fcHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_FastCheckoutHelper($userId, $paymentShortcut);
+        $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
+        $clientId = $modelHelper->getPaymillClientId($userId);
+        $paymentId = $modelHelper->getPaymillPaymentId($this->getPaymentShortName(), $userId);
 
-        if ($fcHelper->loadClientId()) {
-            $clientId = $fcHelper->clientId;
+        if ($clientId != "") {
             $paymentProcessor->setClientId($clientId);
         }
 
-        if ($fcHelper->entryExists()) {
+        if ($paymentId != "") {
             if ($paymillToken === "NoTokenRequired") {
-                $paymentId = $fcHelper->paymentId;
                 $paymentProcessor->setPaymentId($paymentId);
             }
         }
 
-        $preAuth = $swConfig->get("paymillPreAuth") == 1;
+        $preAuth = $swConfig->get("paymillPreAuth");
         $result = $paymentProcessor->processPayment(!$preAuth);
 
         $loggingManager->log("Payment processing resulted in: " . ($result ? "Success" : "Failure"), print_r($result, true));
@@ -103,14 +103,13 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
 
         //Save Client Id
         $clientId = $paymentProcessor->getClientId();
-        $fcHelper->saveClientId($clientId);
+        $modelHelper->setPaymillClientId($userId, $clientId);
 
         //Save Fast Checkout Data
         $isFastCheckoutEnabled = $swConfig->get("paymillFastCheckout");
         if ($isFastCheckoutEnabled) {
             $paymentId = $paymentProcessor->getPaymentId();
-            $loggingManager->log("Saving FC Data for User: $userId with the payment: $paymentShortcut", $paymentId);
-            $fcHelper->savePaymentId($paymentId);
+            $modelHelper->setPaymillPaymentId($this->getPaymentShortName(), $userId, $paymentId);
         }
 
         //Create the order
@@ -118,42 +117,18 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $orderNumber = $this->saveOrder($finalPaymillToken, md5($finalPaymillToken));
         $loggingManager->log("Finish order.", "Ordernumber: " . $orderNumber, "using Token: " . $finalPaymillToken);
 
-        $this->_savePreAuthId($preAuth, $orderNumber, $paymentProcessor, $loggingManager);
+        if ($preAuth) {
+            $modelHelper->setPaymillPreAuthorization($orderNumber, $paymentProcessor->getPreauthId());
+        } else {
+            $modelHelper->setPaymillPreAuthorization($orderNumber, $paymentProcessor->getTransactionId());
+        }
+
         $this->_updateTransaction($orderNumber, $paymentProcessor, $loggingManager);
 
         // reset the session field
         Shopware()->Session()->paymillTransactionToken = null;
 
         return $this->forward('finish', 'checkout', null, array('sUniqueID' => md5($finalPaymillToken)));
-    }
-
-    /**
-     * This method saves the PreAuthId into an Attribute of the provided order.
-     *
-     * @param $preAuth
-     * @param $orderNumber
-     * @param $paymentProcessor
-     * @param $loggingManager
-     */
-    private function _savePreAuthId($preAuth, $orderNumber, $paymentProcessor, $loggingManager)
-    {
-        if ($preAuth) {
-            $manager = Shopware()->Models();
-            $orderId = Shopware()->Db()->fetchOne("SELECT id FROM s_order WHERE ordernumber=?", array($orderNumber));
-            $model = Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneById($orderId);
-            $model->getAttribute()->setPaymillPreAuthorization($paymentProcessor->getPreauthId());
-            $manager->persist($model);
-            $manager->flush();
-            $loggingManager->log("Saved PreAuth Information for $orderNumber", $paymentProcessor->getPreauthId());
-        } else {
-            $manager = Shopware()->Models();
-            $orderId = Shopware()->Db()->fetchOne("SELECT id FROM s_order WHERE ordernumber=?", array($orderNumber));
-            $model = Shopware()->Models()->getRepository('Shopware\Models\Order\Order')->findOneById($orderId);
-            $model->getAttribute()->setPaymillTransaction($paymentProcessor->getTransactionId());
-            $manager->persist($model);
-            $manager->flush();
-            $loggingManager->log("Saved Transaction Information for $orderNumber", $paymentProcessor->getTransactionId());
-        }
     }
 
     /**

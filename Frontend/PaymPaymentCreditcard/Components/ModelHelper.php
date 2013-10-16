@@ -92,12 +92,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
 
     /**
      * Returns the transaction Id for the given order
-     * @param $orderId
+     * @param $orderNumber
      *
      * @return mixed
      */
-    public function getPaymillTransactionId($orderId)
+    public function getPaymillTransactionId($orderNumber)
     {
+        $orderId = $this->_getOrderIdByOrderNumber($orderNumber);
         $sql = "SELECT paymill_transaction
                 FROM s_order_attributes a, s_order o
                 WHERE o.id = a.orderID
@@ -106,21 +107,22 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
         try {
             $transactionId = Shopware()->Db()->fetchOne($sql, array($orderId));
         } catch (Exception $exception) {
-            $transactionId = null;
+            $transactionId = "";
         }
 
-        return $transactionId;
+        return ($transactionId === null) ? "" : $transactionId;
     }
 
     /**
      * Returns the cancellation flag of the desired order
      *
-     * @param $orderId
+     * @param String $orderNumber
      *
      * @return bool
      */
-    public function getPaymillCancelled($orderId)
+    public function getPaymillCancelled($orderNumber)
     {
+        $orderId = $this->_getOrderIdByOrderNumber($orderNumber);
         $sql = "SELECT paymill_cancelled
                 FROM s_order_attributes a, s_order o
                 WHERE o.id = a.orderID
@@ -140,7 +142,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
      *
      * @param string $userId
      *
-     * @return mixed
+     * @return String
      */
     public function getPaymillClientId($userId)
     {
@@ -152,10 +154,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
         try {
             $clientId = Shopware()->Db()->fetchOne($sql, array($userId));
         } catch (Exception $exception) {
-            $clientId = null;
+            $clientId = "";
         }
 
-        return $clientId;
+        return isset($clientId) ? $clientId : "";
     }
 
     /**
@@ -187,27 +189,28 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
                     AND a.paymill_payment_id_elv IS NOT NULL";
                 break;
             default:
-                return false;
+                return "";
         }
 
         try {
             $paymentId = Shopware()->Db()->fetchOne($sql, array($userId));
         } catch (Exception $exception) {
-            $paymentId = null;
+            $paymentId = "";
         }
 
-        return $paymentId;
+        return isset($paymentId) ? $paymentId : "";
     }
 
     /**
      * Returns the PreAuthorization Id for the given order
      *
-     * @param string $orderId
+     * @param string $orderNumber
      *
      * @return mixed
      */
-    public function getPaymillPreAuthorization($orderId)
+    public function getPaymillPreAuthorization($orderNumber)
     {
+        $orderId = $this->_getOrderIdByOrderNumber($orderNumber);
         $sql = "SELECT paymill_pre_authorization
                 FROM s_order_attributes a, s_order o
                 WHERE o.id = a.orderID
@@ -216,28 +219,30 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
         try {
             $preAuthorizationId = Shopware()->Db()->fetchOne($sql, array($orderId));
         } catch (Exception $exception) {
-            $preAuthorizationId = null;
+            $preAuthorizationId = "";
         }
 
-        return $preAuthorizationId;
+        return isset($preAuthorizationId) ? $preAuthorizationId : "";
     }
 
     /**
      * Sets the transaction Id for the given order
-     * @param $orderNumber
-     * @param $transactionId
+     *
+     * @param      $orderNumber
+     * @param      $transactionId
      *
      * @return bool
      */
     public function setPaymillTransactionId($orderNumber, $transactionId)
     {
+        $orderId = $this->_getOrderIdByOrderNumber($orderNumber);
         $sql = "INSERT INTO s_order_attributes(orderID,paymill_transaction)
                 VALUES ( ?, ?)
                 ON DUPLICATE KEY
                 UPDATE orderID = ?, paymill_transaction = ?";
 
         try {
-            Shopware()->Db()->query($sql, array($orderNumber, $transactionId, $orderNumber, $transactionId));
+            Shopware()->Db()->query($sql, array($orderId, $transactionId, $orderId, $transactionId));
             $result = true;
             $message = "Successfully saved Transaction Id for order $orderNumber";
         } catch (Exception $exception) {
@@ -250,13 +255,15 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
 
     /**
      * Sets the payment cancelled flag for the given order. This flag is used to mark transaction completely refunded
+     *
      * @param string $orderNumber
-     * @param bool $paymillCancelled
+     * @param bool   $paymillCancelled
      *
      * @return bool
      */
     public function setPaymillCancelled($orderNumber, $paymillCancelled)
     {
+        $orderId = $this->_getOrderIdByOrderNumber($orderNumber);
         $paymillCancelled = $paymillCancelled ? '1': '0';
         $sql = "INSERT INTO s_order_attributes(orderID,paymill_cancelled)
                 VALUES ( ?, ?)
@@ -264,7 +271,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
                 UPDATE orderID = ?, paymill_cancelled = ?";
 
         try {
-            Shopware()->Db()->query($sql, array($orderNumber, $paymillCancelled, $orderNumber, $paymillCancelled));
+            Shopware()->Db()->query($sql, array($orderId, $paymillCancelled, $orderId, $paymillCancelled));
             $result = true;
             $message = "Successfully saved cancellation flag for order $orderNumber";
         } catch (Exception $exception) {
@@ -277,20 +284,22 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
 
     /**
      * Sets the PreAuthorization Id for the given order.
-     * @param $orderNumber
-     * @param $paymillPreAuthorization
+     *
+     * @param      $orderNumber
+     * @param      $paymillPreAuthorization
      *
      * @return bool
      */
     public function setPaymillPreAuthorization($orderNumber, $paymillPreAuthorization)
     {
+        $orderId = $this->_getOrderIdByOrderNumber($orderNumber);
         $sql = "INSERT INTO s_order_attributes(orderID,paymill_pre_authorization)
                 VALUES ( ?, ?)
                 ON DUPLICATE KEY
                 UPDATE orderID = ?, paymill_pre_authorization = ?";
 
         try {
-            Shopware()->Db()->query($sql, array($orderNumber, $paymillPreAuthorization, $orderNumber,
+            Shopware()->Db()->query($sql, array($orderId, $paymillPreAuthorization, $orderId,
                                                 $paymillPreAuthorization));
             $result = true;
             $message = "Successfully saved PreAuthorization Id for order $orderNumber";
@@ -372,5 +381,27 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
         }
         $this->_loggingManager->log($message,var_export($paymillClientId, true));
         return $result;
+    }
+
+    /**
+     * Returns the OrderId associated with the given Number
+     * @param $orderNumber
+     *
+     * @return string
+     */
+    private function _getOrderIdByOrderNumber($orderNumber)
+    {
+        return Shopware()->Db()->fetchOne("SELECT id FROM s_order WHERE ordernumber = ?", array($orderNumber));
+    }
+
+    /**
+     * Returns the OrderNumber associated with the given Id
+     * @param $orderId
+     *
+     * @return string
+     */
+    public function getOrderNumberById($orderId)
+    {
+        return Shopware()->Db()->fetchOne("SELECT ordernumber FROM s_order WHERE id = ?", array($orderId));
     }
 }
