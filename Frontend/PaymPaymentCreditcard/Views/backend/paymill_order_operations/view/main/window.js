@@ -15,7 +15,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Window', {
         var tabPanel = me.callParent(arguments);
         if (me.displayTab()) {
             tabPanel.add(Ext.create('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
-                title:              '{s namespace=paymill name=paymill_order_operations}Paymill Order Operations{/s}', //@todo translate paymill_backend_order_operations_title
+                title:              '{s namespace=paymill name=paymill_backend_order_operations_title}Paymill Order Operations{/s}',
                 id:                 'pmOrderOperationsTab',
                 historyStore:       me.historyStore,
                 record:             me.record,

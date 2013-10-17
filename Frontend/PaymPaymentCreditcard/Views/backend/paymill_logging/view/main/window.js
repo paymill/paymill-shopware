@@ -12,7 +12,7 @@ Ext.require([
 ]);
 Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
     extend:    'Enlight.app.Window',
-    title:     'Paymill Logging',
+    title:     '{s namespace=Paymill name=paymill_log}Paymill Logging{/s}',
     alias:     'widget.paymill_logging-main-window',
     border:    false,
     autoShow:  true,
@@ -42,23 +42,23 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
             width:       '100%',
             columns:     [
                 {
-                    text:      '{s namespace=Paymill name=date}Datum{/s}',
+                    text:      '{s namespace=Paymill name=paymill_backend_log_entry_date}Datum{/s}',
                     dataIndex: 'entryDate',
                     width:     50
                 },
                 {
-                    text:      '{s namespace=Paymill name=version}Version{/s}',
+                    text:      '{s namespace=Paymill name=paymill_backend_log_version}Version{/s}',
                     dataIndex: 'version',
                     width:     50
                 },
                 {
-                    text:      '{s namespace=Paymill name=merchantinfo}H&auml;ndlerinformation{/s}',
+                    text:      '{s namespace=Paymill name=paymill_backend_log_merchant_info}H&auml;ndlerinformation{/s}',
                     dataIndex: 'merchantInfo',
                     width:     350
                 },
                 {
                     xtype:  'actioncolumn',
-                    header: '{s namespace=Paymill name=action}Actions{/s}',
+                    header: '{s namespace=Paymill name=paymill_backend_log_action}Actions{/s}',
                     width:  60,
                     items:  [
                         {
@@ -113,7 +113,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                                             defaultType: 'displayfield',
                                             items:       [
                                                 {
-                                                    fieldLabel: '{s namespace=Paymill name=date}Datum{/s}',
+                                                    fieldLabel: '{s namespace=Paymill name=paymill_backend_log_entry_date}Datum{/s}',
                                                     value:      record.get('entryDate'),
                                                     fieldStyle: { margin: '0 0 0 50px' }
                                                 }
@@ -125,7 +125,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                                             margin:      '0 0 0 50px',
                                             items:       [
                                                 {
-                                                    fieldLabel: '{s namespace=Paymill name=version}Version{/s}',
+                                                    fieldLabel: '{s namespace=Paymill name=paymill_backend_log_version}Version{/s}',
                                                     value:      record.get('version'),
                                                     fieldStyle: { margin: '0 0 0 50px' }
                                                 }
@@ -139,20 +139,10 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                                             xtype:      'panel',
                                             border:     false,
                                             layout:     'fit',
-                                            title:      '{s namespace=Paymill name=devinfo}Entwicklerinformation{/s}',
+                                            title:      '{s namespace=Paymill name=paymill_backend_log_dev_info}Entwicklerinformation{/s}',
                                             html:       record.get('devInfo'),
                                             autoScroll: true,
-                                            width:      '50%',
-                                            height:     '100%'
-                                        },
-                                        {
-                                            xtype:      'panel',
-                                            border:     false,
-                                            layout:     'fit',
-                                            title:      '{s namespace=Paymill name=additionaldevinfo}zus&auml;tzliche Entwicklerinformation{/s}',
-                                            html:       record.get('devInfoAdditional'),
-                                            autoScroll: true,
-                                            width:      '50%',
+                                            width:      '100%',
                                             height:     '100%'
                                         }
                                     ]

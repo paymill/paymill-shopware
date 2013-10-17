@@ -49,3 +49,12 @@
 .paymill-card-number-discover {
     background: url('image/32x20_discover.png') no-repeat center right !important;
     }
+
+.tooltip {
+    margin-left:   3px;
+    font-size:     11px;
+    color:         #e2e2e2;
+    padding:       0 5px;
+    border-radius: 100px;
+    background:    #636363;
+    }

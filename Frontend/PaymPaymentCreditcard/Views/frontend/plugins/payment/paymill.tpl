@@ -61,18 +61,18 @@
         var result = true;
         if (getPayment() === 'paymillcc') { //If CC
             if (!paymill.validateCardNumber($('#card-number').val())) {
-                errorsCc.append("<li>{s namespace=Paymill name=invalid_cardnumber}Bitte geben Sie eine g&uuml;ltige Kartennummer ein{/s}</li>");
+                errorsCc.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_number_cc}Bitte geben Sie eine g&uuml;ltige Kartennummer ein{/s}</li>");
                 result = false;
             }
             if (!paymill.validateCvc($('#card-cvc').val())) {
                 if(VALIDATE_CVC){
-                    errorsCc.append("<li>{s namespace=Paymill name=invalid_cvc}Bitte geben sie einen g&uuml;ltigen Sicherheitscode ein (R&uuml;ckseite der Karte).{/s}</li>");
+                    errorsCc.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_cvc}Bitte geben sie einen g&uuml;ltigen Sicherheitscode ein (R&uuml;ckseite der Karte).{/s}</li>");
                     result = false;
                 }
             }
             if (!paymill.validateExpiry($('#card-expiry-month').val(), $('#card-expiry-year').val())) {
 
-                errorsCc.append("<li>{s namespace=Paymill name=invalid_expirydate}Das Ablaufdatum der Karte ist ung&uuml;ltig.{/s}</li>");
+                errorsCc.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_expdate}Das Ablaufdatum der Karte ist ung&uuml;ltig.{/s}</li>");
                 result = false;
             }
             if (!result) {
@@ -83,16 +83,16 @@
         }
         if (getPayment() === 'paymilldebit') { //If ELV
             if (!$('#paymill_accountholder').val()) {
-                errorsElv.append("<li>{s namespace=Paymill name=invalid_accountholder}Bitte geben Sie den Kontoinhaber an.{/s}</li>");
+                errorsElv.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_holder_elv}Bitte geben Sie den Kontoinhaber an.{/s}</li>");
                 result = false;
             }
             if (!paymill.validateAccountNumber($('#paymill_accountnumber').val())) {
-                errorsElv.append("<li>{s namespace=Paymill name=invalid_accountnumber}Bitte geben Sie eine g&uuml;ltige Kontonummer ein.{/s}</li>");
+                errorsElv.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_number_elv}Bitte geben Sie eine g&uuml;ltige Kontonummer ein.{/s}</li>");
                 result = false;
             }
 
             if (!paymill.validateBankCode($('#paymill_banknumber').val())) {
-                errorsElv.append("<li>{s namespace=Paymill name=invalid_bankcode}Bitte geben Sie eine g&uuml;ltige BLZ ein.{/s}</li>");
+                errorsElv.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_bankcode}Bitte geben Sie eine g&uuml;ltige BLZ ein.{/s}</li>");
                 result = false;
             }
             if (!result) {
@@ -209,12 +209,12 @@
 
 <div class = "error" style = "display: none" >
     {if $payment_mean.name == 'paymillcc'}
-        <li >{s namespace=Paymill name=invalid_error_creditcard}Bitte geben Sie Ihre Kreditkartendaten ein. Aus Sicherheitsgr&uuml;nden speichern wir diese Nicht auf unserem Server.{/s}</li >
+        <li >{s namespace=Paymill name=paymill_error_text_generic_cc}Bitte geben Sie Ihre Kreditkartendaten ein. Aus Sicherheitsgr&uuml;nden speichern wir diese Nicht auf unserem Server.{/s}</li >
         <ul id = "errorsCc" ></ul >
     {/if}
 
     {if $payment_mean.name == 'paymilldebit'}
-        <li >{s namespace=Paymill name=invalid_error_debit}Bitte geben Sie Ihre Bankdaten ein. Aus Sicherheitsgr&uuml;nden speichern wir diese Nicht auf unserem Server.{/s}</li >
+        <li >{s namespace=Paymill name=paymill_error_text_generic_elv}Bitte geben Sie Ihre Bankdaten ein. Aus Sicherheitsgr&uuml;nden speichern wir diese Nicht auf unserem Server.{/s}</li >
         <ul id = "errorsElv" ></ul >
     {/if}
 
@@ -223,22 +223,22 @@
     <div class = "debit" >
         {if $payment_mean.name == 'paymillcc'}
             <p class = "none" >
-                <label >{s namespace=Paymill name=form_cardholder}Karteninhaber *{/s}</label >
+                <label >{s namespace=Paymill name=paymill_frontend_form_holder_cc}Karteninhaber *{/s}</label >
                 <input id = "account-holder" type = "text" size = "20" class = "text"
                        value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
             </p >
             <p class = "none" >
-                <label >{s namespace=Paymill name=form_cardnumber}Kreditkarten-nummer *{/s}</label >
+                <label >{s namespace=Paymill name=paymill_frontend_form_number_cc}Kreditkarten-nummer *{/s}</label >
                 <input id = "card-number" type = "text" size = "20" class = "text"
                        value = "{$paymillCardNumber}" />
             </p >
             <p class = "none" >
-                <label >{s namespace=Paymill name=form_cvc}CVC*{/s}</label >
+                <label >{s namespace=Paymill name=paymill_frontend_form_cvc}CVC*{/s}</label >
                 <input id = "card-cvc" type = "text" size = "4" class = "text"
-                       value = "{$paymillCvc}" />
+                       value = "{$paymillCvc}" /><span class="tooltip" title="{s namespace=Paymill name=cvc_tooltip}Hinter dem CVV-Code bzw. CVC verbirgt sich ein Sicherheitsmerkmal von Kreditkarten, &uuml;blicherweise handelt es sich dabei um eine drei- bis vierstelligen Nummer. Der CVV-Code befindet sich auf VISA-Kreditkarten. Der gleiche Code ist auch auf MasterCard-Kreditkarten zu finden, hier allerdings unter dem Namen CVC. Die Abk&uuml;rzung CVC steht dabei für Card Validation Code. Bei VISA wird der Code als Card Verification Value-Code bezeichnet. &Auml;hnlich wie bei Mastercard und VISA gibt es auch bei Diners Club, Discover und JCB eine dreistellige  Nummer, die meist auf der R&uuml;ckseite der Karte zu finden ist. Bei Maestro-Karten gibt es mit und ohne dreistelligen CVV. Wird eine Maestro-Karte ohne CVV verwendet kann einfach 000 eingetragen werden. American Express verwendet die CID (Card Identification Number). Dabei handelt es sich um eine vierstellige Nummer, die meist auf der Vorderseite der Karte, rechts oberhalb der Kartennummer zu finden ist.{/s}">?</span>
             </p >
             <p class = "none" >
-                <label >{s namespace=Paymill name=form_expirydate}G&uuml;ltig bis (MM/YYYY) *{/s}</label >
+                <label >{s namespace=Paymill name=paymill_frontend_form_expdate}G&uuml;ltig bis (MM/YYYY) *{/s}</label >
                 <input id = "card-expiry-month" type = "text" style = "width: 30px; display: inline-block;"
                        class = "text"
                        value = "{$paymillMonth}" />
@@ -250,33 +250,33 @@
 
         {if $payment_mean.name == 'paymilldebit' }
             <p class = "none" >
-                <label >{s namespace=Paymill name=form_accountholder}Kontoinhaber *{/s}</label >
+                <label >{s namespace=Paymill name=paymill_frontend_form_holder_elv}Kontoinhaber *{/s}</label >
                 <input id = "paymill_accountholder" type = "text" size = "20" class = "text"
                        value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
             </p >
             <p class = "none" >
-                <label >{s namespace=Paymill name=form_accountnumber}Kontonummer *{/s}</label >
+                <label >{s namespace=Paymill name=paymill_frontend_form_number_elv}Kontonummer *{/s}</label >
                 <input id = "paymill_accountnumber" type = "text" size = "4" class = "text"
                        value = "{$paymillAccountNumber}" />
             </p >
             <p class = "none" >
-                <label >{s namespace=Paymill name=form_bankcode}Bankleitzahl *{/s}</label >
+                <label >{s namespace=Paymill name=paymill_frontend_form_bankcode}Bankleitzahl *{/s}</label >
                 <input id = "paymill_banknumber" type = "text" size = "4" class = "text"
                        value = "{$paymillBankCode}" />
             </p >
         {/if}
 
         {if ($payment_mean.name == 'paymilldebit') || ($payment_mean.name == 'paymillcc')}
-            <p class = "description" >{s namespace=Paymill name=form_info}Die mit einem * markierten Felder sind Pflichtfelder.{/s}</p >
+            <p class = "description" >{s namespace=Paymill name=paymill_frontend_form_info}Die mit einem * markierten Felder sind Pflichtfelder.{/s}</p >
         {/if}
         {if {config name=paymillShowLabel}}
             <p class = "none" >
             <div class = "paymill_powered" >
                 <div class = "paymill_credits" >
                     {if $payment_mean.name == 'paymillcc'}
-                        {s namespace=Paymill name=form_paymilllabel_cc}Sichere Kreditkartenzahlung powered by{/s}
+                        {s namespace=Paymill name=paymill_frontend_label_slogan}Sichere Kreditkartenzahlung powered by{/s}
                     {else}
-                        {s namespace=Paymill name=form_paymilllabel_debit}ELV powered by{/s}
+                        {s namespace=Paymill name=paymill_frontend_label_slogan_elv}ELV powered by{/s}
                     {/if}
                     <a href = "http://www.paymill.de" target = "_blank" >Paymill</a >
                 </div >

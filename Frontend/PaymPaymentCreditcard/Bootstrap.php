@@ -383,25 +383,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      * Adds the translation snippets into the database.
      * Returns true or throws an exception in case of an error
      *
-     * @todo Improve translations and implement a way to load more languages
      * @return boolean
      * @throws Exception
      */
     private function addTranslationSnippets()
     {
-        $sql_shop_ids = "SELECT `id` FROM `s_core_shops` WHERE `locale_id`= 2";
-        $sql_snippets = "REPLACE INTO `s_core_snippets` (`namespace`, `name`, `value`, `localeID`, `shopID`,`created`, `updated`) VALUES " . "('Paymill', 'version', 'Version', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'date', 'Date', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'devinfo', 'Developerinformation', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'additionaldevinfo', 'Additional Developerinformation', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'action', 'Action', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'merchantinfo', 'Merchantinfo', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'invalid_cardnumber', 'Please enter a valid creditcardnumber.', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'invalid_cvc', 'Please enter a valid securecode (see back of creditcard).', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'invalid_expirydate', 'The expirydate is invalid.', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'invalid_accountholder', 'Please enter the cardholders name.', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'invalid_accountnumber', 'Please enter a valid accountnumber.', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'invalid_bankcode', 'Please a valid bankcode.', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'invalid_error_creditcard', 'Please enter your credit card information. For security reason we will not save them on our system.', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'invalid_error_debit', 'Please enter your accountdata. For security reason we will not save them on our system.', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'form_cardholder', 'Cardholder *', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'form_cardnumber', 'Cardnumber *', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'form_cvc', 'CVC *', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'form_expirydate', 'Valid until (MM/YYYY) *', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'form_accountholder', 'Accountholder *', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'form_accountnumber', 'Accountnumber *', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'form_bankcode', 'Bankcode *', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'form_info', 'Fields marked with a * are required.', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'form_paymilllabel_cc', 'Secure credit card payment powered by', '2', '%SHOPID%', NOW(), NOW()), " . "('Paymill', 'form_paymilllabel_debit', 'direct debit payment powered by', '2', '%SHOPID%', NOW(), NOW())," . "('Paymill', 'general_error', 'An error occurred while processing your payment', '2', '%SHOPID%', NOW(), NOW());";
         try {
-            $shopIDs = Shopware()->Db()->fetchAll($sql_shop_ids);
-
-            if (!empty($shopIDs)) {
-                $sql = "";
-                foreach ($shopIDs as $row) {
-                    $sql .= preg_replace("/%SHOPID%/", $row['id'], $sql_snippets);
-                }
-                Shopware()->Db()->exec($sql);
-            }
-
+            $csv = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_CsvReader(dirname(__FILE__) . '/locale/');
+            Shopware()->Db()->exec($csv->getSqlInsert());
             return true;
         } catch (Exception $exception) {
             $this->uninstall();

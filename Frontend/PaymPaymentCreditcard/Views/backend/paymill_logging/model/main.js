@@ -7,7 +7,7 @@
  */
 Ext.define('Shopware.apps.PaymillLogging.model.Main', {
     extend: 'Ext.data.Model',
-    fields: [ 'id', 'entryDate', 'version', 'merchantInfo', 'devInfo', 'devInfoAdditional'],
+    fields: [ 'id', 'entryDate', 'version', 'merchantInfo', 'devInfo'],
     proxy:  {
         type:   'ajax',
         api:    {
