@@ -41,7 +41,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                                         width:'50%',
                                         items: [
                                             {
-                                                value       : '{s namespace=paymill name=backend_description_capture}Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.{/s}'
+                                                value       : '{s namespace=paymill name=backend_capture_description}Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.{/s}' //@todo translate paymill_backend_capture_description
                                             }
                                         ]
                                     },{
@@ -50,7 +50,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                                         width:'50%',
                                         items: [
                                             {
-                                                value       : '{s namespace=paymill name=backend_description_capture}Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.{/s}'
+                                                value       : '{s namespace=paymill name=backend_refund_description}Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.{/s}' //@todo translate paymill_backend_refund_description
                                             }
                                         ]
                                     }
@@ -67,7 +67,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                                         width:'50%',
                                         items: [
                                             captureButton = Ext.create('Ext.Button', {
-                                                text: '{s namespace=paymill name=backend_button_capture}Capture{/s}',
+                                                text: '{s namespace=paymill name=backend_capture_button}Capture{/s}', //@todo translate paymill_backend_capture_button
                                                 scale: 'medium',
                                                 margin: '0 0 0 10',
                                                 disabled: !(me.canCapture()),
@@ -83,7 +83,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                                         width:'50%',
                                         items: [
                                             refundButton = Ext.create('Ext.Button', {
-                                                text: '{s namespace=paymill name=backend_button_refund}Refund{/s}',
+                                                text: '{s namespace=paymill name=backend_refund_button}Refund{/s}',//@todo translate paymill_backend_refund_button
                                                 scale: 'medium',
                                                 margin: '0 0 0 10',
                                                 disabled: !(me.canRefund()),

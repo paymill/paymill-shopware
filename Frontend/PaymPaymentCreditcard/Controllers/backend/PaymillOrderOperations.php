@@ -21,11 +21,13 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
 
     /**
      * Returns if the payment mean is a paymill payment mean
+     *
      * @param $orderId
      *
      * @return bool
      */
-    private function _isPaymillPayment($orderId){
+    private function _isPaymillPayment($orderId)
+    {
         $sql = "SELECT count(name) FROM s_core_paymentmeans payment, s_order o
                 WHERE o.paymentID = payment.id
                 AND (payment.name = 'paymilldebit' OR payment.name = 'paymillcc')
@@ -60,39 +62,30 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
         $result = false;
         require_once dirname(__FILE__) . '/../../lib/Services/Paymill/Preauthorizations.php';
         $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+        $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
+        $preAuthObject = new Services_Paymill_Preauthorizations(trim($swConfig->get("privateKey")), 'https://api.paymill.com/v2/');
 
         //Gather Data
-        $orderId = $this->Request()->getParam("orderId");
-        $privateKey = trim($swConfig->get("privateKey"));
-        $apiUrl = "https://api.paymill.com/v2/";
-
-        $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
-        $orderNumber = $modelHelper->getOrderNumberById($orderId);
+        $orderNumber = $modelHelper->getOrderNumberById($this->Request()->getParam("orderId"));
         $preAuthId = $modelHelper->getPaymillPreAuthorization($orderNumber);
-
-        $preAuthObject = new Services_Paymill_Preauthorizations($privateKey, $apiUrl);
         $preAuthObject = $preAuthObject->getOne($preAuthId);
 
-        $description = $preAuthObject['client']['email'] . " " . Shopware()->Config()->get('shopname');
-        $amount = $preAuthObject['amount'];
-        $currency = $preAuthObject['currency'];
-
         //Create Transaction
-        $parameter = array("amount" => $amount, "currency" => $currency, "description" => $description);
+        $parameter = array(
+            'amount' => $preAuthObject['amount'],
+            'currency' => $preAuthObject['currency'],
+            "description" => $preAuthObject['client']['email'] . ' ' . Shopware()->Config()->get('shopname')
+        );
 
         $paymentProcessor = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor($parameter);
         $paymentProcessor->setPreauthId($preAuthId);
 
         try {
             $result = $paymentProcessor->capture();
-            if ($result) {
-                $messageText = "Capture has been successful.";
-                $modelHelper->setPaymillTransactionId($orderNumber, $paymentProcessor->getTransactionId());
-            } else {
-                $messageText = "Capture failed.";
-            }
+            $messageText = "Capture has been successful."; //@todo translation paymill_backend_capture_success
+            $modelHelper->setPaymillTransactionId($orderNumber, $paymentProcessor->getTransactionId());
         } catch (Exception $exception) {
-            $messageText = $exception->getMessage();
+            $messageText = "Capture failed."; //@todo translation paymill_backend_capture_failure
         }
 
         $this->View()->assign(array('success' => $result, 'messageText' => $messageText));
@@ -124,40 +117,63 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
         require_once dirname(__FILE__) . '/../../lib/Services/Paymill/Transactions.php';
         require_once dirname(__FILE__) . '/../../lib/Services/Paymill/Refunds.php';
         $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+        $refund = new Services_Paymill_Refunds(trim($swConfig->get("privateKey")), 'https://api.paymill.com/v2/');
+        $transaction = new Services_Paymill_Transactions(trim($swConfig->get("privateKey")), 'https://api.paymill.com/v2/');
         $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
-
-        //Gather Data
-        $orderId = $this->Request()->getParam("orderId");
-        $orderNumber = $modelHelper->getOrderNumberById($orderId);
+        $orderNumber = $modelHelper->getOrderNumberById($this->Request()->getParam("orderId"));
         $transactionId = $modelHelper->getPaymillTransactionId($orderNumber);
-        $privateKey = trim($swConfig->get("privateKey"));
-        $apiUrl = "https://api.paymill.com/v2/";
 
-        $transactionObject = new Services_Paymill_Transactions($privateKey, $apiUrl);
-        $transactionObject = $transactionObject->getOne($transactionId);
-
-        $description = $transactionObject['client']['email'] . " " . Shopware()->Config()->get('shopname');
-        $amount = $transactionObject['amount'];
+        $transaction = $transaction->getOne($transactionId);
 
         //Create Transaction
-        $parameter = array('transactionId'   => $transactionId,
-                           'params'          => array(
-                               'amount'      => $amount,
-                               'description' => $description
-                               )
-            );
+        $parameter = array(
+            'transactionId' => $transactionId,
+            'params' => array(
+                'amount'      => $transaction['amount'],
+                'description' => $transaction['client']['email'] . " " . Shopware()->Config()->get('shopname')
+            )
+        );
 
-        $refundObject = new Services_Paymill_Refunds($privateKey, $apiUrl);
-        $refund = $refundObject->create($parameter);
+        $response = $refund->create($parameter);
 
-        //Validate Result
-        $messageText = "";
-        $result = true;
-
-        if($result){
+        //Validate result and prepare feedback
+        if ($result = $this->_validateRefundResponse($response)) {
             $modelHelper->setPaymillCancelled($orderNumber, true);
+            $messageText = "Transaction has been refunded successfully."; //@todo transaction paymill_backend_refund_success
+        } else {
+            $messageText = "Failed to response transaction"; //@todo transaction paymill_backend_refund_failure
         }
 
         $this->View()->assign(array('success' => $result, 'messageText' => $messageText));
+    }
+
+    /**
+     * Validates the response array given by the create call of a refund object
+     *
+     * @param $refund
+     *
+     * @return bool
+     */
+    private function _validateRefundResponse($refund)
+    {
+
+        $loggingManager = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
+
+        if (!isset($refund['id']) && !isset($refund['data']['id'])) {
+            $loggingManager->log("No Refund created.", var_export($refund, true));
+            $hasId = false;
+        } else {
+            $loggingManager->log("Refund created.", isset($refund['id']) ? $refund['id'] : $refund['data']['id']);
+            $hasId = true;
+        }
+
+        if (isset($refund['data']['response_code']) && $refund['data']['response_code'] !== 20000) {
+            $loggingManager->log("An Error occurred during refund creation: " . $refund['data']['response_code'], var_export($refund, true));
+            $responseCodeOK = false;
+        } else {
+            $responseCodeOK = true;
+        }
+
+        return $hasId && $responseCodeOK;
     }
 }
