@@ -64,35 +64,13 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                                     {
                                         xtype: 'fieldcontainer',
                                         defaultType: 'displayfield',
-                                        width:'50%',
-                                        items: [
-                                            captureButton = Ext.create('Ext.Button', {
-                                                text: '{s namespace=paymill name=backend_capture_button}Capture{/s}', //@todo translate paymill_backend_capture_button
-                                                scale: 'medium',
-                                                margin: '0 0 0 10',
-                                                disabled: !(me.canCapture()),
-                                                handler: function() {
-                                                    me.capture();
-                                                }
-                                            })
-
-                                        ]
+                                        id: 'captureButtonSlot',
+                                        width:'50%'
                                     },{
                                         xtype: 'fieldcontainer',
                                         defaultType: 'displayfield',
-                                        width:'50%',
-                                        items: [
-                                            refundButton = Ext.create('Ext.Button', {
-                                                text: '{s namespace=paymill name=backend_refund_button}Refund{/s}',//@todo translate paymill_backend_refund_button
-                                                scale: 'medium',
-                                                margin: '0 0 0 10',
-                                                disabled: !(me.canRefund()),
-                                                handler: function() {
-                                                    me.refund();
-                                                }
-                                            })
-
-                                        ]
+                                        id: 'refundButtonSlot',
+                                        width:'50%'
                                     }
                                 ]
                             })
@@ -103,6 +81,8 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
 
         ];
         this.callParent(arguments);
+        this.displayRefundButton();
+        this.displayCaptureButton();
     },
 
     canCapture: function(){
@@ -135,9 +115,11 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
             },
             success: function(response){
                 var decodedResponse = Ext.decode(response.responseText);
-                var success = decodedResponse.success;
-                var messageText = decodedResponse.messageText;
-                alert(messageText);
+                if(decodedResponse.success){
+                    me.displayCaptureButton();
+                    me.displayRefundButton();
+                }
+                alert(decodedResponse.messageText);
             }
         });
     },
@@ -173,11 +155,43 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
             },
             success: function(response){
                 var decodedResponse = Ext.decode(response.responseText);
-                var success = decodedResponse.success;
-                var messageText = decodedResponse.messageText;
-                alert(messageText);
+                if(decodedResponse.success){
+                    me.displayRefundButton();
+                    me.displayCaptureButton();
+                }
+                alert(decodedResponse.messageText);
             }
         });
+    },
+    displayRefundButton: function(){
+        var me = this;
+        var button =  new Array();
+        button.push(Ext.create('Ext.Button', {
+            text: '{s namespace=paymill name=backend_refund_button}Refund{/s}',//@todo translate paymill_backend_refund_button
+            scale: 'medium',
+            margin: '0 0 0 10',
+            disabled: !(me.canRefund()),
+            handler: function() {
+                me.refund();
+            }
+        }));
+        Ext.ComponentManager.get('refundButtonSlot').removeAll();
+        Ext.ComponentManager.get('refundButtonSlot').add(button);
+    },
+    displayCaptureButton: function(){
+        var me = this;
+        var button =  new Array();
+        button.push(Ext.create('Ext.Button', {
+            text: '{s namespace=paymill name=backend_capture_button}Capture{/s}', //@todo translate paymill_backend_capture_button
+            scale: 'medium',
+            margin: '0 0 0 10',
+            disabled: !(me.canCapture()),
+            handler: function() {
+                me.capture();
+            }
+        }));
+        Ext.ComponentManager.get('captureButtonSlot').removeAll();
+        Ext.ComponentManager.get('captureButtonSlot').add(button);
     }
 });
 //{/block}
