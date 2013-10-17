@@ -144,6 +144,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
         Shopware()->Session()->paymillTotalAmount = $totalAmount;
         $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
+        $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
 
         if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
             return;
