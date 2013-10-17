@@ -44,13 +44,13 @@ Fast Checkout: Fast checkout can be enabled by selecting the option in the PAYMI
 
 Preauthorization and manual capture: If the option is selected, a preauthorization will be generated during checkout. On generation of the invoice, the capture will be triggered automatically, allowing easy capturing without the need to trigger it manually.
 
-## Translation of payment method displaynames
-If you are interested in translating the displayname of any payment method, you can do so by following these steps:
+## Translation of payment method display names
+If you are interested in translating the display name of any payment method, you can do so by following these steps:
 
 * Got to the Shopware Backend
 * Click on Configuration/Payment Methods
 * Select the desired method (Paymill Methods will show as "Kreditkartenzahlung" and "ELV"
 * Click on the globe icon in the right corner of the Description field
-* Select the desired languange from the list in the left frame
+* Select the desired language from the list in the left frame
 * Enter your translation for the payment name
 * After you save your changes, you are good to go.
