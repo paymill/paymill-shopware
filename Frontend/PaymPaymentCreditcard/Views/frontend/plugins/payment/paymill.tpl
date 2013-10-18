@@ -60,6 +60,10 @@
         errorsElv.html("");
         var result = true;
         if (getPayment() === 'paymillcc') { //If CC
+            if (!paymill.validateHolder($('#card-holder').val())) {
+                errorsCc.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_holder_cc}Please enter the cardholders name.{/s}</li>");
+                result = false;
+            }
             if (!paymill.validateCardNumber($('#card-number').val())) {
                 errorsCc.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_number_cc}Please enter a valid creditcardnumber.{/s}</li>");
                 result = false;
@@ -82,7 +86,7 @@
             }
         }
         if (getPayment() === 'paymilldebit') { //If ELV
-            if (!$('#paymill_accountholder').val()) {
+            if (!paymill.validateHolder($('#paymill_accountholder').val())) {
                 errorsElv.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_holder_elv}Please enter the account name.{/s}</li>");
                 result = false;
             }
@@ -144,7 +148,7 @@
                                 if(VALIDATE_CVC){
                                     paymill.createToken({
                                         number:     $('#card-number').val(),
-                                        cardholder: $('#account-holder').val(),
+                                        cardholder: $('#card-holder').val(),
                                         exp_month:  $('#card-expiry-month').val(),
                                         exp_year:   $('#card-expiry-year').val(),
                                         cvc:        $('#card-cvc').val(),
@@ -155,7 +159,7 @@
                                     cvcInput = $('#card-cvc').val();
                                     paymill.createToken({
                                         number:     $('#card-number').val(),
-                                        cardholder: $('#account-holder').val(),
+                                        cardholder: $('#card-holder').val(),
                                         exp_month:  $('#card-expiry-month').val(),
                                         exp_year:   $('#card-expiry-year').val(),
                                         cvc:        cvcInput === "" ? "000" : cvcInput,
@@ -224,7 +228,7 @@
         {if $payment_mean.name == 'paymillcc'}
             <p class = "none" >
                 <label >{s namespace=Paymill name=paymill_frontend_form_holder_cc}Credit Card Holder *{/s}</label >
-                <input id = "account-holder" type = "text" size = "20" class = "text"
+                <input id = "card-holder" type = "text" size = "20" class = "text"
                        value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
             </p >
             <p class = "none" >
