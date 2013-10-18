@@ -32,4 +32,13 @@ class Shopware_Controllers_Backend_PaymillLogging extends Shopware_Controllers_B
         $total = $loggingManager->getTotal();
         $this->View()->assign(array("data" => $store, "total" => $total, "success" => true));
     }
+
+    /**
+     * Returns the path to image resources used by the log view
+     */
+    public function getImagePathAction()
+    {
+        return "";
+        throw new Exception(__CLASS__." ".__FUNCTION__." not implemented.");
+    }
 }

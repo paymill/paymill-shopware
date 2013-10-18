@@ -20,7 +20,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
     layout:    {
         type: 'fit'
     },
-    height:    520,
+    height:    800,
     width:     800,
 
     initComponent:   function ()
@@ -44,12 +44,12 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                 {
                     text:      '{s namespace=Paymill name=paymill_backend_log_entry_date}Date{/s}',
                     dataIndex: 'entryDate',
-                    width:     50
+                    width:     75
                 },
                 {
                     text:      '{s namespace=Paymill name=paymill_backend_log_version}Version{/s}',
                     dataIndex: 'version',
-                    width:     50
+                    width:     40
                 },
                 {
                     text:      '{s namespace=Paymill name=paymill_backend_log_merchant_info}Merchant Information{/s}',
@@ -59,10 +59,11 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                 {
                     xtype:  'actioncolumn',
                     header: '{s namespace=Paymill name=paymill_backend_log_action}Actions{/s}',
-                    width:  60,
+                    width:  35,
                     items:  [
                         {
                             iconCls: 'sprite-question-button',
+                            icon: me.getInfoIcon(),
                             action:  'Details',
                             scope:   me,
                             handler: function (grid, rowIndex, colIndex, item, eOpts, record)
@@ -78,6 +79,12 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                     xtype:       'pagingtoolbar',
                     store:       me.store,
                     dock:        'bottom',
+                    displayInfo: true
+                },
+                {
+                    xtype:       'pagingtoolbar',
+                    store:       me.store,
+                    dock:        'top',
                     displayInfo: true
                 }
             ]
@@ -153,5 +160,21 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                     ]})
             ]
         }).show();
+    },
+    getInfoIcon: function (){
+        Ext.Ajax.request({
+            url:     '{url controller=PaymillLogging action=getImagePath}',
+            method:  'POST',
+            async:   false,
+            params:  {
+                type: 'icon_info'
+            },
+            success: function (response)
+            {
+                var decodedResponse = Ext.decode(response.responseText);
+                result = decodedResponse.success;
+            }
+        });
+        return result;
     }
 });
