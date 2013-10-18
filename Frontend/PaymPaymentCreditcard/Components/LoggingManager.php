@@ -12,21 +12,14 @@ require_once dirname(__FILE__) . '/../lib/Services/Paymill/LoggingInterface.php'
 class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager implements Services_Paymill_LoggingInterface
 {
     /*** @var string */
-    private $_processId = null;
+    private $_processId = '';
 
     /**
      * Creates an instance of the LoggingManager
+     *
      * @param string $processId
      */
-    function __construct($processId = null)
-    {
-        $this->_processId = $processId;
-    }
-
-    /**
-     * @param null $processId
-     */
-    public function setProcessId($processId)
+    function __construct($processId = '')
     {
         $this->_processId = $processId;
     }
@@ -39,7 +32,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager 
         return $this->_processId;
     }
 
-
+    /**
+     * @param null $processId
+     */
+    public function setProcessId($processId)
+    {
+        $this->_processId = $processId;
+    }
 
     /**
      * This method is meant to be called during the installation of the plugin to allow use of the LoggingManager.
@@ -57,7 +56,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager 
                    "`version` varchar(25) NOT NULL COLLATE utf8_unicode_ci," .
                    "`merchantInfo` varchar(250) COLLATE utf8_unicode_ci NOT NULL," .
                    "`devInfo` text COLLATE utf8_unicode_ci DEFAULT NULL," .
-                   "PRIMARY KEY (`id`)" . ") ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1";
+                   "PRIMARY KEY (`id`)" .
+                   ") ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1";
+
             Shopware()->Db()->query($sql);
         } catch (Exception $exception) {
             Shopware()->Log()->Err("There was an Error creating the Log-Table: " . $exception->getMessage());
