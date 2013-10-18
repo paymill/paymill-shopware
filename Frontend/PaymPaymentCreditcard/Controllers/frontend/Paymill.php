@@ -95,11 +95,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         // finish the order if payment was successfully processed
         if ($result !== true) {
             Shopware()->Session()->paymillTransactionToken = null;
-            Shopware()->Session()->pigmbhErrorMessage = "An error occurred while processing your payment";
-            if (Shopware()->Locale()->getLanguage() === 'de') {
-                Shopware()->Session()->pigmbhErrorMessage = 'W&auml;hrend Ihrer Zahlung ist ein Fehler aufgetreten.';
-            }
-
+            Shopware()->Session()->pigmbhErrorMessage = $this->_getSnippet('paymill_error_text_general');
             return $this->forward('error');
         }
 
@@ -172,5 +168,19 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
 
         $this->redirect(array("controller"   => "checkout", "action" => "confirm", "forceSecure" => 1,
                               "errorMessage" => $errorMessage));
+    }
+
+    /**
+     * Returns the error message in the correct language as a string
+     * @param string $snippetName
+     * @return string $error
+     */
+    private function _getSnippet($snippetName)
+    {
+        $default = "An error occurred while processing your payment.";
+        $shopId = Shopware()->Shop()->getId();
+        $sql = "SELECT value FROM s_core_snippets WHERE shopID = ? AND `name` = ?";
+        $result = Shopware()->Db()->fetchOne( $sql, array( $shopId, $snippetName ) );
+        return $result? $result : $default;
     }
 }

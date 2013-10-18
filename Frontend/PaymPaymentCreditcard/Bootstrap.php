@@ -253,7 +253,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
         $this->createPaymentMeans();
         $this->_createForm();
-        $this->_createPluginConfigTranslation();
         $this->addTranslationSnippets();
         $this->_createEvents();
         $this->_applyBackendViewModifications();
@@ -337,49 +336,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-     * Creates the Translation for the plugin configuration
-     */
-    private function _createPluginConfigTranslation()
-    {
-        try {
-            $form = $this->Form();
-            $translations = array('de_DE' => array('publicKey'           => 'Public Key', 'privateKey' => 'Privat Key',
-                                                   'paymillPreAuth'      => 'Kreditkarten Transaktionen im Checkout authorisieren, Buchung manuell durchführen',
-                                                   'paymillDebugging'    => 'Debugging aktivieren',
-                                                   'paymillFastCheckout' => 'Daten für Fast Checkout speichern',
-                                                   'paymillLogging'      => 'Logging aktivieren',
-                                                   'paymillShowLabel'    => 'Paymill Label anzeigen'),
-                                  'en_GB' => array('publicKey'           => 'Public Key', 'privateKey' => 'Private Key',
-                                                   'paymillPreAuth'      => 'Authorize credit card transactions during checkout and capture manually',
-                                                   'paymillDebugging'    => 'Activate debugging',
-                                                   'paymillFastCheckout' => 'Save data for FastCheckout',
-                                                   'paymillLogging'      => 'Activate logging',
-                                                   'paymillShowLabel'    => 'Show Paymill-label'));
-
-            $shopRepository = Shopware()->Models()->getRepository('\Shopware\Models\Shop\Locale');
-            foreach ($translations as $locale => $snippets) {
-                $localeModel = $shopRepository->findOneBy(array('locale' => $locale));
-                foreach ($snippets as $element => $snippet) {
-                    if ($localeModel === null) {
-                        continue;
-                    }
-                    $elementModel = $form->getElement($element);
-                    if ($elementModel === null) {
-                        continue;
-                    }
-                    $translationModel = new \Shopware\Models\Config\ElementTranslation();
-                    $translationModel->setLabel($snippet);
-                    $translationModel->setLocale($localeModel);
-                    $elementModel->addTranslation($translationModel);
-                }
-            }
-        } catch (Exception $exception) {
-            $this->uninstall();
-            throw new Exception("Can not create translation." . $exception->getMessage());
-        }
-    }
-
-    /**
      * Adds the translation snippets into the database.
      * Returns true or throws an exception in case of an error
      *
@@ -391,10 +347,62 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         try {
             $csv = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_CsvReader(dirname(__FILE__) . '/locale/');
             Shopware()->Db()->exec($csv->getSqlInsert());
+            $this->_createPluginConfigTranslation();
             return true;
         } catch (Exception $exception) {
             $this->uninstall();
             throw new Exception("Can not insert translation-snippets." . $exception->getMessage());
+        }
+    }
+
+    /**
+     * Creates the Translation for the plugin configuration
+     */
+    private function _createPluginConfigTranslation()
+    {
+        try {
+            $form = $this->Form();
+
+            $map = array('publicKey'           => 'paymill_config_public_key_label',
+                         'privateKey'          => 'paymill_config_private_key_label',
+                         'paymillPreAuth'      => 'paymill_config_preauthorize_label',
+                         'paymillDebugging'    => 'paymill_config_debugging_label',
+                         'paymillFastCheckout' => 'paymill_config_fast_checkout_label',
+                         'paymillLogging'      => 'paymill_config_logging_label',
+                         'paymillShowLabel'    => 'paymill_config_show_label_label'
+            );
+
+            $shopRepository = Shopware()->Models()->getRepository('\Shopware\Models\Shop\Locale');
+            $localeModelDE = $shopRepository->findOneBy(array('locale' => 'de_DE'));
+            $localeModelEN = $shopRepository->findOneBy(array('locale' => 'en_GB'));
+            $sql = "SELECT value FROM s_core_snippets s, s_core_locales l ".
+                   "WHERE s.localeID = l.id ".
+                   "AND l.locale = ? ".
+                   "AND `name` = ?";
+            foreach ($map as $element => $code) {
+                $elementModel = $form->getElement($element);
+                if ($elementModel === null) {
+                    continue;
+                }
+
+
+                //Add german snippets
+                $translationModelDE = new \Shopware\Models\Config\ElementTranslation();
+                $snippetDE = Shopware()->Db()->fetchOne($sql, array( 'de_DE', $code));
+                $translationModelDE->setLabel($snippetDE);
+                $translationModelDE->setLocale($localeModelDE);
+                $elementModel->addTranslation($translationModelDE);
+
+                //Add english snippets
+                $translationModelEN = new \Shopware\Models\Config\ElementTranslation();
+                $snippetEN = Shopware()->Db()->fetchOne($sql, array( 'en_GB', $code));
+                $translationModelEN->setLabel($snippetEN);
+                $translationModelEN->setLocale($localeModelEN);
+                $elementModel->addTranslation($translationModelEN);
+            }
+        } catch (Exception $exception) {
+            $this->uninstall();
+            throw new Exception("Can not create translation." . $exception->getMessage());
         }
     }
 
@@ -489,20 +497,12 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $form = $this->Form();
 
         $form->setElement('text', 'publicKey', array('label' => 'Public Key', 'required' => true));
-
         $form->setElement('text', 'privateKey', array('label' => 'Private Key', 'required' => true));
-
-        $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Kreditkarten Transaktionen im Checkout authorisieren, Buchung manuell durchführen',
-                                                              'value' => false));
-
-        $form->setElement('checkbox', 'paymillDebugging', array('label' => 'Debugging aktivieren', 'value' => false));
-
-        $form->setElement('checkbox', 'paymillFastCheckout', array('label' => 'Daten für Fast Checkout speichern',
-                                                                   'value' => false));
-
-        $form->setElement('checkbox', 'paymillLogging', array('label' => 'Logging aktivieren', 'value' => false));
-
-        $form->setElement('checkbox', 'paymillShowLabel', array('label' => 'Paymill Label anzeigen', 'value' => false));
+        $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => false));
+        $form->setElement('checkbox', 'paymillDebugging', array('label' => 'Activate debugging', 'value' => false));
+        $form->setElement('checkbox', 'paymillFastCheckout', array('label' => 'Save data for FastCheckout', 'value' => false));
+        $form->setElement('checkbox', 'paymillLogging', array('label' => 'Activate logging', 'value' => false));
+        $form->setElement('checkbox', 'paymillShowLabel', array('label' => 'Show Paymill-label during checkout', 'value' => false));
     }
 
     /**

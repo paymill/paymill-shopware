@@ -42,7 +42,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
             width:       '100%',
             columns:     [
                 {
-                    text:      '{s namespace=Paymill name=paymill_backend_log_entry_date}Datum{/s}',
+                    text:      '{s namespace=Paymill name=paymill_backend_log_entry_date}Date{/s}',
                     dataIndex: 'entryDate',
                     width:     50
                 },
@@ -52,7 +52,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                     width:     50
                 },
                 {
-                    text:      '{s namespace=Paymill name=paymill_backend_log_merchant_info}H&auml;ndlerinformation{/s}',
+                    text:      '{s namespace=Paymill name=paymill_backend_log_merchant_info}Merchant Information{/s}',
                     dataIndex: 'merchantInfo',
                     width:     350
                 },
@@ -113,7 +113,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                                             defaultType: 'displayfield',
                                             items:       [
                                                 {
-                                                    fieldLabel: '{s namespace=Paymill name=paymill_backend_log_entry_date}Datum{/s}',
+                                                    fieldLabel: '{s namespace=Paymill name=paymill_backend_log_entry_date}Date{/s}',
                                                     value:      record.get('entryDate'),
                                                     fieldStyle: { margin: '0 0 0 50px' }
                                                 }
@@ -139,7 +139,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                                             xtype:      'panel',
                                             border:     false,
                                             layout:     'fit',
-                                            title:      '{s namespace=Paymill name=paymill_backend_log_dev_info}Entwicklerinformation{/s}',
+                                            title:      '{s namespace=Paymill name=paymill_backend_log_dev_info}Developer Information{/s}',
                                             html:       record.get('devInfo'),
                                             autoScroll: true,
                                             width:      '100%',
