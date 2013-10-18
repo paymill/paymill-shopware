@@ -47,3 +47,7 @@
 "paymill_action_delete";"Remove Selected Entries"
 "paymill_action_delete_all";"Clear Log"
 "paymill_3ds_cancel";"Cancel"
+"paymill_backend_order_operations_capture_success";"Transaction captured successfully."
+"paymill_backend_order_operations_capture_failure";"Transaction could not be captured: "
+"paymill_backend_order_operations_refund_success";"Transaction refunded successfully."
+"paymill_backend_order_operations_refund_failure";"Transaction could not be refunded: "

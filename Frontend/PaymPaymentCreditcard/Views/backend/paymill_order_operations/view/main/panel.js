@@ -41,7 +41,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                                         width:'50%',
                                         items: [
                                             {
-                                                value       : '{s namespace=paymill name=paymill_backend_order_operations_capture_description}Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.{/s}' //@todo translate paymill_backend_capture_description
+                                                value       : '{s namespace=paymill name=paymill_backend_order_operations_capture_description}{/s}'
                                             }
                                         ]
                                     },{
@@ -50,7 +50,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                                         width:'50%',
                                         items: [
                                             {
-                                                value       : '{s namespace=paymill name=paymill_backend_order_operations_refund_description}Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.{/s}' //@todo translate paymill_backend_refund_description
+                                                value       : '{s namespace=paymill name=paymill_backend_order_operations_refund_description}{/s}'
                                             }
                                         ]
                                     }
@@ -115,11 +115,18 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
             },
             success: function(response){
                 var decodedResponse = Ext.decode(response.responseText);
+                var messageText = "";
+                if (decodedResponse.success) {
+                    messageText = "{s namespace=Paymill name=paymill_backend_order_operations_capture_success}Transaction captured successfully.{/s}";
+                } else {
+                    messageText = "{s namespace=Paymill name=paymill_backend_order_operations_capture_failure}Transaction could not be captured: {/s}";
+                    messageText += decodedResponse.code;
+                }
                 if(decodedResponse.success){
                     me.displayCaptureButton();
                     me.displayRefundButton();
                 }
-                alert(decodedResponse.messageText);
+                alert(messageText);
             }
         });
     },
@@ -155,11 +162,18 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
             },
             success: function(response){
                 var decodedResponse = Ext.decode(response.responseText);
+                var messageText = "";
+                if (decodedResponse.success) {
+                    messageText = "{s namespace=Paymill name=paymill_backend_order_operations_refund_success}Transaction refunded successfully.{/s}";
+                } else {
+                    messageText = "{s namespace=Paymill name=paymill_backend_order_operations_refund_failure}Transaction could not be refunded: {/s}";
+                    messageText += decodedResponse.code;
+                }
                 if(decodedResponse.success){
                     me.displayRefundButton();
                     me.displayCaptureButton();
                 }
-                alert(decodedResponse.messageText);
+                alert(messageText);
             }
         });
     },

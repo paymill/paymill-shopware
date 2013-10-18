@@ -82,13 +82,11 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
 
         try {
             $result = $paymentProcessor->capture();
-            $messageText = "Capture has been successful."; //@todo translation paymill_backend_capture_success
             $modelHelper->setPaymillTransactionId($orderNumber, $paymentProcessor->getTransactionId());
+            $this->View()->assign(array('success' => $result));
         } catch (Exception $exception) {
-            $messageText = "Capture failed."; //@todo translation paymill_backend_capture_failure
+            $this->View()->assign(array('success' => $result, 'code' => $exception->getMessage()));
         }
-
-        $this->View()->assign(array('success' => $result, 'messageText' => $messageText));
     }
 
     /**
@@ -139,12 +137,9 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
         //Validate result and prepare feedback
         if ($result = $this->_validateRefundResponse($response)) {
             $modelHelper->setPaymillCancelled($orderNumber, true);
-            $messageText = "Transaction has been refunded successfully."; //@todo transaction paymill_backend_refund_success
-        } else {
-            $messageText = "Failed to response transaction"; //@todo transaction paymill_backend_refund_failure
         }
 
-        $this->View()->assign(array('success' => $result, 'messageText' => $messageText));
+        $this->View()->assign(array('success' => $result, 'code' => $response['data']['response_code']));
     }
 
     /**

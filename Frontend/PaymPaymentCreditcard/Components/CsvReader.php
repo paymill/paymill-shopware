@@ -20,6 +20,26 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_CsvReader
     private $_translations;
 
     /**
+     * Returns the path for the snippet files
+     *
+     * @return string
+     */
+    public function getPath()
+    {
+        return $this->_path;
+    }
+
+    /**
+     * Sets the path for the snippet files
+     *
+     * @param string $path
+     */
+    public function setPath($path)
+    {
+        $this->_path = $path;
+    }
+
+    /**
      * Creates an instance of the CsvReader Class
      *
      * @param String $path
@@ -58,9 +78,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_CsvReader
             if (($files = scandir($this->getPath()))) {
                 foreach ($files as $file) {
                     if (is_file($this->getPath() . $file)) {
-                        if ($this->_knownLanguages[basename($file, '.csv')]) {
-                            $this->loadCsvFileByName($file);
-                        }
+                        $this->loadCsvFileByName($file);
                     }
                 }
             }
@@ -72,39 +90,21 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_CsvReader
     }
 
     /**
-     * Returns the path for the snippet files
-     *
-     * @return string
-     */
-    public function getPath()
-    {
-        return $this->_path;
-    }
-
-    /**
-     * Sets the path for the snippet files
-     *
-     * @param string $path
-     */
-    public function setPath($path)
-    {
-        $this->_path = $path;
-    }
-
-    /**
      * Loads a single csv file by the given name
      *
      * @param string $filename Name of the file
      */
     private function loadCsvFileByName($filename)
     {
-        $translations = array();
-        if (($file = fopen($this->getPath() . $filename, "r")) !== false) {
-            while (($data = fgetcsv($file, 0, ';', '"')) !== false) {
-                $translations[$data[0]] = $data[1];
+        if($this->_knownLanguages[basename($filename, '.csv')]){
+            $translations = array();
+            if (($file = fopen($this->getPath() . $filename, "r")) !== false) {
+                while (($data = fgetcsv($file, 0, ';', '"')) !== false) {
+                    $translations[$data[0]] = $data[1];
+                }
             }
+            $this->_translations[$this->_knownLanguages[basename($filename, '.csv')]] = $translations;
         }
-        $this->_translations[$this->_knownLanguages[basename($filename, '.csv')]] = $translations;
     }
 
     /**
@@ -113,8 +113,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_CsvReader
      */
     private function _prepareDbInsert()
     {
+        $result = "";
         try {
-            $result = "";
             $snippetsArray = $this->_translations;
             $shopIdsSql = "SELECT id FROM s_core_shops WHERE locale_id = ?";
             foreach ($snippetsArray as $localeId => $snippets) {

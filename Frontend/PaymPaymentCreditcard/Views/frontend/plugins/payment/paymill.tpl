@@ -277,6 +277,7 @@
                         {s namespace=Paymill name=paymill_frontend_label_slogan}Sichere Kreditkartenzahlung powered by{/s}
                     {else}
                         {s namespace=Paymill name=paymill_frontend_label_slogan_elv}ELV powered by{/s}
+                        <br />
                     {/if}
                     <a href = "http://www.paymill.de" target = "_blank" >Paymill</a >
                 </div >
