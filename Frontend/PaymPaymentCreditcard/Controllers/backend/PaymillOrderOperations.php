@@ -84,6 +84,9 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
             $result = $paymentProcessor->capture();
             $modelHelper->setPaymillTransactionId($orderNumber, $paymentProcessor->getTransactionId());
             $this->View()->assign(array('success' => $result));
+            if($result){
+                $this->_updatePaymentStatus(12, $this->Request()->getParam("orderId"));
+            }
         } catch (Exception $exception) {
             $this->View()->assign(array('success' => $result, 'code' => $exception->getMessage()));
         }
@@ -137,6 +140,7 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
         //Validate result and prepare feedback
         if ($result = $this->_validateRefundResponse($response)) {
             $modelHelper->setPaymillCancelled($orderNumber, true);
+            $this->_updatePaymentStatus(20, $this->Request()->getParam("orderId"));
         }
 
         $this->View()->assign(array('success' => $result, 'code' => $response['data']['response_code']));
@@ -170,5 +174,18 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
         }
 
         return $hasId && $responseCodeOK;
+    }
+
+    /**
+     * Sets the status of the given payment
+     *
+     * @param integer $statusId
+     * @param string $orderId
+     */
+    private function _updatePaymentStatus($statusId, $orderId)
+    {
+
+        $order = Shopware()->Modules()->Order();
+        $order->setPaymentStatus($orderId, $statusId, false);
     }
 }

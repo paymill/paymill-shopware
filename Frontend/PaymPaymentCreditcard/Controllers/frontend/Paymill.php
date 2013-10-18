@@ -36,6 +36,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
     {
         //Initialise variables
         $user = Shopware()->Session()->sOrderVariables['sUserData'];
+        $sState = array('reserviert' => 18, 'bezahlt' => 12);
         $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $loggingManager = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
 
@@ -111,8 +112,9 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         }
 
         //Create the order
+        $statusId = $captureNow ? $sState['bezahlt']: $sState['reserviert'];
         $finalPaymillToken = $paymillToken === "NoTokenRequired" ? $this->createPaymentUniqueId() : $paymillToken;
-        $orderNumber = $this->saveOrder($finalPaymillToken, md5($finalPaymillToken));
+        $orderNumber = $this->saveOrder($finalPaymillToken, md5($finalPaymillToken), $statusId);
         $loggingManager->log("Finish order.", "Ordernumber: " . $orderNumber, "using Token: " . $finalPaymillToken);
 
         if ($captureNow) {
