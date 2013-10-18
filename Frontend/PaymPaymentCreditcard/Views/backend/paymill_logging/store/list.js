@@ -8,7 +8,7 @@
 
 Ext.define('Shopware.apps.PaymillLogging.store.List', {
     extend:   'Ext.data.Store',
-    autoLoad: false,
-    pageSize: 20,
+    autoLoad: true,
+    pageSize: 30,
     model:    'Shopware.apps.PaymillLogging.model.Main'
 });
