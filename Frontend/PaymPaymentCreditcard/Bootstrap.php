@@ -328,6 +328,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 } catch (Exception $exception){
                     return false;
                 }
+
+            try{
+                    $addColumn = "ALTER TABLE `paymill_log` ADD processId varchar(250) NOT NULL AFTER id";
+                    Shopware()->Db()->query($addColumn);
+                } catch (Exception $exception){
+                    return false;
+                }
             case '1.1.0':
                 return $result;
         }
