@@ -77,7 +77,7 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
             "description" => $preAuthObject['client']['email'] . ' ' . Shopware()->Config()->get('shopname')
         );
 
-        $paymentProcessor = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor($parameter);
+        $paymentProcessor = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor($parameter, $orderNumber);
         $paymentProcessor->setPreauthId($preAuthId);
 
         try {

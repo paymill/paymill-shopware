@@ -38,7 +38,10 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $user = Shopware()->Session()->sOrderVariables['sUserData'];
         $sState = array('reserviert' => 18, 'bezahlt' => 12);
         $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+        $processId = md5(time()." ". $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname']);
+        Shopware()->Session()->paymillProcessId = $processId;
         $loggingManager = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
+        $loggingManager->setProcessId($processId);
 
         // read transaction token from session
         $paymillToken = Shopware()->Session()->paymillTransactionToken;
@@ -70,7 +73,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             'payment'          => $paymentShortcut
         );
 
-        $paymentProcessor = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor($params);
+        $paymentProcessor = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor($params, $processId);
 
         $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
         $clientId = $modelHelper->getPaymillClientId($userId);

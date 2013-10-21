@@ -15,9 +15,11 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcesso
     /**
      * Creates an instance of the paymentProcessor class. This class from the paymill lib allows easier access to most
      * calls used during the payment process.
+     *
      * @param array $params
+     * @param string  $processId
      */
-    public function __construct($params)
+    public function __construct($params, $processId)
     {
         $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $privateKey = trim($swConfig->get("privateKey"));
@@ -27,6 +29,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcesso
         $source .= "_" . Shopware()->Config()->get('version');
         $this->setSource($source);
         $loggingManager = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
+        $loggingManager->setProcessId($processId);
         parent::__construct($privateKey, $apiUrl, null, $params, $loggingManager);
     }
 }
