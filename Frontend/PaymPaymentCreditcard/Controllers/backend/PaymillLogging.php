@@ -25,20 +25,38 @@ class Shopware_Controllers_Backend_PaymillLogging extends Shopware_Controllers_B
      */
     public function loadStoreAction()
     {
-        $start = intval($this->Request()->getParam("start"));
-        $limit = intval($this->Request()->getParam("limit"));
-        $loggingManager = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
-        $store = $loggingManager->read($start, ($limit));
-        $total = $loggingManager->getTotal();
-        $this->View()->assign(array("data" => $store, "total" => $total, "success" => true));
-    }
 
-    /**
-     * Returns the path to image resources used by the log view
-     */
-    public function getImagePathAction()
-    {
-        return "";
-        throw new Exception(__CLASS__." ".__FUNCTION__." not implemented.");
+        $start = intval($this->Request()->getParam('start'));
+        $limit = intval($this->Request()->getParam('limit'));
+
+       if ($sort = $this->Request()->getParam('sort')) {
+            $sort = current($sort);
+        }
+
+
+        if ($filter = $this->Request()->getParam('filter')) {
+            foreach ($filter as $value) {
+                if (empty($value['property']) || empty($value['value'])) {
+                    continue;
+                }
+                if ($value['property'] == 'searchTerm') {
+                    $this->Request()->setParam('searchTerm', $value['value']);
+                }
+            }
+        }
+
+        if($searchTerm = $this->Request()->getParam('searchTerm')){
+            $searchTerm = trim($searchTerm);
+        }
+
+        $direction = empty($sort['direction']) || $sort['direction'] == 'DESC' ? 'DESC' : 'ASC';
+        $property = empty($sort['property']) ? 'id' : $sort['property'];
+
+        //Load Data
+        $loggingManager = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
+        $select = $loggingManager->read($start, ($limit), $property, $direction, $searchTerm);
+
+        $total = $loggingManager->getTotal();
+        $this->View()->assign(array("data" => $select, "total" => $total, "success" => true));
     }
 }

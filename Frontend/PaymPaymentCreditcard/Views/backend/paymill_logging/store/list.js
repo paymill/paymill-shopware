@@ -8,7 +8,18 @@
 
 Ext.define('Shopware.apps.PaymillLogging.store.List', {
     extend:   'Ext.data.Store',
+    model:    'Shopware.apps.PaymillLogging.model.Main',
     autoLoad: true,
     pageSize: 32,
-    model:    'Shopware.apps.PaymillLogging.model.Main'
+    proxy: {
+        type: 'ajax',
+        url : '{url action=loadStore}',
+        reader: {
+            type: 'json',
+            root: 'data'
+        }
+    },
+    remoteSort: true,
+    remoteFilter: true
+
 });

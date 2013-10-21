@@ -85,27 +85,34 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager 
      * read(int,int)<br/>
      * Reads all entries from the paymill_log table, filters for start and limit numbers and returns them as an array.
      *
-     * @param int $start first value to be read.(Recommended range: 0 to n)
-     * @param int $limit Number of values to be read. (Recommended range: 1 to n)
+     * @param int     $start     first value to be read.(Recommended range: 0 to n)
+     * @param int     $limit     Number of values to be read. (Recommended range: 1 to n)
      *
-     * @uses selectAll($query) protected method of this class, make sure to override it to allow access.
+     * @param string $property  the property to sort by
+     * @param string $direction either asc or desc for the sort direction
+     * @param string    $searchTerm
+     *
      * @return array result
      */
-    public function read($start, $limit)
+    public function read($start, $limit, $property, $direction, $searchTerm = "")
     {
         //Cast arguments to int to avoid insecure values
         $start = (int)$start;
         $limit = (int)$limit;
-        if ($start > $limit) {
-            $limit = $start;
-        }
+
 
         //Build SQL Statement using arguments
-        $read = "SELECT * FROM `paymill_log` LIMIT " . $start . ", " . $limit;
+        $read = "SELECT * FROM  `paymill_log` ";
+
+        if($searchTerm !== ""){
+            $read .= 'WHERE (merchantInfo LIKE "%' . $searchTerm . '%" OR devInfo LIKE "%' . $searchTerm . '%") ';
+        }
+
+        $read .= "ORDER BY  `paymill_log`.". $property  ." ". $direction ." LIMIT ". $start .", " . $limit;
 
         //Process Select and return result
         $result = Shopware()->Db()->fetchAll($read);
-
+        
         return $result;
     }
 

@@ -36,6 +36,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
     {
         return Ext.create('Ext.grid.Panel', {
             store:       me.store,
+            id:          'mainGrid',
             forceFit:    true,
             border:      false,
             height:      '100%',
@@ -62,8 +63,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                     width:  35,
                     items:  [
                         {
-                            iconCls: 'sprite-question-button',
-                            icon: me.getInfoIcon(),
+                            iconCls: 'sprite-sticky-notes-pin',
                             action:  'Details',
                             scope:   me,
                             handler: function (grid, rowIndex, colIndex, item, eOpts, record)
@@ -82,10 +82,12 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                     displayInfo: true
                 },
                 {
-                    xtype:       'pagingtoolbar',
-                    store:       me.store,
-                    dock:        'top',
-                    displayInfo: true
+                    xtype: 'toolbar',
+                    ui: 'shopware-ui',
+                    id: 'topToolbar',
+                    dock: 'top',
+                    border: false,
+                    items: me.getTopBar()
                 }
             ]
         });
@@ -161,20 +163,21 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
             ]
         }).show();
     },
-    getInfoIcon: function (){
-        Ext.Ajax.request({
-            url:     '{url controller=PaymillLogging action=getImagePath}',
-            method:  'POST',
-            async:   false,
-            params:  {
-                type: 'icon_info'
-            },
-            success: function (response)
+    getTopBar:function () {
+        var me = this,
+        items = [];
+        items.push(
             {
-                var decodedResponse = Ext.decode(response.responseText);
-                result = decodedResponse.success;
+                xtype: 'textfield',
+                name: 'searchfield',
+                id: 'searchfield',
+                cls:'searchfield',
+                emptyText:'{s namespace=Paymill name=paymill_backend_log_search_term}Search...{/s}',
+                checkChangeBuffer: 1000,
+                enableKeyEvents:true,
+                width: 400
             }
-        });
-        return result;
+        );
+        return items;
     }
 });
