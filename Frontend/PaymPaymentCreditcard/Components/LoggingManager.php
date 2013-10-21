@@ -85,16 +85,17 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager 
      * read(int,int)<br/>
      * Reads all entries from the paymill_log table, filters for start and limit numbers and returns them as an array.
      *
-     * @param int     $start     first value to be read.(Recommended range: 0 to n)
-     * @param int     $limit     Number of values to be read. (Recommended range: 1 to n)
+     * @param int    $start     first value to be read.(Recommended range: 0 to n)
+     * @param int    $limit     Number of values to be read. (Recommended range: 1 to n)
      *
      * @param string $property  the property to sort by
      * @param string $direction either asc or desc for the sort direction
-     * @param string    $searchTerm
+     * @param string $searchTerm
+     * @param bool   $connectedSearch
      *
      * @return array result
      */
-    public function read($start, $limit, $property, $direction, $searchTerm = "")
+    public function read($start, $limit, $property, $direction, $searchTerm = "", $connectedSearch = false)
     {
         //Cast arguments to int to avoid insecure values
         $start = (int)$start;
@@ -102,10 +103,19 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager 
 
 
         //Build SQL Statement using arguments
-        $read = "SELECT * FROM  `paymill_log` ";
+        if($connectedSearch){
+            $read = "SELECT processId FROM  `paymill_log` ";
+        }else{
+            $read = "SELECT * FROM  `paymill_log` ";
+        }
 
         if($searchTerm !== ""){
             $read .= 'WHERE (merchantInfo LIKE "%' . $searchTerm . '%" OR devInfo LIKE "%' . $searchTerm . '%") ';
+        }
+
+        if($connectedSearch){
+            $read = "SELECT * FROM  `paymill_log` WHERE processId IN (".$read.")";
+
         }
 
         $read .= "ORDER BY  `paymill_log`.". $property  ." ". $direction ." LIMIT ". $start .", " . $limit;

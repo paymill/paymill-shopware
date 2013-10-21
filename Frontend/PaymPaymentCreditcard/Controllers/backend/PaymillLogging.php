@@ -42,6 +42,9 @@ class Shopware_Controllers_Backend_PaymillLogging extends Shopware_Controllers_B
                 if ($value['property'] == 'searchTerm') {
                     $this->Request()->setParam('searchTerm', $value['value']);
                 }
+                if ($value['property'] == 'connectedSearch') {
+                    $this->Request()->setParam('connectedSearch', $value['value']);
+                }
             }
         }
 
@@ -52,11 +55,17 @@ class Shopware_Controllers_Backend_PaymillLogging extends Shopware_Controllers_B
         $direction = empty($sort['direction']) || $sort['direction'] == 'DESC' ? 'DESC' : 'ASC';
         $property = empty($sort['property']) ? 'id' : $sort['property'];
 
-        //Load Data
         $loggingManager = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
-        $select = $loggingManager->read($start, ($limit), $property, $direction, $searchTerm);
+
+        //Load Data
+        if($connectedSearch = $this->Request()->getParam('connectedSearch')){
+            $data = $loggingManager->read($start, ($limit), $property, $direction, $searchTerm, $connectedSearch);
+        } else {
+            $data = $loggingManager->read($start, ($limit), $property, $direction, $searchTerm);
+        }
+
 
         $total = $loggingManager->getTotal();
-        $this->View()->assign(array("data" => $select, "total" => $total, "success" => true));
+        $this->View()->assign(array("data" => $data, "total" => $total, "success" => true));
     }
 }

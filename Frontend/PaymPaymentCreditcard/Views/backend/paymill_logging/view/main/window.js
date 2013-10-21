@@ -176,6 +176,13 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                 checkChangeBuffer: 1000,
                 enableKeyEvents:true,
                 width: 400
+            },
+            {
+                xtype: 'checkbox',
+                name: 'connectedSearch',
+                id: 'connectedSearch',
+                cls:'connectedSearch',
+                fieldLabel:'{s namespace=Paymill name=paymill_backend_log_search_connected_checkbox}Connected Search{/s}'
             }
         );
         return items;

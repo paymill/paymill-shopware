@@ -9,6 +9,7 @@
 Ext.define('Shopware.apps.PaymillLogging.controller.Main', {
     extend:     'Ext.app.Controller',
     mainWindow: null,
+    connectedSearch: false,
     init:       function ()
     {
         var me = this;
@@ -20,6 +21,9 @@ Ext.define('Shopware.apps.PaymillLogging.controller.Main', {
         me.control({
             'paymill_logging-main-window [name=searchfield]': {
                 change: me.onSearchForm
+            },
+            'paymill_logging-main-window [name=connectedSearch]': {
+                change: me.onConnectedSearch
             }
         });
 
@@ -36,16 +40,33 @@ Ext.define('Shopware.apps.PaymillLogging.controller.Main', {
     {
         var me = this;
         var store = me.getStore('List');
-        console.log("Suche nach: " + value);
         if (value.length === 0) {
             store.load();
         } else {
             store.load({
-                filters : [{
-                               property: 'searchTerm',
-                               value: value
-                           }]
+                filters : [
+                   {
+                       property: 'searchTerm',
+                       value: value
+                   },
+                   {
+                       property: 'connectedSearch',
+                       value: me.connectedSearch
+                   }
+                ]
             });
         }
+    },
+
+    /**
+     * Callback function triggered when the connected search state is beeing changed
+     *
+     * @param field
+     * @param value
+     */
+    onConnectedSearch: function (field, value)
+    {
+        var me = this;
+        me.connectedSearch = value;
     }
 });
