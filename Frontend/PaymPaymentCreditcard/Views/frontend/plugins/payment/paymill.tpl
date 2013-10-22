@@ -115,10 +115,13 @@
         {
             var brand = paymill.cardType($('#card-number').val());
             brand = brand.toLowerCase();
+            debug("Credit Card Brand identified as: "+brand);
             $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
             $('#card-cvc').val("");
             if (brand !== 'unknown') {
+                brand = brand !== 'american express' ? brand : 'amex';
                 $('#card-number').addClass("paymill-card-number-" + brand);
+                debug("Credit Card Brand identified as: "+brand);
             }
             if(brand === 'maestro'){
                 VALIDATE_CVC = false;
