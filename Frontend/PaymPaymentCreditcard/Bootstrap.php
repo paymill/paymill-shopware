@@ -489,13 +489,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         return parent::disable();
     }
 
-    /**
-     * Defines the capabilities of the plugin
-     */
-    public function getCapabilities()
-    {
-        return array('install' => true, 'update' => true, 'enable' => true);
-    }
 
     /**
      * Creates the payment method
