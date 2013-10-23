@@ -53,9 +53,6 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
 
     /**
      * Action Listener to execute the capture for applicable transactions
-     *
-     * @todo Add translations and exception handling for different cases
-     * @todo Add logging
      */
     public function captureAction()
     {

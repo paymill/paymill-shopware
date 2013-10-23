@@ -256,6 +256,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $this->addTranslationSnippets();
         $this->_createEvents();
         $this->_applyBackendViewModifications();
+        $this->_translatePaymentNames();
 
         return true;
     }
@@ -359,6 +360,29 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         } catch (Exception $exception) {
             $this->uninstall();
             throw new Exception("Can not insert translation-snippets." . $exception->getMessage());
+        }
+    }
+
+    /**
+     * Sets the payment names for all subshops with given translations
+     */
+    private function _translatePaymentNames()
+    {
+        $translationObject = new Shopware_Components_Translation();
+        $ccPayment = $this->Payments()->findOneBy(array('name' => 'paymillcc'));
+        $ccId = $ccPayment->getId();
+        $elvPayment = $this->Payments()->findOneBy(array('name' => 'paymilldebit'));
+        $elvId = $elvPayment->getId();
+        $snippets = Shopware()->Db()->fetchAll("
+                        SELECT localeID, name, value
+                        FROM s_core_snippets
+                        WHERE namespace = 'Paymill' AND (name = 'paymill_credit_card' OR name = 'paymill_direct_debit')
+                        GROUP BY `localeID`,`value`"
+            );
+
+        foreach ($snippets as $snippet) {
+            $translationObject->write($snippet['localeID'], "config_payment", $snippet['name'] ===
+                                                                              'paymill_direct_debit' ? $elvId : $ccId, array('description' => $snippet['value']), 1);
         }
     }
 
