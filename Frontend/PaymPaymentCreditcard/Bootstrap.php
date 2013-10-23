@@ -280,15 +280,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function uninstall()
     {
-        Shopware()->Db()->delete("s_core_paymentmeans", "name in('paymillcc','paymilldebit')");
-        try {
-            $this->Application()->Models()->removeAttribute('s_order_attributes', 'paymill', 'preAuthorization');
-            $this->Application()->Models()->removeAttribute('s_order_attributes', 'paymill', 'transaction');
-            $this->Application()->Models()->removeAttribute('s_order_attributes', 'paymill', 'cancelled');
-            $this->Application()->Models()->generateAttributeModels(array('s_order_attributes'));
-        } catch (Exception $e) {
-        }
-
         return parent::uninstall();
     }
 
