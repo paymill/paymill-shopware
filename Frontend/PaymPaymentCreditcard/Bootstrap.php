@@ -497,18 +497,28 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     protected function createPaymentMeans()
     {
-        $paymillcc = array('name'     => 'paymillcc', 'description' => 'Kreditkartenzahlung',
-                           'action'   => 'payment_paymill', 'active' => 1, 'template' => 'paymill.tpl',
-            //'paymillcc.tpl',
-                           'pluginID' => $this->getId());
 
-        Shopware()->Payments()->createRow($paymillcc)->save();
+        $this->createPayment(
+             array(
+                  'active' => 1,
+                  'name'     => 'paymillcc',
+                  'action'   => 'payment_paymill',
+                  'template' => 'paymill.tpl',
+                  'description' => 'Kreditkartenzahlung',
+                  'additionalDescription' => ''
+             )
+        );
 
-        $paymilldebit = array('name'     => 'paymilldebit', 'description' => 'ELV', 'action' => 'payment_paymill',
-                              'active'   => 1, 'template' => 'paymill.tpl', //'paymilldebit.tpl',
-                              'pluginID' => $this->getId());
-
-        Shopware()->Payments()->createRow($paymilldebit)->save();
+        $this->createPayment(
+             array(
+                  'active' => 1,
+                  'name'     => 'paymilldebit',
+                  'action'   => 'payment_paymill',
+                  'template' => 'paymill.tpl',
+                  'description' => 'ELV',
+                  'additionalDescription' => ''
+             )
+        );
     }
 
     /**
