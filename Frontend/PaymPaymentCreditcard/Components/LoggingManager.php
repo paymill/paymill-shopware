@@ -155,4 +155,30 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager 
 
         return $swConfig->get('paymillLogging');
     }
+
+    /**
+     * Updates the log table for versions below 1.1.0
+     * @throws Exception
+     */
+    public function updateFromLegacyVersion()
+    {
+        try {
+            $dropLogColumn = "ALTER TABLE `pigmbh_paymill_log` DROP `devInfoAdditional`";
+            Shopware()->Db()->query($dropLogColumn);
+        } catch (Exception $exception) {
+            throw new Exception("Cannot drop deprecated column devInfoAdditional. ".$exception->getMessage());
+        }
+        try {
+            $renameLogTable = "RENAME TABLE `pigmbh_paymill_log` TO `paymill_log`";
+            Shopware()->Db()->query($renameLogTable);
+        } catch (Exception $exception) {
+            throw new Exception("Cannot rename log table. ".$exception->getMessage());
+        }
+        try {
+            $addColumn = "ALTER TABLE `paymill_log` ADD processId varchar(250) NOT NULL AFTER id";
+            Shopware()->Db()->query($addColumn);
+        } catch (Exception $exception) {
+            throw new Exception("Cannot add column processId to log table. ".$exception->getMessage());
+        }
+    }
 }

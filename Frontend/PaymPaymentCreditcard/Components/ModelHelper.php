@@ -12,11 +12,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
 {
     private $_loggingManager = null;
 
-
     /**
      * This method is meant to be called during the installation of the plugin to allow use of the Model Helper.
+     *
      * @param Shopware_Components_Plugin_Bootstrap $bootstrap
-     * @return bool
+     *
+     * @throws Exception
+     * @return void
      */
     public static function install($bootstrap)
     {
@@ -32,20 +34,21 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             $models->addAttribute('s_user_attributes', 'paymill', 'client_id', 'varchar(255)');
             $models->addAttribute('s_user_attributes', 'paymill', 'payment_id_cc', 'varchar(255)');
             $models->addAttribute('s_user_attributes', 'paymill', 'payment_id_elv', 'varchar(255)');
-            $result = true;
+
+            //Persist changes
+            $bootstrap->Application()->Models()->generateAttributeModels(array('s_order_attributes'));
+            $bootstrap->Application()->Models()->generateAttributeModels(array('s_user_attributes'));
         } catch (Exception $exception) {
-            $result = false;
+            Shopware()->Log()->Err("Cannot edit shopware models. ". $exception->getMessage());
+            throw new Exception("Cannot edit shopware models. ". $exception->getMessage());
         }
-        //Persist changes
-        $bootstrap->Application()->Models()->generateAttributeModels(array('s_order_attributes'));
-        $bootstrap->Application()->Models()->generateAttributeModels(array('s_user_attributes'));
-        return $result;
     }
 
     /**
      * Executes all update routines for the given version number
-     * @return bool
      *
+     * @throws Exception
+     * @return void
      */
     public function updateFromLegacyVersion(){
         //Backup database tables
@@ -72,13 +75,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
                 }
 
             }
-
-            $result = true;
         } catch(Exception $exception){
-            $result = false;
+            throw new Exception("Cannot update fast checkout information." . $exception->getMessage());
         }
-
-        return $result;
 
     }
 
