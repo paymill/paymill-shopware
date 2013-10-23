@@ -41,7 +41,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                                         width:'50%',
                                         items: [
                                             {
-                                                value       : '{s namespace=paymill name=paymill_backend_order_operations_capture_description}{/s}'
+                                                value       : "{s namespace=paymill name=paymill_backend_order_operations_capture_description}{/s}"
                                             }
                                         ]
                                     },{
@@ -50,7 +50,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                                         width:'50%',
                                         items: [
                                             {
-                                                value       : '{s namespace=paymill name=paymill_backend_order_operations_refund_description}{/s}'
+                                                value       : "{s namespace=paymill name=paymill_backend_order_operations_refund_description}{/s}"
                                             }
                                         ]
                                     }
