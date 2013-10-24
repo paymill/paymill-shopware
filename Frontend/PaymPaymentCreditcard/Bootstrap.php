@@ -261,6 +261,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $this->createPaymentMeans();
             $this->_createForm();
             $this->_addTranslationSnippets();
+            $this->_createPluginConfigTranslation();
             $this->_createEvents();
             $this->_applyBackendViewModifications();
             $this->_translatePaymentNames();
@@ -319,6 +320,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 case '1.0.4':
                 case '1.0.5':
                 case '1.0.6':
+                    $this->_createForm();
                     $this->_createEvents();
                     $this->_addTranslationSnippets();
 
@@ -337,9 +339,11 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                     throw new Exception('Unknown version, cannot update');
             }
         } catch (Exception $exception) {
+            Shopware()->Log()->Err($exception->getMessage());
             throw new Exception($exception->getMessage());
         }
 
+        Shopware()->Log()->Err("Updated PAYMILL plugin: ". var_export($updateSuccess, true));
         return $updateSuccess;
     }
 
@@ -348,15 +352,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      * Returns true or throws an exception in case of an error
      *
      * @throws Exception
-     * @return boolean
+     * @return void
      */
     private function _addTranslationSnippets()
     {
         try {
             $csv = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_CsvReader(dirname(__FILE__) . '/locale/');
             Shopware()->Db()->exec($csv->getSqlInsert());
-            $this->_createPluginConfigTranslation();
-            return true;
         } catch (Exception $exception) {
             Shopware()->Log()->Err("Can not insert translation-snippets." . $exception->getMessage());
             throw new Exception("Can not insert translation-snippets." . $exception->getMessage());
@@ -421,9 +423,11 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                    "WHERE s.localeID = l.id ".
                    "AND l.locale = ? ".
                    "AND `name` = ?";
+
             foreach ($map as $element => $code) {
                 $elementModel = $form->getElement($element);
                 if ($elementModel === null) {
+                    Shopware()->Log()->Err($element." not found.");
                     continue;
                 }
 
