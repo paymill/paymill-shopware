@@ -319,6 +319,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 case '1.0.4':
                 case '1.0.5':
                 case '1.0.6':
+                    $this->_createEvents();
                     $this->_addTranslationSnippets();
 
                     $loggingHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
