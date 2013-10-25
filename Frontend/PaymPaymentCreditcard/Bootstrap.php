@@ -270,7 +270,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             throw new Exception($exception->getMessage());
         }
 
-        return parent::install();
+        $installSuccess = parent::install();
+        Shopware()->Log()->Err("Installed PAYMILL plugin: ". var_export($installSuccess, true));
+        return $installSuccess;
     }
 
     /**
@@ -320,16 +322,16 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 case '1.0.4':
                 case '1.0.5':
                 case '1.0.6':
-                    $this->_createForm();
-                    $this->_createEvents();
-                    $this->_addTranslationSnippets();
-
                     $loggingHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
                     $loggingHelper->updateFromLegacyVersion();
 
                     Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
                     $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
                     $modelHelper->updateFromLegacyVersion();
+
+                    $this->_createEvents();
+                    $this->_addTranslationSnippets();
+                    $this->_updateConfigForm();
 
                 case '1.1.0':
                     $updateSuccess = true;
@@ -431,7 +433,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                     continue;
                 }
 
-
                 //Add german snippets
                 $translationModelDE = new \Shopware\Models\Config\ElementTranslation();
                 $snippetDE = Shopware()->Db()->fetchOne($sql, array( 'de_DE', $code));
@@ -445,38 +446,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 $translationModelEN->setLabel($snippetEN);
                 $translationModelEN->setLocale($localeModelEN);
                 $elementModel->addTranslation($translationModelEN);
+
+                $this->Application()->Models()->persist($elementModel);
             }
         } catch (Exception $exception) {
             Shopware()->Log()->Err("Can not create translation for configuration form." . $exception->getMessage());
             throw new Exception("Can not create translation for configuration form." . $exception->getMessage());
         }
-    }
-
-    /**
-     * Enables the plugin
-     *
-     * @throws Exception
-     * @return boolean
-     * @todo to be removed
-     */
-    public function enable()
-    {
-        try {
-
-            $payment[0] = 'paymillcc';
-            $payment[1] = 'paymilldebit';
-
-            foreach ($payment as $key) {
-                $currentPayment = $this->Payments()->findOneBy(array('name' => $key));
-                if ($currentPayment) {
-                    $currentPayment->setActive(true);
-                }
-            }
-        } catch (Exception $exception) {
-            throw new Exception("Cannot change payment-activity state: " . $exception->getMessage());
-        }
-
-        return parent::enable();
     }
 
     /**
@@ -516,26 +492,27 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     {
         try{
             $this->createPayment(
-                 array(
-                      'active' => 1,
-                      'name'     => 'paymillcc',
-                      'action'   => 'payment_paymill',
-                      'template' => 'paymill.tpl',
-                      'description' => 'Kreditkartenzahlung',
-                      'additionalDescription' => ''
-                 )
-            );
+                     array(
+                          'active' => 1,
+                          'name'     => 'paymillcc',
+                          'action'   => 'payment_paymill',
+                          'template' => 'paymill.tpl',
+                          'description' => 'Kreditkartenzahlung',
+                          'additionalDescription' => ''
+                     )
+                );
 
-            $this->createPayment(
-                 array(
-                      'active' => 1,
-                      'name'     => 'paymilldebit',
-                      'action'   => 'payment_paymill',
-                      'template' => 'paymill.tpl',
-                      'description' => 'ELV',
-                      'additionalDescription' => ''
-                 )
-            );
+                $this->createPayment(
+                     array(
+                          'active' => 1,
+                          'name'     => 'paymilldebit',
+                          'action'   => 'payment_paymill',
+                          'template' => 'paymill.tpl',
+                          'description' => 'ELV',
+                          'additionalDescription' => ''
+                     )
+                );
+
         } catch (Exception $exception){
             Shopware()->Log()->Err("There was an error creating the payment means. " . $exception->getMessage());
             throw new Exception("There was an error creating the payment means. " . $exception->getMessage());
@@ -560,6 +537,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $form->setElement('checkbox', 'paymillFastCheckout', array('label' => 'Save data for FastCheckout', 'value' => false));
             $form->setElement('checkbox', 'paymillLogging', array('label' => 'Activate logging', 'value' => false));
             $form->setElement('checkbox', 'paymillShowLabel', array('label' => 'Show Paymill-label during checkout', 'value' => false));
+            $this->Application()->Models()->persist($form);
+            return true;
         } catch (Exception $exception){
             Shopware()->Log()->Err("There was an error creating the plugin configuration. " . $exception->getMessage());
             throw new Exception("There was an error creating the plugin configuration. " . $exception->getMessage());
@@ -604,5 +583,38 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             Shopware()->Log()->Err("can not create menu entry." . $exception->getMessage());
             throw new Exception("can not create menu entry." . $exception->getMessage());
         }
+    }
+
+    /**
+     * Updates the config form
+     * @throws Exception
+     */
+    private function _updateConfigForm()
+    {
+        $form = $this->Form();
+        $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => false));
+        $shopRepository = Shopware()->Models()->getRepository('\Shopware\Models\Shop\Locale');
+        $localeModelDE = $shopRepository->findOneBy(array('locale' => 'de_DE'));
+        $localeModelEN = $shopRepository->findOneBy(array('locale' => 'en_GB'));
+
+
+        if (is_null($elementModel = $form->getElement('paymillPreAuth'))) {
+            throw new Exception("PreAuth Option does not exist.");
+        }
+
+        $translationModelDE = new \Shopware\Models\Config\ElementTranslation();
+        $snippetDE = Shopware()->Db()->fetchOne("SELECT value FROM s_core_snippets s, s_core_locales l WHERE s.localeID = l.id AND l.locale = ? AND `name` = ?", array( 'de_DE', 'paymill_config_preauthorize_label'));
+        $translationModelDE->setLabel($snippetDE);
+        $translationModelDE->setLocale($localeModelDE);
+        $elementModel->addTranslation($translationModelDE);
+
+        //Add english snippets
+        $translationModelEN = new \Shopware\Models\Config\ElementTranslation();
+        $snippetEN = Shopware()->Db()->fetchOne("SELECT value FROM s_core_snippets s, s_core_locales l WHERE s.localeID = l.id AND l.locale = ? AND `name` = ?", array( 'en_GB', 'paymill_config_preauthorize_label'));
+        $translationModelEN->setLabel($snippetEN);
+        $translationModelEN->setLocale($localeModelEN);
+        $elementModel->addTranslation($translationModelEN);
+
+        $this->Application()->Models()->persist($form);
     }
 }
