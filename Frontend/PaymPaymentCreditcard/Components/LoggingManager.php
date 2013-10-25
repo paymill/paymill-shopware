@@ -163,20 +163,18 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager 
     public function updateFromLegacyVersion()
     {
         try {
-            $dropLogColumn = "ALTER TABLE `pigmbh_paymill_log` DROP `devInfoAdditional`";
-            Shopware()->Db()->query($dropLogColumn);
-        } catch (Exception $exception) {
-            throw new Exception("Cannot drop deprecated column devInfoAdditional. ".$exception->getMessage());
-        }
-        try {
-            $renameLogTable = "RENAME TABLE `pigmbh_paymill_log` TO `paymill_log`";
-            Shopware()->Db()->query($renameLogTable);
-        } catch (Exception $exception) {
-            throw new Exception("Cannot rename log table. ".$exception->getMessage());
-        }
-        try {
-            $addColumn = "ALTER TABLE `paymill_log` ADD processId varchar(250) NOT NULL AFTER id";
-            Shopware()->Db()->query($addColumn);
+            $sql = "CREATE TABLE IF NOT EXISTS `paymill_log` (" .
+                   "`id` int(11) NOT NULL AUTO_INCREMENT," .
+                   "`processId` varchar(250) NOT NULL," .
+                   "`entryDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP," .
+                   "`version` varchar(25) NOT NULL COLLATE utf8_unicode_ci," .
+                   "`merchantInfo` varchar(250) COLLATE utf8_unicode_ci NOT NULL," .
+                   "`devInfo` text COLLATE utf8_unicode_ci DEFAULT NULL," .
+                   "PRIMARY KEY (`id`)" .
+                   ") ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;".
+                   "DROP TABLE IF EXISTS `paymill_log`;";
+
+            Shopware()->Db()->query($sql);
         } catch (Exception $exception) {
             throw new Exception("Cannot add column processId to log table. ".$exception->getMessage());
         }
