@@ -483,7 +483,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $form->setElement('checkbox', 'paymillFastCheckout', array('label' => 'Save data for FastCheckout', 'value' => false));
             $form->setElement('checkbox', 'paymillLogging', array('label' => 'Activate logging', 'value' => false));
             $form->setElement('checkbox', 'paymillShowLabel', array('label' => 'Show Paymill-label during checkout', 'value' => false));
-            return true;
         } catch (Exception $exception){
             Shopware()->Log()->Err("There was an error creating the plugin configuration. " . $exception->getMessage());
             throw new Exception("There was an error creating the plugin configuration. " . $exception->getMessage());

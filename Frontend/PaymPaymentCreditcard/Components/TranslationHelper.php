@@ -23,6 +23,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelp
 
     private $_form = null;
 
+    /**
+     * @param $form
+     */
     public function __construct($form){
         $this->_form = $form;
     }
