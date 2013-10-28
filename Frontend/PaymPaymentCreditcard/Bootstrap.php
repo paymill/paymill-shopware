@@ -258,13 +258,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         try {
             Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager::install();
             Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
+            $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper($this->Form());
             $this->createPaymentMeans();
             $this->_createForm();
             $this->_addTranslationSnippets();
-            $this->_createPluginConfigTranslation();
             $this->_createEvents();
             $this->_applyBackendViewModifications();
             $this->_translatePaymentNames();
+            $translationHelper->createPluginConfigTranslation();
         } catch(Exception $exception) {
             $this->uninstall();
             throw new Exception($exception->getMessage());
@@ -332,6 +333,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                     $this->_createEvents();
                     $this->_addTranslationSnippets();
                     $this->_updateConfigForm();
+                    $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper($this->Form());
+                    $translationHelper->updateConfigConfigTranslations();
 
                 case '1.1.0':
                     $updateSuccess = true;
@@ -395,63 +398,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         } catch (Exception $exception) {
             Shopware()->Log()->Err("Can not create translation for payment names." . $exception->getMessage());
             throw new Exception("Can not create translation for payment names." . $exception->getMessage());
-        }
-    }
-
-    /**
-     * Creates the Translation for the plugin configuration
-     *
-     * @throws Exception
-     * @return void
-     */
-    private function _createPluginConfigTranslation()
-    {
-        try {
-            $form = $this->Form();
-
-            $map = array('publicKey'           => 'paymill_config_public_key_label',
-                         'privateKey'          => 'paymill_config_private_key_label',
-                         'paymillPreAuth'      => 'paymill_config_preauthorize_label',
-                         'paymillDebugging'    => 'paymill_config_debugging_label',
-                         'paymillFastCheckout' => 'paymill_config_fast_checkout_label',
-                         'paymillLogging'      => 'paymill_config_logging_label',
-                         'paymillShowLabel'    => 'paymill_config_show_label_label'
-            );
-
-            $shopRepository = Shopware()->Models()->getRepository('\Shopware\Models\Shop\Locale');
-            $localeModelDE = $shopRepository->findOneBy(array('locale' => 'de_DE'));
-            $localeModelEN = $shopRepository->findOneBy(array('locale' => 'en_GB'));
-            $sql = "SELECT value FROM s_core_snippets s, s_core_locales l ".
-                   "WHERE s.localeID = l.id ".
-                   "AND l.locale = ? ".
-                   "AND `name` = ?";
-
-            foreach ($map as $element => $code) {
-                $elementModel = $form->getElement($element);
-                if ($elementModel === null) {
-                    Shopware()->Log()->Err($element." not found.");
-                    continue;
-                }
-
-                //Add german snippets
-                $translationModelDE = new \Shopware\Models\Config\ElementTranslation();
-                $snippetDE = Shopware()->Db()->fetchOne($sql, array( 'de_DE', $code));
-                $translationModelDE->setLabel($snippetDE);
-                $translationModelDE->setLocale($localeModelDE);
-                $elementModel->addTranslation($translationModelDE);
-
-                //Add english snippets
-                $translationModelEN = new \Shopware\Models\Config\ElementTranslation();
-                $snippetEN = Shopware()->Db()->fetchOne($sql, array( 'en_GB', $code));
-                $translationModelEN->setLabel($snippetEN);
-                $translationModelEN->setLocale($localeModelEN);
-                $elementModel->addTranslation($translationModelEN);
-
-                $this->Application()->Models()->persist($elementModel);
-            }
-        } catch (Exception $exception) {
-            Shopware()->Log()->Err("Can not create translation for configuration form." . $exception->getMessage());
-            throw new Exception("Can not create translation for configuration form." . $exception->getMessage());
         }
     }
 
@@ -537,7 +483,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $form->setElement('checkbox', 'paymillFastCheckout', array('label' => 'Save data for FastCheckout', 'value' => false));
             $form->setElement('checkbox', 'paymillLogging', array('label' => 'Activate logging', 'value' => false));
             $form->setElement('checkbox', 'paymillShowLabel', array('label' => 'Show Paymill-label during checkout', 'value' => false));
-            $this->Application()->Models()->persist($form);
             return true;
         } catch (Exception $exception){
             Shopware()->Log()->Err("There was an error creating the plugin configuration. " . $exception->getMessage());
@@ -591,30 +536,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     private function _updateConfigForm()
     {
-        $form = $this->Form();
-        $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => false));
-        $shopRepository = Shopware()->Models()->getRepository('\Shopware\Models\Shop\Locale');
-        $localeModelDE = $shopRepository->findOneBy(array('locale' => 'de_DE'));
-        $localeModelEN = $shopRepository->findOneBy(array('locale' => 'en_GB'));
-
-
-        if (is_null($elementModel = $form->getElement('paymillPreAuth'))) {
-            throw new Exception("PreAuth Option does not exist.");
+        //Add new Config Element
+        try{
+            $form = $this->Form();
+            $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => false));
+        } catch (Exception $exception) {
+            Shopware()->Log()->Err("Could not update config form with new fields: ". $exception->getMessage());
+            throw new Exception("Could not update config form with new fields: ". $exception->getMessage());
         }
-
-        $translationModelDE = new \Shopware\Models\Config\ElementTranslation();
-        $snippetDE = Shopware()->Db()->fetchOne("SELECT value FROM s_core_snippets s, s_core_locales l WHERE s.localeID = l.id AND l.locale = ? AND `name` = ?", array( 'de_DE', 'paymill_config_preauthorize_label'));
-        $translationModelDE->setLabel($snippetDE);
-        $translationModelDE->setLocale($localeModelDE);
-        $elementModel->addTranslation($translationModelDE);
-
-        //Add english snippets
-        $translationModelEN = new \Shopware\Models\Config\ElementTranslation();
-        $snippetEN = Shopware()->Db()->fetchOne("SELECT value FROM s_core_snippets s, s_core_locales l WHERE s.localeID = l.id AND l.locale = ? AND `name` = ?", array( 'en_GB', 'paymill_config_preauthorize_label'));
-        $translationModelEN->setLabel($snippetEN);
-        $translationModelEN->setLocale($localeModelEN);
-        $elementModel->addTranslation($translationModelEN);
-
-        $this->Application()->Models()->persist($form);
     }
 }
