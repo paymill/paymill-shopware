@@ -54,3 +54,40 @@ If you are interested in translating the display name of any payment method, you
 * Select the desired language from the list in the left frame
 * Enter your translation for the payment name
 * After you save your changes, you are good to go.
+
+##Release Notes
+
+###EN
+#####1.1.0
+- Lib has been updated
+- Checkout Form is now always being displayed, showing masked customer information if there is fast checkout data. This allows customers to change their credit card or bank details after the data has been saved.
+- Improved the CVC tool-tip in the checkout form
+- Customers will now get identified on their first usage of a PAYMILL payment mean and will now always use the same id, even if fast checkout is not enabled.
+- Added pre authorization as a plug-in option: If active, credit card transactions will be authorized during checkout and can be captured from a new tab in the order detail view
+- Added refund option from the detail tab. Any transaction booked after the update can be completely refunded at will
+- Implemented special handling for Maestro cards during the checkout: cards without CVC are now supported
+- Improved the translation routine to prepare the support for different languages in the frontend.
+- Added status updates for PAYMILL transactions.
+- Improved the log to allow search
+- Fixed a bug causing the debug option not to work
+- Added translations for the payment names.
+- Improved update routine: from this version onwards the Shopware update function will be completely functional with this module
+- Improved code readability
+
+###DE
+####1.1.0
+- Lib wurde aktualisiert
+- Zahlungsformular zeigt jetzt maskierte Zahlungsdaten sofern fast checkout daten vorhanden sind. Dadurch können Kunden ihre hinterlegten Daten aktualisieren
+- CVC Tooltip wurde verbessert
+- Kunden werden jetzt ab der ersten Nutzung einer PAYMILL Zahlungsart als Bestandkunden geführt und alle weiteren Transaktionen werden diesem Kunden zugeordnet
+- Autorisierungsoption wurde hinzugefügt: Sofern aktiv, werden Kraditkarten Transaktionen im Checkout autorisiert und können anschließend über eine Erweiterung der Bestellungsdetail-Ansicht belastet werden.
+- Gutschrift wurde implementiert: Alle nach Installation dieser Version durchgeführten Transaktionen können per Button in der Bestellungsdetail-Ansicht wieder gutgeschrieben werden
+- Sonderbehandlung für Maestro Karten im Zahlungsformular: Es werden nun auch Karten ohne CVC unterstützt
+- Verbesserte Übersetzungslogik implementiert. Dies ebnet den Weg für das hinzufügen verschiedener Sprachen in künftigen Updates
+- Statusaktualisierung für PAYMILL Bestellungen implementiert: Alle nach Installation dieser Version durchgeführten Bestellungen werden auf entsprechende Statuswerte gesetzt.
+- Log Ansicht wurde verbessert und bietet jetzt eine Suchfunktion
+- Fehler der dazu führen konnte, dass die Debugging Funktion nicht funktionierte wurde behoben
+- Übersetzung der Zahlungsarten wurde implementiert
+- Lastschrift wurde in ELV umbenannt. Diese Änderung ist vorerst nur für neue Installationen verfügbar.
+- Update routine wurde verbessert: Ab dieser Version wird die Shopware Update Routine vom Modul vollständig unterstützt
+- Lesbarkeit des Quellcodes wurde verbessert
