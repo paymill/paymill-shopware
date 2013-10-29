@@ -172,7 +172,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager 
                    "`devInfo` text COLLATE utf8_unicode_ci DEFAULT NULL," .
                    "PRIMARY KEY (`id`)" .
                    ") ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;".
-                   "DROP TABLE IF EXISTS `paymill_log`;";
+                   "DROP TABLE IF EXISTS `pigmbh_paymill_log`;";
 
             Shopware()->Db()->query($sql);
         } catch (Exception $exception) {
