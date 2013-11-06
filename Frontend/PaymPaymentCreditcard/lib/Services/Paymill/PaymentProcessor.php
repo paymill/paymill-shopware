@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * This class acts as an easy to use gateway for the paymill phph wrapper.
+ * @version    1.0.0
+ * @category   PayIntelligent
+ * @copyright  Copyright (c) 2013 PayIntelligent GmbH (http://payintelligent.de)
+ */
 class Services_Paymill_PaymentProcessor
 {
 
@@ -29,6 +35,7 @@ class Services_Paymill_PaymentProcessor
     private $_paymentId = null;
     //Source
     private $_source;
+    private $_errorCode;
 
     /**
      * Creates an object of the PaymentProcessor class.
@@ -50,7 +57,6 @@ class Services_Paymill_PaymentProcessor
         $this->setPrivateKey($privateKey);
         $this->setApiUrl($apiUrl);
         $this->setLibBase($libBase);
-        $this->_preAuthAmount = $params['preauthamount'];
         $this->_token = $params['token'];
         $this->_amount = $params['amount'];
         $this->_currency = $params['currency'];
@@ -102,6 +108,7 @@ class Services_Paymill_PaymentProcessor
                         'client' => $this->_clientId
                     )
             );
+
             $this->_validateResult($payment, 'Payment');
 
             $this->_paymentId = $payment['id'];
@@ -121,9 +128,10 @@ class Services_Paymill_PaymentProcessor
             'amount' => $this->_amount,
             'currency' => $this->_currency,
             'description' => $this->_description,
+            'preauthorization' => $this->_preauthId,
             'source' => $this->_source
         );
-        $this->_preauthId != null ? $parameter['preauthorization'] = $this->_preauthId : $parameter['payment'] = $this->_paymentId ;
+        $this->_preauthId != null ? $parameter['preauthorization'] = $this->_preauthId : $parameter['payment'] = $this->_paymentId;
         $transaction = $this->_transactionsObject->create($parameter);
         $this->_validateResult($transaction, 'Transaction');
 
@@ -212,14 +220,23 @@ class Services_Paymill_PaymentProcessor
 
         foreach ($arrayMask as $mask => $type) {
             if (is_null($parameter[$mask])) {
+                $validation = false;
                 $this->_log("The Parameter $mask is missing.", var_export($parameter, true));
-                $validation = false;
-            } elseif($type === 'string' && !is_string($parameter[$mask])) {
-                $this->_log("The Parameter $mask is not a string.", var_export($parameter, true));
-                $validation = false;
-            } elseif ($type === 'integer' && !is_integer($parameter[$mask])) {
-                $this->_log("The Parameter $mask is not an integer.", var_export($parameter, true));
-                $validation = false;
+            } else {
+                switch ($type) {
+                    case 'string':
+                        if (!is_string($parameter[$mask])) {
+                            $this->_log("The Parameter $mask is not a string.", var_export($parameter, true));
+                            $validation = false;
+                        }
+                        break;
+                    case 'integer':
+                        if (!is_integer($parameter[$mask])) {
+                            $this->_log("The Parameter $mask is not an integer.", var_export($parameter, true));
+                            $validation = false;
+                        }
+                        break;
+                }
             }
 
             if (!$validation) {
@@ -236,38 +253,56 @@ class Services_Paymill_PaymentProcessor
      * @param string $type
      * @return boolean
      */
-    private function _validateResult($transaction, $type)
+    private function _validateResult($paymillObject, $type)
     {
-        $this->_lastResponse = $transaction;
-        if (isset($transaction['data']['response_code']) && $transaction['data']['response_code'] !== 20000) {
-            $this->_log("An Error occured: " . $transaction['data']['response_code'], var_export($transaction, true));
-            throw new Exception("Invalid Result Exception: Invalid ResponseCode");
+        $this->_lastResponse = $paymillObject;
+        if (isset($paymillObject['data']['response_code']) && $paymillObject['data']['response_code'] !== 20000) {
+            $this->_log("An Error occured: " . $paymillObject['data']['response_code'], var_export($paymillObject, true));
+            if (empty($paymillObject['data']['response_code'])) {
+                $paymillObject['data']['response_code'] = 0;
+            }
+            
+            throw new Exception("Invalid Result Exception: Invalid ResponseCode", $paymillObject['data']['response_code']);
+        }
+        
+        if (isset($paymillObject['response_code']) && $paymillObject['response_code'] !== 20000) {
+            $this->_log("An Error occured: " . $paymillObject['response_code'], var_export($paymillObject, true));
+            if (empty($paymillObject['response_code'])) {
+                $paymillObject['response_code'] = 0;
+            }
+            
+            throw new Exception("Invalid Result Exception: Invalid ResponseCode", $paymillObject['response_code']);
         }
 
-        if (!isset($transaction['id']) && !isset($transaction['data']['id'])) {
-            $this->_log("No $type created.", var_export($transaction, true));
+        if (!isset($paymillObject['id']) && !isset($paymillObject['data']['id'])) {
+            $this->_log("No $type created.", var_export($paymillObject, true));
             throw new Exception("Invalid Result Exception: Invalid Id");
         } else {
-            $this->_log("$type created.", isset($transaction['id']) ? $transaction['id'] : $transaction['data']['id']);
+            $this->_log("$type created.", isset($paymillObject['id']) ? $paymillObject['id'] : $paymillObject['data']['id']);
         }
 
-        if($type != 'Transaction') {
-            return true;
-        } elseif (!array_key_exists('status', $transaction)) {
-            // another error occured
-            $this->_log("$type could not be issued.", var_export($transaction, true));
-            throw new Exception("Invalid Result Exception: $type could not be issued");
-        } elseif ($transaction['status'] == "closed") {
-            // transaction was successfully issued
-            return true;
-        } elseif ($transaction['status'] == "open") {
-            // transaction was issued but status is open for any reason
-            $this->_log("Status is open.", var_export($transaction, true));
-            throw new Exception("Invalid Result Exception: Invalid Orderstate");
+        // check result
+        if ($type == 'Transaction') {
+            if (is_array($paymillObject) && array_key_exists('status', $paymillObject)) {
+                if ($paymillObject['status'] == "closed") {
+                    // transaction was successfully issued
+                    return true;
+                } elseif ($paymillObject['status'] == "open") {
+                    // transaction was issued but status is open for any reason
+                    $this->_log("Status is open.", var_export($paymillObject, true));
+                    throw new Exception("Invalid Result Exception: Invalid Orderstate");
+                } else {
+                    // another error occured
+                    $this->_log("Unknown error." . var_export($paymillObject, true));
+                    throw new Exception("Invalid Result Exception: Unknown Error");
+                }
+            } else {
+                // another error occured
+                $this->_log("$type could not be issued.", var_export($paymillObject, true));
+                throw new Exception("Invalid Result Exception: $type could not be issued.");
+            }
         } else {
-            // another error occured
-            $this->_log("Unknown error." . var_export($transaction, true));
-            throw new Exception("Invalid Result Exception: Unknown Error");
+            return true;
         }
     }
 
@@ -292,20 +327,29 @@ class Services_Paymill_PaymentProcessor
             return false;
         }
 
+        $this->_log('Process payment with following data', print_r($this->toArray(), true));
+
         try {
+
             $this->_createClient();
+            $this->_log('Client API Response', print_r($this->_clientsObject->getResponse(), true));
             $this->_createPayment();
+            $this->_log('Payment API Response', print_r($this->_paymentsObject->getResponse(), true));
 
             //creates a transaction if there is no difference between the amount
             if ($this->_preAuthAmount === $this->_amount && $captureNow) {
                 $this->_createTransaction();
+                $this->_log('Transaction API Response', print_r($this->getLastResponse(), true));
             } else {
                 $this->_processPreAuthCapture($captureNow);
+                $this->_log('Pre-Auth API Response', print_r($this->getLastResponse(), true));
             }
+
             return true;
         } catch (Exception $ex) {
+            $this->_errorCode = $ex->getCode();
             // paymill wrapper threw an exception
-            $this->_log("Exception thrown from paymill wrapper.", $ex->getMessage());
+            $this->_log("Exception thrown from paymill wrapper. Code: " . $ex->getCode() . " Message: " . $ex->getMessage(), print_r($this->_transactionsObject->getResponse(), true));
             return false;
         }
     }
@@ -330,7 +374,6 @@ class Services_Paymill_PaymentProcessor
             'apiurl' => $this->_apiUrl,
             'libbase' => $this->_libBase,
             'privatekey' => $this->_privateKey,
-            'logger' => $this->_logger,
             'token' => $this->_token,
             'amount' => $this->_amount,
             'preauthamount' => $this->_preAuthAmount,
@@ -394,6 +437,11 @@ class Services_Paymill_PaymentProcessor
     public function getLastResponse()
     {
         return $this->_lastResponse;
+    }
+    
+    public function getErrorCode()
+    {
+        return $this->_errorCode;
     }
 
     /*     * **************************************************************************************************************
