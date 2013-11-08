@@ -337,6 +337,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                     $translationHelper->updateConfigConfigTranslations();
 
                 case '1.1.0':
+                case '1.1.1':
                     $updateSuccess = true;
                     break;
                 default:
