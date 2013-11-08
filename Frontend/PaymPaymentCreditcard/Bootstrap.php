@@ -439,7 +439,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         try{
             $this->createPayment(
                      array(
-                          'active' => 1,
+                          'active' => 0,
                           'name'     => 'paymillcc',
                           'action'   => 'payment_paymill',
                           'template' => 'paymill.tpl',
@@ -450,7 +450,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
                 $this->createPayment(
                      array(
-                          'active' => 1,
+                          'active' => 0,
                           'name'     => 'paymilldebit',
                           'action'   => 'payment_paymill',
                           'template' => 'paymill.tpl',

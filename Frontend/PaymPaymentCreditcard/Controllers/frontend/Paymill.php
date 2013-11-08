@@ -73,38 +73,33 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             'payment'          => $paymentShortcut
         );
 
-        try{
-            $paymentProcessor = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor($params, $processId);
+        $paymentProcessor = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_PaymentProcessor($params, $processId);
 
-            $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
-            $clientId = $modelHelper->getPaymillClientId($userId);
-            $paymentId = $modelHelper->getPaymillPaymentId($this->getPaymentShortName(), $userId);
+        $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
+        $clientId = $modelHelper->getPaymillClientId($userId);
+        $paymentId = $modelHelper->getPaymillPaymentId($this->getPaymentShortName(), $userId);
 
-            if ($clientId != "") {
-                $paymentProcessor->setClientId($clientId);
-            }
-
-            if ($paymentId != "") {
-                if ($paymillToken === "NoTokenRequired") {
-                    $paymentProcessor->setPaymentId($paymentId);
-                }
-            }
-
-            $preAuthOption = $swConfig->get("paymillPreAuth");
-            $isCCPayment = $paymentShortcut === 'cc';
-            $captureNow = !($preAuthOption && $isCCPayment);
-            $result = $paymentProcessor->processPayment($captureNow);
-        } catch(Exception $exception){
-            $result = false;
-            $errorCode = $exception->getCode();
+        if ($clientId != "") {
+            $paymentProcessor->setClientId($clientId);
         }
+
+        if ($paymentId != "") {
+            if ($paymillToken === "NoTokenRequired") {
+                $paymentProcessor->setPaymentId($paymentId);
+            }
+        }
+
+        $preAuthOption = $swConfig->get("paymillPreAuth");
+        $isCCPayment = $paymentShortcut === 'cc';
+        $captureNow = !($preAuthOption && $isCCPayment);
+        $result = $paymentProcessor->processPayment($captureNow);
 
         $loggingManager->log("Payment processing resulted in: " . ($result ? "Success" : "Failure"), print_r($result, true));
 
         // finish the order if payment was successfully processed
         if ($result !== true) {
             Shopware()->Session()->paymillTransactionToken = null;
-            Shopware()->Session()->pigmbhErrorMessage = $this->_getSnippet('PAYMILL_'.$errorCode);
+            Shopware()->Session()->pigmbhErrorMessage = $this->_getSnippet('PAYMILL_'.$paymentProcessor->getErrorCode());
             return $this->forward('error');
         }
 

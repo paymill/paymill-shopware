@@ -5,6 +5,7 @@
 - Added CHANGELOG.md
 - Implemented improved error feedback
 - Added Snippets to support the improved feedback
+- Changed initial state of the payment means to disabled.
 
 ##1.1.0
 - Lib has been updated
