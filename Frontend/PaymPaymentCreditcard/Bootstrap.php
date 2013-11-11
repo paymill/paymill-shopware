@@ -272,7 +272,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         }
 
         $installSuccess = parent::install();
-        Shopware()->Log()->Err("Installed PAYMILL plugin: ". var_export($installSuccess, true));
         return $installSuccess;
     }
 
@@ -350,7 +349,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             throw new Exception($exception->getMessage());
         }
 
-        Shopware()->Log()->Err("Updated PAYMILL plugin: ". var_export($updateSuccess, true));
         return $updateSuccess;
     }
 
