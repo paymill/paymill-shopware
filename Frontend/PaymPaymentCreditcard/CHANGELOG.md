@@ -5,7 +5,8 @@
 - Added CHANGELOG.md
 - Implemented improved error feedback
 - Added Snippets to support the improved feedback
-- Changed initial state of the payment means to disabled.
+- Fixed a bug causing the cvc tooltip to be english in all languages
+- Removed logging for successful installations and updates 
 
 ##1.1.0
 - Lib has been updated
