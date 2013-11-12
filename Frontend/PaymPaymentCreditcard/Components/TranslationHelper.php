@@ -24,6 +24,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelp
     private $_form = null;
 
     /**
+     * Creates an instance of the translation helper
      * @param $form
      */
     public function __construct($form){

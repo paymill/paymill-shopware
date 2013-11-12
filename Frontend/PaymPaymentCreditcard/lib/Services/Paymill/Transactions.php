@@ -18,6 +18,7 @@ class Services_Paymill_Transactions extends Services_Paymill_Base
      *
      * @param array $itemData
      *
+     * @throws Services_Paymill_Exception
      * @return array item updated or null
      */
     public function update(array $itemData = array())
@@ -28,9 +29,10 @@ class Services_Paymill_Transactions extends Services_Paymill_Base
     /**
      * General REST DELETE verb
      * Delete or inactivate/cancel resource item
-     * 
+     *
      * @param string $clientId
      *
+     * @throws Services_Paymill_Exception
      * @return array item deleted
      */
     public function delete($clientId = null)

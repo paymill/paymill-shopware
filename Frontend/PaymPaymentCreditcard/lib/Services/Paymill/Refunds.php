@@ -37,7 +37,10 @@ class Services_Paymill_Refunds extends Services_Paymill_Base
      * General REST DELETE verb
      * Delete or inactivate/cancel resource item
      *
-     * @param string $clientId
+     * @param null $identifier
+     *
+     * @throws Services_Paymill_Exception
+     * @internal param string $clientId
      *
      * @return array item deleted
      */
@@ -47,7 +50,12 @@ class Services_Paymill_Refunds extends Services_Paymill_Base
     }
 
     /**
-     * {@inheritDoc}
+     * * General REST PUT verb
+     * Update resource item
+     *
+     * @param array $itemData
+     * @return array|void
+     * @throws Services_Paymill_Exception
      */
     public function update(array $itemData = array())
     {

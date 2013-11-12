@@ -25,7 +25,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager 
     }
 
     /**
-     * @return null
+     * Returns the process id used for connected search
+     * @return string
      */
     public function getProcessId()
     {
@@ -33,7 +34,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager 
     }
 
     /**
-     * @param null $processId
+     * Sets the process id used for connected search
+     * @param string $processId
      */
     public function setProcessId($processId)
     {

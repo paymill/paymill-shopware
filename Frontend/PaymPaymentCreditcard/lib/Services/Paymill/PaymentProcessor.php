@@ -39,18 +39,12 @@ class Services_Paymill_PaymentProcessor
 
     /**
      * Creates an object of the PaymentProcessor class.
-     * @param String <b>$privateKey</b> Paymill-PrivateKey
-     * @param String <b>$apiUrl</b> Paymill-Api Url
-     * @param String <b>$libBase</b> Path to the lib Base (Can be null, Default Path will be used)
-     * @param array <b>$params</b>( <br />
-     *    <b>token</b>,               generated Token <br />
-     *    <b>amount</b>,              Basketamount <br />
-     *    <b>currency</b>,            Transaction currency <br />
-     *    <b>name</b>,                Customer name <br />
-     *    <b>email</b>,               Customer emailaddress <br />
-     *    <b>description</b>,         Description for transactions <br />
-     * ) <p color='red'><b>(If not set here, the use of setters is required for the class to work)</b></p>
-     * @param object $loggingClassInstance Instance of Object implementing the Services_Paymill_PaymentProcessorInterface. If not set, there will be no logging.
+     *
+     * @param String                            $privateKey
+     * @param String                            $apiUrl
+     * @param String                            $libBase
+     * @param array                             $params
+     * @param Services_Paymill_LoggingInterface $loggingClassInstance Instance of Object implementing the Services_Paymill_PaymentProcessorInterface. If not set, there will be no logging.
      */
     public function __construct($privateKey = null, $apiUrl = null, $libBase = null, $params = null, Services_Paymill_LoggingInterface $loggingClassInstance = null)
     {
@@ -69,9 +63,9 @@ class Services_Paymill_PaymentProcessor
     /**
      * Creates a Paymill-Client with the given Data
      *
-     * @param array $params
+     * @internal param array $params
      * @return boolean
-     */
+*/
     private function _createClient()
     {
         if (isset($this->_clientId)) {
@@ -94,9 +88,9 @@ class Services_Paymill_PaymentProcessor
     /**
      * Creates a Paymill-Payment with the given Data
      *
-     * @param array $params
+     * @internal param array $params
      * @return boolean
-     */
+*/
     private function _createPayment()
     {
         if (isset($this->_paymentId)) {
@@ -119,9 +113,9 @@ class Services_Paymill_PaymentProcessor
     /**
      * Creates a Paymill-Transaction with the given Data
      *
-     * @param array $params
+     * @internal param array $params
      * @return boolean
-     */
+*/
     private function _createTransaction()
     {
         $parameter = array(
@@ -142,9 +136,9 @@ class Services_Paymill_PaymentProcessor
     /**
      * Creates a Paymill-Transaction with the given Data
      *
-     * @param array $params
+     * @internal param array $params
      * @return boolean
-     */
+*/
     private function _createPreauthorization()
     {
         $preAuth = $this->_preauthObject->create(
@@ -192,9 +186,9 @@ class Services_Paymill_PaymentProcessor
 
     /**
      * Validates the array passed as an argument to be processPayment() compliant
-     * @param mixed $parameter
+     * @internal param mixed $parameter
      * @return boolean
-     */
+*/
     private function _validateParameter()
     {
         if ($this->_preAuthAmount == null) {
@@ -249,10 +243,13 @@ class Services_Paymill_PaymentProcessor
     /**
      * Validates the created Paymill-Objects
      *
-     * @param array $transaction
+     * @param        $paymillObject
      * @param string $type
+     *
+     * @throws Exception
+     * @internal param array $transaction
      * @return boolean
-     */
+*/
     private function _validateResult($paymillObject, $type)
     {
         $this->_lastResponse = $paymillObject;
@@ -306,6 +303,11 @@ class Services_Paymill_PaymentProcessor
         }
     }
 
+    /**
+     * @param $captureNow
+     *
+     * @return bool
+     */
     private function _processPreAuthCapture($captureNow)
     {
         $this->_createPreauthorization();
@@ -318,8 +320,9 @@ class Services_Paymill_PaymentProcessor
     /**
      * Executes the Payment Process
      *
+     * @param bool $captureNow
      * @return boolean
-     */
+*/
     final public function processPayment($captureNow = true)
     {
         $this->_initiatePhpWrapperClasses();
@@ -354,6 +357,9 @@ class Services_Paymill_PaymentProcessor
         }
     }
 
+    /**
+     * @return bool
+     */
     final public function capture()
     {
         $this->_initiatePhpWrapperClasses();
@@ -550,8 +556,8 @@ class Services_Paymill_PaymentProcessor
     /**
      * Sets up the Logger Object.
      * <b>The Logger object can be any class implementing the Services_Paymill_PaymentProcessorInterface.</b>
-     * @param any $logger
-     */
+     * @param Services_Paymill_LoggingInterface $logger
+*/
     public function setLogger(Services_Paymill_LoggingInterface $logger = null)
     {
         $this->_logger = $logger;

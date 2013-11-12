@@ -30,7 +30,7 @@
 
 ##1.0.5
 - Added translation of payment names as a paragraph to the readme file
-- Added Translation of payment method displaynames section to the readme file
+- Added Translation of payment method display names section to the readme file
 
 ##1.0.4
 - Fixed a bug causing crashes if no shop with english language is available

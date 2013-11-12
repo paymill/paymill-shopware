@@ -205,6 +205,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
+     * Eventhandler for the update of the client with new data on email change
      * @param $arguments
      */
     public function onUpdateCustomerEmail($arguments)
