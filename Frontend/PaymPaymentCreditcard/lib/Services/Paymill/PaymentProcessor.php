@@ -358,6 +358,7 @@ class Services_Paymill_PaymentProcessor
     }
 
     /**
+     * Executes capture
      * @return bool
      */
     final public function capture()
@@ -444,7 +445,11 @@ class Services_Paymill_PaymentProcessor
     {
         return $this->_lastResponse;
     }
-    
+
+    /**
+     * Returns the error code
+     * @return mixed
+     */
     public function getErrorCode()
     {
         return $this->_errorCode;
