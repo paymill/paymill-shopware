@@ -1,4 +1,7 @@
 #Release Notes
+##1.1.2
+- Fixed a bug causing crashes during checkout
+
 ##1.1.1
 - Updated Lib
 - Updated README.md files
