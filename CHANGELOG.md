@@ -1,4 +1,7 @@
 #Release Notes
+##1.1.2
+- Fixed a bug causing crashes during checkout
+
 ##1.1.1
 - Updated Lib
 - Updated README.md files
@@ -6,7 +9,7 @@
 - Implemented improved error feedback
 - Added Snippets to support the improved feedback
 - Fixed a bug causing the cvc tooltip to be english in all languages
-- Removed logging for successful installations and updates
+- Removed logging for successful installations and updates 
 
 ##1.1.0
 - Lib has been updated
@@ -30,7 +33,7 @@
 
 ##1.0.5
 - Added translation of payment names as a paragraph to the readme file
-- Added Translation of payment method display names section to the readme file
+- Added Translation of payment method displaynames section to the readme file
 
 ##1.0.4
 - Fixed a bug causing crashes if no shop with english language is available
