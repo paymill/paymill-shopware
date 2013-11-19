@@ -339,6 +339,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 case '1.1.0':
                     $this->_addTranslationSnippets();
                 case '1.1.1':
+                case '1.1.2':
                     $updateSuccess = true;
                     break;
                 default:

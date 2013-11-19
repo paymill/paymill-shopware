@@ -304,6 +304,7 @@ class Services_Paymill_PaymentProcessor
     }
 
     /**
+     * Executes the Capture Process
      * @param $captureNow
      *
      * @return bool
