@@ -13,20 +13,6 @@ class Services_Paymill_Transactions extends Services_Paymill_Base
     protected $_serviceResource = 'transactions/';
 
     /**
-     * General REST PUT verb
-     * Update resource item
-     *
-     * @param array $itemData
-     *
-     * @throws Services_Paymill_Exception
-     * @return array item updated or null
-     */
-    public function update(array $itemData = array())
-    {
-        throw new Services_Paymill_Exception( __CLASS__ . " does not support " . __METHOD__, "404");
-    }
-
-    /**
      * General REST DELETE verb
      * Delete or inactivate/cancel resource item
      *
