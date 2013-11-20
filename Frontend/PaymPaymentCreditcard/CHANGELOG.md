@@ -1,4 +1,7 @@
 #Release Notes
+##1.2.0
+- Added additional validation to the fast checkout process
+
 ##1.1.2
 - Fixed a bug causing crashes during checkout
 

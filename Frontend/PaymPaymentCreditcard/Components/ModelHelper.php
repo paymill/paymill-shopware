@@ -190,7 +190,15 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
         }
 
         try {
+            require_once dirname(__FILE__) . '/../lib/Services/Paymill/Payments.php';
+            $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+
             $paymentId = Shopware()->Db()->fetchOne($sql, array($userId));
+            $payment = new Services_Paymill_Payments(trim($swConfig->get("privateKey")), 'https://api.paymill.com/v2/');
+            $paymentData = $payment->getOne($paymentId);
+            if(!isset($paymentData['id'])){
+                $paymentId = "";
+            }
         } catch (Exception $exception) {
             $paymentId = "";
         }
