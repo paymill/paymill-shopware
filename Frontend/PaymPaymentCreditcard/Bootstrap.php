@@ -123,11 +123,16 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         if ($paymentIdElv != "") {
             $elvPayment = new Services_Paymill_Payments($privateKey, $apiUrl);
             $paymentObject = $elvPayment->getOne($paymentIdElv);
+            $view->paymillIban = $paymentObject['iban'];
+            $view->paymillBic = $paymentObject['bic'];
             $view->paymillAccountNumber = $paymentObject['account'];
             $view->paymillBankCode = $paymentObject['code'];
         } else {
+            $view->paymillIban = "";
+            $view->paymillBic = "";
             $view->paymillAccountNumber = "";
             $view->paymillBankCode = "";
+
         }
 
 
@@ -146,6 +151,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             Shopware()->Session()->paymillTotalAmount = $totalAmount;
             $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
             $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
+            $arguments->getSubject()->View()->Template()->assign("sepaActive", $swConfig->get("paymillShowLabel"));
+
         } catch (Exception $exception){
             Shopware()->Session()->paymillTotalAmount = $totalAmount;
         }

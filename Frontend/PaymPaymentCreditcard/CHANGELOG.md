@@ -1,6 +1,7 @@
 #Release Notes
 ##1.2.0
 - Added additional validation to the fast checkout process
+- Implemented optional SEPA direct debit form. Only payments from germany are supported
 
 ##1.1.2
 - Fixed a bug causing crashes during checkout

@@ -11,6 +11,10 @@
         console.log("[" + getPayment() + "] " + message);
         {/if}
     }
+    function isSepaActive(){
+        sepaActive = "{config name=paymillShowLabel}";
+        return sepaActive == 1;
+    }
     function getPayment()
     {
         return "{$sPayment.name}";
@@ -37,13 +41,24 @@
         }
 
         if(getPayment() === 'paymilldebit'){
-            var accountNumber = $('#paymill_accountnumber').val();
-            var bankCode = $('#paymill_banknumber').val();
-            if((accountNumber === "" || bankCode === "") ||
-            ("{$paymillAccountNumber}" !== accountNumber) ||
-            ("{$paymillBankCode}" !== bankCode)){
-                debug("Direct Debit information found. New Information will be used. Token should be getting generated.");
-                return false;
+            if(isSepaActive()){
+                var iban = $('#paymill_iban').val();
+                var bic = $('#paymill_bic').val();
+                if((iban === "" || bic === "") ||
+                   ("{$paymillIban}" !== iban) ||
+                   ("{$paymillBic}" !== bic)){
+                    debug("Direct Debit information found. New Information will be used. Token should be getting generated.");
+                    return false;
+                }
+            } else {
+                var accountNumber = $('#paymill_accountnumber').val();
+                var bankCode = $('#paymill_banknumber').val();
+                if((accountNumber === "" || bankCode === "") ||
+                ("{$paymillAccountNumber}" !== accountNumber) ||
+                ("{$paymillBankCode}" !== bankCode)){
+                    debug("Direct Debit information found. New Information will be used. Token should be getting generated.");
+                    return false;
+                }
             }
         }
         debug("Fast Checkout Data found and not altered. Will process with given data. Validation will be skipped.");
@@ -90,14 +105,26 @@
                 errorsElv.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_holder_elv}Please enter the account name.{/s}</li>");
                 result = false;
             }
-            if (!paymill.validateAccountNumber($('#paymill_accountnumber').val())) {
-                errorsElv.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_number_elv}Please enter a valid account number{/s}</li>");
-                result = false;
-            }
+            if(isSepaActive()){
+                if ($('#paymill_iban').val() === '') {
+                    errorsElv.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_iban}Please enter a valid iban{/s}</li>");
+                    result = false;
+                }
 
-            if (!paymill.validateBankCode($('#paymill_banknumber').val())) {
-                errorsElv.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_bankcode}Please a valid bankcode.{/s}</li>");
-                result = false;
+                if ($('#paymill_bic').val() === '') {
+                    errorsElv.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_bic}Please a valid bic.{/s}</li>");
+                    result = false;
+                }
+            } else {
+                if (!paymill.validateAccountNumber($('#paymill_accountnumber').val())) {
+                    errorsElv.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_number_elv}Please enter a valid account number{/s}</li>");
+                    result = false;
+                }
+
+                if (!paymill.validateBankCode($('#paymill_banknumber').val())) {
+                    errorsElv.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_bankcode}Please a valid bankcode.{/s}</li>");
+                    result = false;
+                }
             }
             if (!result) {
                 errorsElv.parent().show();
@@ -128,7 +155,7 @@
             }
         });
 
-        $("#basketButton").click(function (event)
+        $("#basketButton").click(function()
         {
             if ($('#' + paymill_form_id).attr("checked") === "checked") {
                 if ($("input[type='checkbox'][name='sAGB']").length) {
@@ -172,11 +199,19 @@
                                 }
                             }
                             if (getPayment() === 'paymilldebit') { //If ELV
-                                paymill.createToken({
-                                    number:        $('#paymill_accountnumber').val(),
-                                    bank:          $('#paymill_banknumber').val(),
-                                    accountholder: $('#paymill_accountholder').val()
-                                }, PaymillResponseHandler);
+                                if(isSepaActive()){
+                                    paymill.createToken({
+                                        iban:        $('#paymill_iban').val(),
+                                        bic:          $('#paymill_bic').val(),
+                                        accountholder: $('#paymill_accountholder').val()
+                                    }, PaymillResponseHandler);
+                                } else {
+                                    paymill.createToken({
+                                        number:        $('#paymill_accountnumber').val(),
+                                        bank:          $('#paymill_banknumber').val(),
+                                        accountholder: $('#paymill_accountholder').val()
+                                    }, PaymillResponseHandler);
+                                }
                             }
                         } catch (e) {
                             alert("Ein Fehler ist aufgetreten: " + e);
@@ -257,20 +292,33 @@
 
         {if $payment_mean.name == 'paymilldebit' }
             <p class = "none" >
-                <label >{s namespace=Paymill name=paymill_frontend_form_holder_elv}Account Holder *{/s}</label >
+                <label for = "paymill_accountholder">{s namespace=Paymill name=paymill_frontend_form_holder_elv}Account Holder *{/s}</label >
                 <input id = "paymill_accountholder" type = "text" size = "20" class = "text"
                        value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
             </p >
-            <p class = "none" >
-                <label >{s namespace=Paymill name=paymill_frontend_form_number_elv}Account Number *{/s}</label >
-                <input id = "paymill_accountnumber" type = "text" size = "4" class = "text"
-                       value = "{$paymillAccountNumber}" />
-            </p >
-            <p class = "none" >
-                <label >{s namespace=Paymill name=paymill_frontend_form_bankcode}Bankcode *{/s}</label >
-                <input id = "paymill_banknumber" type = "text" size = "4" class = "text"
-                       value = "{$paymillBankCode}" />
-            </p >
+            {if {config name=paymillShowLabel}}
+                <p class = "none" >
+                    <label for ="paymill_iban">{s namespace=Paymill name=paymill_frontend_form_iban}IBAN *{/s}</label >
+                    <input id = "paymill_iban" type = "text" size = "4" class = "text"
+                           value = "{$paymillIban}" />
+                </p >
+                <p class = "none" >
+                    <label for = "paymill_bic">{s namespace=Paymill name=paymill_frontend_form_bic}BIC *{/s}</label >
+                    <input id = "paymill_bic" type = "text" size = "4" class = "text"
+                           value = "{$paymillBic}" />
+                </p >
+            {else}
+                <p class = "none" >
+                    <label for = "paymill_accountnumber">{s namespace=Paymill name=paymill_frontend_form_number_elv}Account Number *{/s}</label >
+                    <input id = "paymill_accountnumber" type = "text" size = "4" class = "text"
+                           value = "{$paymillAccountNumber}" />
+                </p >
+                <p class = "none" >
+                    <label for = "paymill_banknumber">{s namespace=Paymill name=paymill_frontend_form_bankcode}Bankcode *{/s}</label >
+                    <input id = "paymill_banknumber" type = "text" size = "4" class = "text"
+                           value = "{$paymillBankCode}" />
+                </p >
+            {/if}
         {/if}
 
         {if ($payment_mean.name == 'paymilldebit') || ($payment_mean.name == 'paymillcc')}
