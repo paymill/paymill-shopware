@@ -142,9 +142,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $basket = Shopware()->Session()->sOrderVariables['sBasket'];
         $totalAmount = (round((float)$basket['sAmount'] * 100, 2));
 
-        Shopware()->Session()->paymillTotalAmount = $totalAmount;
-        $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
-        $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
+        try{
+            Shopware()->Session()->paymillTotalAmount = $totalAmount;
+            $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
+            $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
+        } catch (Exception $exception){
+            Shopware()->Session()->paymillTotalAmount = $totalAmount;
+        }
+
 
         if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
             return;
