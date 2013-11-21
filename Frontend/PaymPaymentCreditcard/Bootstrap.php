@@ -151,7 +151,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             Shopware()->Session()->paymillTotalAmount = $totalAmount;
             $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
             $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
-            $arguments->getSubject()->View()->Template()->assign("sepaActive", $swConfig->get("paymillShowLabel"));
+            $arguments->getSubject()->View()->Template()->assign("sepaActive", $swConfig->get("paymillShowLabel")); //@todo Change this to the sepa option after the config form has been remade for task PSW-19
 
         } catch (Exception $exception){
             Shopware()->Session()->paymillTotalAmount = $totalAmount;
@@ -307,6 +307,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function uninstall()
     {
+        $configHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper();
+        $configHelper->persist();
         return parent::uninstall();
     }
 
@@ -490,13 +492,15 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
         try{
             $form = $this->Form();
-            $form->setElement('text', 'publicKey', array('label' => 'Public Key', 'required' => true));
-            $form->setElement('text', 'privateKey', array('label' => 'Private Key', 'required' => true));
-            $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => false));
-            $form->setElement('checkbox', 'paymillDebugging', array('label' => 'Activate debugging', 'value' => false));
-            $form->setElement('checkbox', 'paymillFastCheckout', array('label' => 'Save data for FastCheckout', 'value' => false));
-            $form->setElement('checkbox', 'paymillLogging', array('label' => 'Activate logging', 'value' => false));
-            $form->setElement('checkbox', 'paymillShowLabel', array('label' => 'Show Paymill-label during checkout', 'value' => false));
+            $configHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper();
+            $data = $configHelper->loadData();
+            $form->setElement('text', 'publicKey', array('label' => 'Public Key', 'required' => true, 'value' => $data['publicKey']));
+            $form->setElement('text', 'privateKey', array('label' => 'Private Key', 'required' => true, 'value' => $data['privateKey']));
+            $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => $data['paymillPreAuth']));
+            $form->setElement('checkbox', 'paymillDebugging', array('label' => 'Activate debugging', 'value' => $data['paymillDebugging']));
+            $form->setElement('checkbox', 'paymillFastCheckout', array('label' => 'Save data for FastCheckout', 'value' => $data['paymillFastCheckout']));
+            $form->setElement('checkbox', 'paymillLogging', array('label' => 'Activate logging', 'value' => $data['paymillLogging']));
+            $form->setElement('checkbox', 'paymillSepaActive', array('label' => 'Show new SEPA Form', 'value' => $data['paymillSepaActive']));
         } catch (Exception $exception){
             Shopware()->Log()->Err("There was an error creating the plugin configuration. " . $exception->getMessage());
             throw new Exception("There was an error creating the plugin configuration. " . $exception->getMessage());
