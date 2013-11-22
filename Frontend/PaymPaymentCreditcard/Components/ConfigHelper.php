@@ -70,7 +70,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper
         $this->_createConfigTable();
         $sql = "Select * FROM paymill_config_data WHERE id = 1;";
         $result = Shopware()->Db()->fetchAll($sql);
-        Shopware()->Log()->Err(var_export($result, true));
         return $result[0];
     }
 }

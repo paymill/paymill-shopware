@@ -158,13 +158,4 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager 
 
         return $swConfig->get('paymillLogging');
     }
-
-    /**
-     * Updates the log table for versions below 1.1.0
-     * @throws Exception
-     */
-    public function updateFromLegacyVersion()
-    {
-        throw new Exception(__CLASS__." ".__FUNCTION__." not implemented.");
-    }
 }

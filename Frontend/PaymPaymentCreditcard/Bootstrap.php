@@ -473,11 +473,11 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $data = $configHelper->loadData();
             $form->setElement('text', 'publicKey', array('label' => 'Public Key', 'required' => true, 'value' => $data['publicKey']));
             $form->setElement('text', 'privateKey', array('label' => 'Private Key', 'required' => true, 'value' => $data['privateKey']));
-            $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => $data['paymillPreAuth']));
-            $form->setElement('checkbox', 'paymillDebugging', array('label' => 'Activate debugging', 'value' => $data['paymillDebugging']));
-            $form->setElement('checkbox', 'paymillFastCheckout', array('label' => 'Save data for FastCheckout', 'value' => $data['paymillFastCheckout']));
-            $form->setElement('checkbox', 'paymillLogging', array('label' => 'Activate logging', 'value' => $data['paymillLogging']));
-            $form->setElement('checkbox', 'paymillSepaActive', array('label' => 'Show new SEPA Form', 'value' => $data['paymillSepaActive']));
+            $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => $data['paymillPreAuth'] == 1));
+            $form->setElement('checkbox', 'paymillDebugging', array('label' => 'Activate debugging', 'value' => $data['paymillDebugging'] == 1));
+            $form->setElement('checkbox', 'paymillFastCheckout', array('label' => 'Save data for FastCheckout', 'value' => $data['paymillFastCheckout'] == 1));
+            $form->setElement('checkbox', 'paymillLogging', array('label' => 'Activate logging', 'value' => $data['paymillLogging'] == 1));
+            $form->setElement('checkbox', 'paymillSepaActive', array('label' => 'Show new SEPA Form', 'value' => $data['paymillSepaActive'] == 1));
         } catch (Exception $exception){
             Shopware()->Log()->Err("There was an error creating the plugin configuration. " . $exception->getMessage());
             throw new Exception("There was an error creating the plugin configuration. " . $exception->getMessage());
