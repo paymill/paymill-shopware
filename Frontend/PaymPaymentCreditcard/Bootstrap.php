@@ -205,14 +205,24 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     public function getInfo()
     {
         return array('version'   => $this->getVersion(),
-                     'autor'     => 'PayIntelligent GmbH',
+                     'author'     => 'PayIntelligent GmbH',
                      'source'    => $this->getSource(),
                      'supplier'  => 'PAYMILL GmbH',
                      'support'   => 'support@paymill.com',
                      'link'      => 'https://www.paymill.com',
                      'copyright' => 'Copyright (c) 2013, PayIntelligent GmbH',
                      'label'     => 'Paymill',
-                     'description' => ''
+                     'description' => '<h2>Payment plugin for Shopware Community Edition Version 4.0.0 - 4.1.3</h2>'
+                                      .'<ul>'
+                                      .'<li style="list-style: inherit;">PCI DSS compatibility</li>'
+                                      .'<li style="list-style: inherit;">Payment means: Credit Card (Visa, Visa Electron, Mastercard, Maestro, Diners, Discover, JCB, AMEX, China Union Pay), Direct Debit (ELV)</li>'
+                                      .'<li style="list-style: inherit;">Refunds can be created from an additional tab in the order detail view</li>'
+                                      .'<li style="list-style: inherit;">Optional configuration for authorization and manual capture with credit card payments</li>'
+                                      .'<li style="list-style: inherit;">Optional fast checkout configuration allowing your customers not to enter their payment detail over and over during checkout</li>'
+                                      .'<li style="list-style: inherit;">Improved payment form with visual feedback for your customers</li>'
+                                      .'<li style="list-style: inherit;">Supported Languages: German, English</li>'
+                                      .'<li style="list-style: inherit;">Backend Log with custom View accessible from your shop backend</li>'
+                                      .'</ul>'
         );
     }
 
@@ -322,50 +332,17 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function update($oldVersion)
     {
-        $updateSuccess = false;
-
         try{
             switch($oldVersion) {
-                case '1.0.0':
-                    // update not possible
-                case '1.0.1':
-                    // update not possible
-                    Shopware()->Log()->Err('Your plugin version is no longer supported. Please contact support for further information');
-                    throw new Exception('Your plugin version is no longer supported. Please contact support for further information');
-                case '1.0.2':
-                case '1.0.3':
-                case '1.0.4':
-                case '1.0.5':
-                case '1.0.6':
-                    $loggingHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
-                    $loggingHelper->updateFromLegacyVersion();
-
-                    Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
-                    $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
-                    $modelHelper->updateFromLegacyVersion();
-
-                    $this->_createEvents();
-                    $this->_addTranslationSnippets();
-                    $this->_updateConfigForm();
-                    $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper($this->Form());
-                    $translationHelper->updateConfigConfigTranslations();
-
-                case '1.1.0':
-                    $this->_addTranslationSnippets();
-                case '1.1.1':
-                case '1.1.2':
-                    $updateSuccess = true;
-                    break;
                 default:
-                    Shopware()->Log()->Err('Unknown version, cannot update');
-                    throw new Exception('Unknown version, cannot update');
+                    $updateSuccess = $this->uninstall();
+                    $updateSuccess = $updateSuccess ? $this->install(): false;
+                    return $updateSuccess;
             }
         } catch (Exception $exception) {
             Shopware()->Log()->Err($exception->getMessage());
             throw new Exception($exception->getMessage());
         }
-
-        return $updateSuccess;
     }
 
     /**
@@ -544,22 +521,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         } catch (Exception $exception) {
             Shopware()->Log()->Err("can not create menu entry." . $exception->getMessage());
             throw new Exception("can not create menu entry." . $exception->getMessage());
-        }
-    }
-
-    /**
-     * Updates the config form
-     * @throws Exception
-     */
-    private function _updateConfigForm()
-    {
-        //Add new Config Element
-        try{
-            $form = $this->Form();
-            $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => false));
-        } catch (Exception $exception) {
-            Shopware()->Log()->Err("Could not update config form with new fields: ". $exception->getMessage());
-            throw new Exception("Could not update config form with new fields: ". $exception->getMessage());
         }
     }
 }

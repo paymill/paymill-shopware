@@ -32,38 +32,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelp
     }
 
     /**
-     * Updates the config form
-     * @throws Exception
-     */
-    public function updateConfigConfigTranslations()
-    {
-        $form = $this->_form;
-        $translationStore = $this->_getSnippets();
-
-        //Map translations to elements
-        foreach($this->_configTranslationMapping as $elementName => $translationName){
-            $elementModel = $form->getElement($elementName);
-            if($elementModel === null) {
-                //Continue with the next element if there is no element available
-                continue;
-            }
-
-            //Alter existing translations
-            if($elementModel->hasTranslations()){
-                $this->_updateConfigTranslations($elementName, $translationStore, $elementModel);
-
-            } else {
-                //Add new translations
-                foreach($translationStore as $language => $translationMap){
-                    $shopRepository = Shopware()->Models()->getRepository('\Shopware\Models\Shop\Locale');
-                    $localeModel = $shopRepository->findOneBy(array( 'locale' => $language ));
-                    $this->_addNewConfigTranslation($localeModel, $translationMap[$elementName], $elementModel);
-                }
-            }
-        }
-    }
-
-    /**
      * Creates the Translation for the plugin configuration
      *
      * @throws Exception
@@ -108,35 +76,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelp
         $translationModel->setLabel($translationSnippet);
         $translationModel->setLocale($localeModel);
         $elementModel->addTranslation($translationModel);
-    }
-
-    /**
-     * Handles the update of translations
-     * @param string $elementName
-     * @param array $translationStore
-     * @param \Shopware\Models\Config\Element $elementModel
-     */
-    private function _updateConfigTranslations($elementName, $translationStore, $elementModel){
-        $translations = $elementModel->getTranslations();
-        $hasTranslations = array();
-        do{
-            $localeName = $translations->current()->getLocale()->getLocale();
-            $hasTranslations[$localeName] = $translations->key();
-        }while($translations->next());
-
-        //Add new translations
-        foreach($translationStore as $language => $translationMap){
-            if(isset($hasTranslations[$language])){
-                $elementModel->getTranslations()
-                             ->get($hasTranslations[$language])
-                             ->setLabel($translationMap[$elementName]);
-
-            } else {
-                $shopRepository = Shopware()->Models()->getRepository('\Shopware\Models\Shop\Locale');
-                $localeModel = $shopRepository->findOneBy(array( 'locale' => $language ));
-                $this->_addNewConfigTranslation($localeModel, $translationMap[$elementName], $elementModel);
-            }
-        }
     }
 
     /**

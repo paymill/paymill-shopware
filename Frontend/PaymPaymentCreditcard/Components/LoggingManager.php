@@ -59,7 +59,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager 
                    "`merchantInfo` varchar(250) COLLATE utf8_unicode_ci NOT NULL," .
                    "`devInfo` text COLLATE utf8_unicode_ci DEFAULT NULL," .
                    "PRIMARY KEY (`id`)" .
-                   ") ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1";
+                   ") ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;".
+                   "DROP TABLE IF EXISTS `pigmbh_paymill_log`;";
 
             Shopware()->Db()->query($sql);
         } catch (Exception $exception) {
@@ -164,21 +165,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager 
      */
     public function updateFromLegacyVersion()
     {
-        try {
-            $sql = "CREATE TABLE IF NOT EXISTS `paymill_log` (" .
-                   "`id` int(11) NOT NULL AUTO_INCREMENT," .
-                   "`processId` varchar(250) NOT NULL," .
-                   "`entryDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP," .
-                   "`version` varchar(25) NOT NULL COLLATE utf8_unicode_ci," .
-                   "`merchantInfo` varchar(250) COLLATE utf8_unicode_ci NOT NULL," .
-                   "`devInfo` text COLLATE utf8_unicode_ci DEFAULT NULL," .
-                   "PRIMARY KEY (`id`)" .
-                   ") ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;".
-                   "DROP TABLE IF EXISTS `pigmbh_paymill_log`;";
-
-            Shopware()->Db()->query($sql);
-        } catch (Exception $exception) {
-            throw new Exception("Cannot add column processId to log table. ".$exception->getMessage());
-        }
+        throw new Exception(__CLASS__." ".__FUNCTION__." not implemented.");
     }
 }

@@ -24,6 +24,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
     {
         try {
             $models = Shopware()->Models();
+            Shopware()->Db()->query("DROP TABLE IF EXISTS `paymill_fastCheckout`;");
 
             //Add Order Properties
             $models->addAttribute('s_order_attributes', 'paymill', 'pre_authorization', 'varchar(255)');
@@ -42,43 +43,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             Shopware()->Log()->Err("Cannot edit shopware models. ". $exception->getMessage());
             throw new Exception("Cannot edit shopware models. ". $exception->getMessage());
         }
-    }
-
-    /**
-     * Executes all update routines for the given version number
-     *
-     * @throws Exception
-     * @return void
-     */
-    public function updateFromLegacyVersion(){
-        //Backup database tables
-        $sql = "SELECT * FROM paymill_fastCheckout";
-        try{
-            $tableDump = Shopware()->Db()->fetchAll($sql);
-
-            foreach($tableDump as $rows => $entries){
-                $userId = $entries['userId'];
-                $clientId = $entries['clientId'];
-                $ccPaymentId = $entries['ccPaymentId'];
-                $elvPaymentId = $entries['elvPaymentId'];
-
-                if(isset($clientId)){
-                    $this->setPaymillClientId($userId,$clientId);
-                }
-
-                if(isset($ccPaymentId)){
-                    $this->setPaymillPaymentId("cc",$userId, $ccPaymentId);
-                }
-
-                if(isset($elvPaymentId)){
-                    $this->setPaymillPaymentId("elv",$userId, $ccPaymentId);
-                }
-
-            }
-        } catch(Exception $exception){
-            throw new Exception("Cannot update fast checkout information." . $exception->getMessage());
-        }
-
     }
 
     /**
