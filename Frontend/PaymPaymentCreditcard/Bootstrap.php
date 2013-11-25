@@ -281,13 +281,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         try {
             Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager::install();
             Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
-            $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper($this->Form());
             $this->createPaymentMeans();
             $this->_createForm();
             $this->_addTranslationSnippets();
             $this->_createEvents();
             $this->_applyBackendViewModifications();
             $this->_translatePaymentNames();
+            $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper($this->Form());
             $translationHelper->createPluginConfigTranslation();
         } catch(Exception $exception) {
             $this->uninstall();
@@ -471,6 +471,15 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $form = $this->Form();
             $configHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper();
             $data = $configHelper->loadData();
+
+            $sql = "DELETE FROM s_core_config_element_translations
+               WHERE element_id IN (SELECT s_core_config_elements.id FROM s_core_config_elements
+               WHERE s_core_config_elements.form_id = (SELECT s_core_config_forms.id FROM s_core_config_forms
+               WHERE s_core_config_forms.plugin_id = ?));
+               DELETE FROM s_core_config_elements
+               WHERE form_id = (SELECT id FROM s_core_config_forms WHERE plugin_id = ?);";
+            Shopware()->Db()->query($sql, array($this->getId(), $this->getId()));
+
             $form->setElement('text', 'publicKey', array('label' => 'Public Key', 'required' => true, 'value' => $data['publicKey']));
             $form->setElement('text', 'privateKey', array('label' => 'Private Key', 'required' => true, 'value' => $data['privateKey']));
             $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => $data['paymillPreAuth'] == 1));

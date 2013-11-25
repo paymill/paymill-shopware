@@ -18,7 +18,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelp
         'paymillDebugging'    => 'paymill_config_debugging_label',
         'paymillFastCheckout' => 'paymill_config_fast_checkout_label',
         'paymillLogging'      => 'paymill_config_logging_label',
-        'paymillShowLabel'    => 'paymill_config_show_label_label'
+        'paymillSepaActive'   => 'paymill_config_sepa_active_label'
     );
 
     private $_form = null;

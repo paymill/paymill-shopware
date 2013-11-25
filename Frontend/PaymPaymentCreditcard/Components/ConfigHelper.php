@@ -64,7 +64,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper
         );
     }
 
-
     public function loadData()
     {
         $this->_createConfigTable();
