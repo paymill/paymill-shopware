@@ -88,3 +88,8 @@
 "PAYMILL_50501";"Timeout on side of the acquirer."
 "PAYMILL_50502";"Risk management transaction timeout."
 "PAYMILL_50600";"Duplicate transaction."
+"paymillSepaActive";"Show SEPA Form instead of old direct debit form. Currently only german data is supported."
+"paymill_error_text_invalid_iban";"Invalid IBAN"
+"paymill_error_text_invalid_bic";"Invalid BIC"
+"paymill_frontend_form_iban";"IBAN"
+"paymill_frontend_form_bic";"BIC"

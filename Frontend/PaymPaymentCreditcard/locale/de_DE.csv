@@ -88,3 +88,8 @@
 "PAYMILL_50501";"Die Schnittstelle zum Acquirer reagiert nicht, daher bekommen wir keine Antwort ob die Transaktion erfolgreich durchgelaufen ist."
 "PAYMILL_50502";"Es gibt eine Zeitüberschreitung bei der Risiko-Management Transaktion."
 "PAYMILL_50600";"Doppelte Transaktion."
+"paymillSepaActive";"SEPA Formular anzeigen. Momentan werden nur deutsche Bankdaten unterstützt"
+"paymill_error_text_invalid_iban";"IBAN ungültig"
+"paymill_error_text_invalid_bic";"BIC ungültig"
+"paymill_frontend_form_iban";"IBAN"
+"paymill_frontend_form_bic";"BIC"
