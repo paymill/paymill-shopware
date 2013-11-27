@@ -1,4 +1,7 @@
 #Release Notes
+##1.1.3
+- Fixed a bug causing the first Payment attempt for new customers to crash under some circumstances
+
 ##1.1.2
 - Fixed a bug causing crashes during checkout
 
