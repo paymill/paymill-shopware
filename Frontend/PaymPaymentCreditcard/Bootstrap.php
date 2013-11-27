@@ -144,19 +144,15 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         }
 
         //Save amount into session to allow 3Ds
-        $basket = Shopware()->Session()->sOrderVariables['sBasket'];
-        $totalAmount = (round((float)$basket['sAmount'] * 100, 2));
+        $basket = $arguments->getSubject()->getBasket();
+        $totalAmount = $basket['sAmount'];
+        $totalAmount = (round((float)$totalAmount * 100, 2));
 
-        try{
-            Shopware()->Session()->paymillTotalAmount = $totalAmount;
-            $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
-            $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
-            $arguments->getSubject()->View()->Template()->assign("sepaActive", $swConfig->get("paymillShowLabel")); //@todo Change this to the sepa option after the config form has been remade for task PSW-19
-
-        } catch (Exception $exception){
-            Shopware()->Session()->paymillTotalAmount = $totalAmount;
-        }
-
+        Shopware()->Session()->paymillTotalAmount = $totalAmount;
+        $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
+        $arguments->getSubject()->View()->Template()->assign("publicKey", trim($swConfig->get("publicKey")));
+        $arguments->getSubject()->View()->Template()->assign("sepaActive", $swConfig->get("paymillSepaActive")); //@todo Change this to the sepa option after the config form has been remade for task PSW-19
+        $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
 
         if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
             return;
@@ -504,7 +500,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         try{
             $this->subscribeEvent('Enlight_Controller_Action_PostDispatch', 'onPostDispatch');
             $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Frontend_PaymentPaymill', 'onGetControllerPath');
-            $this->subscribeEvent('Enlight_Controller_Action_PreDispatch_Frontend_Checkout', 'onCheckoutConfirm');
+            $this->subscribeEvent('Enlight_Controller_Action_PostDispatch_Frontend_Checkout', 'onCheckoutConfirm');
             $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Backend_PaymillLogging', 'paymillBackendControllerLogging');
             $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Backend_PaymillOrderOperations', 'paymillBackendControllerOperations');
             $this->subscribeEvent('Shopware_Modules_Admin_UpdateAccount_FilterEmailSql', 'onUpdateCustomerEmail');

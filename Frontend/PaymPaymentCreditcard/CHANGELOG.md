@@ -3,6 +3,9 @@
 - Added additional validation to the fast checkout process
 - Implemented optional SEPA direct debit form. Only payments from germany are supported
 
+##1.1.3
+- Fixed a bug causing the first Payment attempt for new customers to crash under some circumstances
+
 ##1.1.2
 - Fixed a bug causing crashes during checkout
 

@@ -1,6 +1,6 @@
 <link rel = "stylesheet" type = "text/css" href = "{link file='frontend/_resources/paymill_styles.css'}" />
 <script type = "text/javascript" >
-    var PAYMILL_PUBLIC_KEY = '{config name=publicKey|replace:' ':''}';
+    var PAYMILL_PUBLIC_KEY = '{$publicKey}';
     var VALIDATE_CVC = true;
 </script >
 <script type = "text/javascript" src = "https://bridge.paymill.com/" ></script >
