@@ -2,6 +2,28 @@
 <script type = "text/javascript" >
     var PAYMILL_PUBLIC_KEY = '{$publicKey}';
     var VALIDATE_CVC = true;
+    var API_ERRORS = new Array();
+    API_ERRORS["PAYMILL_internal_server_error"] = '{s namespace=Paymill name=PAYMILL_internal_server_error}{/s}';
+    API_ERRORS["PAYMILL_invalid_public_key"] = '{s namespace=Paymill name=PAYMILL_invalid_public_key}{/s}';
+    API_ERRORS["PAYMILL_invalid_payment_data"] = '{s namespace=Paymill name=PAYMILL_invalid_payment_data}{/s}';
+    API_ERRORS["PAYMILL_unknown_error"] = '{s namespace=Paymill name=PAYMILL_unknown_error}{/s}';
+    API_ERRORS["PAYMILL_3ds_cancelled"] = '{s namespace=Paymill name=PAYMILL_3ds_cancelled}{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_number"] = '{s namespace=Paymill name=PAYMILL_field_invalid_card_number}{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_exp_year"] = '{s namespace=Paymill name=PAYMILL_field_invalid_card_exp_year}{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_exp_month"] = '{s namespace=Paymill name=PAYMILL_field_invalid_card_exp_month}{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_exp"] = '{s namespace=Paymill name=PAYMILL_field_invalid_card_exp}{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_cvc"] = '{s namespace=Paymill name=PAYMILL_field_invalid_card_cvc}{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_holder"] = '{s namespace=Paymill name=PAYMILL_field_invalid_card_holder}{/s}';
+    API_ERRORS["PAYMILL_field_invalid_amount_int"] = '{s namespace=Paymill name=PAYMILL_field_invalid_amount_int}{/s}';
+    API_ERRORS["PAYMILL_field_field_invalid_amount"] = '{s namespace=Paymill name=PAYMILL_field_field_invalid_amount}{/s}';
+    API_ERRORS["PAYMILL_field_field_field_invalid_currency"] = '{s namespace=Paymill name=PAYMILL_field_field_field_invalid_currency}{/s}';
+    API_ERRORS["PAYMILL_field_invalid_account_number"] = '{s namespace=Paymill name=PAYMILL_field_invalid_account_number}{/s}';
+    API_ERRORS["PAYMILL_field_invalid_account_holder"] = '{s namespace=Paymill name=PAYMILL_field_invalid_account_holder}{/s}';
+    API_ERRORS["PAYMILL_field_invalid_bank_code"] = '{s namespace=Paymill name=PAYMILL_field_invalid_bank_code}{/s}';
+    API_ERRORS["PAYMILL_field_invalid_iban"] = '{s namespace=Paymill name=PAYMILL_field_invalid_iban}{/s}';
+    API_ERRORS["PAYMILL_field_invalid_bic"] = '{s namespace=Paymill name=PAYMILL_field_invalid_bic}{/s}';
+    API_ERRORS["PAYMILL_field_invalid_country"] = '{s namespace=Paymill name=PAYMILL_field_invalid_country}{/s}';
+    API_ERRORS["PAYMILL_field_invalid_bank_data"] = '{s namespace=Paymill name=PAYMILL_field_invalid_bank_data}{/s}';
 </script >
 <script type = "text/javascript" src = "https://bridge.paymill.com/" ></script >
 <script type = "text/javascript" >
@@ -237,8 +259,9 @@
     {
         debug("Started Paymill response handler");
         if (error) {
-            debug("API returned error:" + error.apierror);
-            alert("API returned error:" + error.apierror);
+            errorText = API_ERRORS["PAYMILL_" + error.apierror];
+            debug(errorText);
+            alert(errorText);
         } else {
             debug("Received token from Paymill API: " + result.token);
             var form = $("#basketButton").parent().parent();

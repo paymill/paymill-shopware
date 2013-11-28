@@ -151,7 +151,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         Shopware()->Session()->paymillTotalAmount = $totalAmount;
         $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
         $arguments->getSubject()->View()->Template()->assign("publicKey", trim($swConfig->get("publicKey")));
-        $arguments->getSubject()->View()->Template()->assign("sepaActive", $swConfig->get("paymillSepaActive")); //@todo Change this to the sepa option after the config form has been remade for task PSW-19
+        $arguments->getSubject()->View()->Template()->assign("sepaActive", $swConfig->get("paymillSepaActive"));
         $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
 
         if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
