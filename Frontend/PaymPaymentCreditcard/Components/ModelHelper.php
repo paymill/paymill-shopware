@@ -114,8 +114,17 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
                 WHERE u.id = a.userID
                 AND u.id = ?
                 AND a.paymill_client_id IS NOT NULL";
+
         try {
+            require_once dirname(__FILE__) . '/../lib/Services/Paymill/Clients.php';
+            $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
             $clientId = Shopware()->Db()->fetchOne($sql, array($userId));
+            $client = new Services_Paymill_Clients(trim($swConfig->get("privateKey")), 'https://api.paymill.com/v2/');
+            $clientData = $client->getOne($clientId);
+            if(!isset($clientData['id'])){
+                $clientId = "";
+                $this->setPaymillClientId($userId,"");
+            }
         } catch (Exception $exception) {
             $clientId = "";
         }
@@ -160,8 +169,15 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             $paymentId = Shopware()->Db()->fetchOne($sql, array($userId));
             $payment = new Services_Paymill_Payments(trim($swConfig->get("privateKey")), 'https://api.paymill.com/v2/');
             $paymentData = $payment->getOne($paymentId);
+
             if(!isset($paymentData['id'])){
                 $paymentId = "";
+            }
+
+            if(isset($paymentData['client'])){
+                if($paymentData['client'] !== $this->getPaymillClientId($userId)){
+                    $paymentId = "";
+                }
             }
         } catch (Exception $exception) {
             $paymentId = "";

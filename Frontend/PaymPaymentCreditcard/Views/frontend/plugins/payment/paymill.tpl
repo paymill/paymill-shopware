@@ -319,7 +319,7 @@
                 <input id = "paymill_accountholder" type = "text" size = "20" class = "text"
                        value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
             </p >
-            {if {config name=paymillShowLabel}}
+            {if {config name=paymillSepaActive}}
                 <p class = "none" >
                     <label for ="paymill_iban">{s namespace=Paymill name=paymill_frontend_form_iban}IBAN *{/s}</label >
                     <input id = "paymill_iban" type = "text" size = "4" class = "text"
@@ -346,21 +346,6 @@
 
         {if ($payment_mean.name == 'paymilldebit') || ($payment_mean.name == 'paymillcc')}
             <p class = "description" >{s namespace=Paymill name=paymill_frontend_form_info}Fields marked with a * are required.{/s}</p >
-        {/if}
-        {if {config name=paymillShowLabel}}
-            <p class = "none" >
-            <div class = "paymill_powered" >
-                <div class = "paymill_credits" >
-                    {if $payment_mean.name == 'paymillcc'}
-                        {s namespace=Paymill name=paymill_frontend_label_slogan}Secure credit card payment powered by {/s}
-                    {else}
-                        {s namespace=Paymill name=paymill_frontend_label_slogan_elv}Direct Debit payment powered by {/s}
-                        <br />
-                    {/if}
-                    <a href = "http://www.paymill.de" target = "_blank" >Paymill</a >
-                </div >
-            </div >
-            </p >
         {/if}
     </div >
 {/if}
