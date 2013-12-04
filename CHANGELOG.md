@@ -1,4 +1,8 @@
 #Release Notes
+##1.1.4
+- Fixed a bug keeping unregistered users from changing the Supplier country in the shopping cart
+- Fixed a bug causing crashes on language changes in the shopping cart
+
 ##1.1.3
 - Fixed a bug causing the first Payment attempt for new customers to crash under some circumstances
 
