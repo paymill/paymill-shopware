@@ -94,6 +94,11 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     {
         $view = $arguments->getSubject()->View();
         $params = $arguments->getRequest()->getParams();
+
+        if($params['sTargetAction'] === 'cart'){
+            return;
+        }
+
         $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
         $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
@@ -148,11 +153,21 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $totalAmount = $basket['sAmount'];
         $totalAmount = (round((float)$totalAmount * 100, 2));
 
+
         Shopware()->Session()->paymillTotalAmount = $totalAmount;
         $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
         $arguments->getSubject()->View()->Template()->assign("publicKey", trim($swConfig->get("publicKey")));
         $arguments->getSubject()->View()->Template()->assign("sepaActive", $swConfig->get("paymillSepaActive"));
         $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
+
+        try{
+            Shopware()->Session()->paymillTotalAmount = $totalAmount;
+            $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
+            $arguments->getSubject()->View()->Template()->assign("publicKey", trim($swConfig->get("publicKey")));
+            $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
+        } catch (Exception $exception){
+            Shopware()->Session()->paymillTotalAmount = $totalAmount;
+        }
 
         if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
             return;
