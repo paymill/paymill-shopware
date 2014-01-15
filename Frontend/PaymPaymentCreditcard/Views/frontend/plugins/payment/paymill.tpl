@@ -160,20 +160,38 @@
     {
         var paymill_form_id = "payment_mean{$payment_mean.id}";
 
-        $('#card-number').keyup(function ()
-        {
-            var brand = paymill.cardType($('#card-number').val());
-            brand = brand.toLowerCase();
-            debug("Credit Card Brand identified as: "+brand);
-            $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
-            $('#card-cvc').val("");
-            if (brand !== 'unknown') {
-                brand = brand !== 'american express' ? brand : 'amex';
-                $('#card-number').addClass("paymill-card-number-" + brand);
-                debug("Credit Card Brand identified as: "+brand);
-            }
-            if(brand === 'maestro'){
-                VALIDATE_CVC = false;
+        $('#card-number').keyup(function() {
+            var brand = detectCreditcardBranding($('#card-number').val());
+            console.log("Brand detected: " + brand);
+            switch (brand) {
+                case 'unknown':
+                    $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
+                    break;
+                case 'carte bleue':
+                    $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
+                    $('#card-number').addClass("paymill-card-number-" + 'carte-bleue');
+                    break;
+                case 'china unionpay':
+                    $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
+                    $('#card-number').addClass("paymill-card-number-" + 'unionpay');
+                    break;
+                case 'diners club':
+                    $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
+                    $('#card-number').addClass("paymill-card-number-" + 'diners');
+                    break;
+                case 'maestro':
+                    VALIDATE_CVC = false;
+                case 'dankort':
+                case 'carta-si':
+                case 'discover':
+                case 'jcb':
+                case 'amex':
+                case 'mastercard':
+                case 'visa':
+                    $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
+                    $('#card-number').addClass("paymill-card-number-" + brand);
+                    break;
+
             }
         });
 
@@ -269,6 +287,48 @@
             form.append("<input type='hidden' name='paymillToken' value='" + token + "'/>");
             form.get(0).submit();
         }
+    }
+
+    function detectCreditcardBranding(creditcardNumber) {
+        var brand = 'unknown';
+        if (creditcardNumber.length > 5) {
+            switch (true) {
+                case /^(415006|497|407497|513)/.test(creditcardNumber):
+                    brand = "carte bleue";
+                    break;
+                case /^(45399[78]|432913|5255)/.test(creditcardNumber):
+                    brand = "carta si";
+                    break;
+                case /^(4571|5019)/.test(creditcardNumber):
+                    brand = "dankort";
+                    break;
+                case /^(62|88)/.test(creditcardNumber):
+                    brand = "china unionpay";
+                    break;
+                case /^6(011|5)/.test(creditcardNumber):
+                    brand = "discover";
+                    break;
+                case /^3(0[0-5]|[68])/.test(creditcardNumber):
+                    brand = "diners club";
+                    break;
+                case /^(5018|5020|5038|5893|6304|6759|6761|6762|6763|0604|6390)/.test(creditcardNumber):
+                    brand = "maestro";
+                    break;
+                case /^(2131|1800|35)/.test(creditcardNumber):
+                    brand = "jcb";
+                    break;
+                case /^(3[47])/.test(creditcardNumber):
+                    brand = "amex";
+                    break;
+                case /^(5[1-5])/.test(creditcardNumber):
+                    brand = "mastercard";
+                    break;
+                case /^(4)/.test(creditcardNumber):
+                    brand = "visa";
+                    break;
+            }
+        }
+        return brand;
     }
 </script >
 

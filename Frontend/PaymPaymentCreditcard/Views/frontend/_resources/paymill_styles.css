@@ -18,36 +18,59 @@
     text-decoration: underline;
     }
 
-.paymill-card-number-visa {
+.paymill-card-number-visa
+{
     background: url('image/32x20_visa.png') no-repeat center right !important;
     }
 
-.paymill-card-number-mastercard {
+.paymill-card-number-mastercard
+{
     background: url('image/32x20_mastercard.png') no-repeat center right !important;
     }
 
-.paymill-card-number-amex {
+.paymill-card-number-amex
+{
     background: url('image/32x20_amex.png') no-repeat center right !important;
     }
 
-.paymill-card-number-jcb {
+.paymill-card-number-jcb
+{
     background: url('image/32x20_jcb.png') no-repeat center right !important;
     }
 
-.paymill-card-number-maestro {
+.paymill-card-number-maestro
+{
     background: url('image/32x20_maestro.png') no-repeat center right !important;
     }
 
-.paymill-card-number-carte-bleue {
+.paymill-card-number-unionpay
+{
     background: url('image/32x20_unionpay.png') no-repeat center right !important;
     }
 
-.paymill-card-number-diners {
+.paymill-card-number-diners
+{
     background: url('image/32x20_dinersclub.png') no-repeat center right !important;
     }
 
-.paymill-card-number-discover {
+.paymill-card-number-discover
+{
     background: url('image/32x20_discover.png') no-repeat center right !important;
+    }
+
+.paymill-card-number-carte-bleue
+{
+    background: url('image/32x20_carte-bleue.png') no-repeat center right !important;
+    }
+
+.paymill-card-number-dankort
+{
+    background: url('image/32x20_dankort.png') no-repeat center right !important;
+    }
+
+.paymill-card-number-carta-si
+{
+    background: url('image/32x20_carta-si.png') no-repeat center right !important;
     }
 
 .tooltip {
