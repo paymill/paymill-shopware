@@ -34,7 +34,7 @@
         {/if}
     }
     function isSepaActive(){
-        sepaActive = "{config name=paymillShowLabel}";
+        sepaActive = "{config name=paymillSepaActive}";
         return sepaActive == 1;
     }
     function getPayment()
