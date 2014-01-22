@@ -10,7 +10,7 @@ Ext.define('Shopware.apps.PaymillLogging.model.Main', {
     fields: [
         { name: 'id', type: 'int'},
         { name: 'processId', type: 'string'},
-        { name: 'entryDate', type: 'date'},
+        { name: 'entryDate', type: 'string'},
         { name: 'version', type: 'string'},
         { name: 'merchantInfo', type: 'string'},
         { name: 'devInfo', type: 'string'}
