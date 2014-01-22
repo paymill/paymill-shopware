@@ -116,9 +116,9 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
 
         //Create the order
         $statusId = $captureNow ? $sState['bezahlt']: $sState['reserviert'];
-        $finalPaymillToken = $paymillToken === "NoTokenRequired" ? $this->createPaymentUniqueId() : $paymillToken;
-        $orderNumber = $this->saveOrder($finalPaymillToken, md5($finalPaymillToken), $statusId);
-        $loggingManager->log("Finish order.", "Ordernumber: " . $orderNumber, "using Token: " . $finalPaymillToken);
+        $transactionId = $captureNow ? $paymentProcessor->getTransactionId() : $paymentProcessor->getPreauthId();
+        $orderNumber = $this->saveOrder($transactionId, md5($transactionId), $statusId);
+        $loggingManager->log("Finish order.", "Ordernumber: " . $orderNumber, "using TransactionId: " . $transactionId);
 
         if ($captureNow) {
             $modelHelper->setPaymillTransactionId($orderNumber, $paymentProcessor->getTransactionId());
@@ -131,7 +131,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         // reset the session field
         Shopware()->Session()->paymillTransactionToken = null;
 
-        return $this->forward('finish', 'checkout', null, array('sUniqueID' => md5($finalPaymillToken)));
+        return $this->forward('finish', 'checkout', null, array('sUniqueID' => md5($transactionId)));
     }
 
     /**
