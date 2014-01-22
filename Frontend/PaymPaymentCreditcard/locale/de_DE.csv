@@ -37,7 +37,7 @@
 "paymill_backend_log_action"; "Aktionen"
 "paymill_backend_log_dev_info";"Entwickler Informationen"
 "paymill_backend_order_operations_title";"Paymill Bestellungsoptionen"
-"paymill_backend_order_operations_capture_description";"Sofern eine Bestellung während aktivierter "Kreditkarten Transaktionen im Checkout authorisieren, Buchung manuell durchf&uuml;hren" Option abgeschlossen worden ist, kann hier der Betrag belastet werden."
+"paymill_backend_order_operations_capture_description";"Sofern eine Bestellung während aktivierter 'Kreditkarten Transaktionen im Checkout authorisieren, Buchung manuell durchf&uuml;hren' Option abgeschlossen worden ist, kann hier der Betrag belastet werden."
 "paymill_backend_order_operations_refund_description";"Erfolgreiche Transaktionen können hier rückerstattet werden."
 "paymill_backend_order_operations_capture_button";"Capture"
 "paymill_backend_order_operations_refund_button";"Gutschrift"

@@ -78,7 +78,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_CsvReader
             if (($files = scandir($this->getPath()))) {
                 foreach ($files as $file) {
                     if (is_file($this->getPath() . $file)) {
-                        $this->loadCsvFileByName($file);
+                        $this->_loadCsvFileByName($file);
                     }
                 }
             }
@@ -94,7 +94,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_CsvReader
      *
      * @param string $filename Name of the file
      */
-    private function loadCsvFileByName($filename)
+    private function _loadCsvFileByName($filename)
     {
         if($this->_knownLanguages[basename($filename, '.csv')]){
             $translations = array();
