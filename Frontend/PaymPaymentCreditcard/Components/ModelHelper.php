@@ -29,7 +29,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             //Add Order Properties
             $models->addAttribute('s_order_attributes', 'paymill', 'pre_authorization', 'varchar(255)');
             $models->addAttribute('s_order_attributes', 'paymill', 'transaction', 'varchar(255)');
-            $models->addAttribute('s_order_attributes', 'paymill', 'cancelled', 'tinyint(1)', false, 0);
+            $models->addAttribute('s_order_attributes', 'paymill', 'refund', 'varchar(255)', false, 0);
 
             //Add User Properties
             $models->addAttribute('s_user_attributes', 'paymill', 'client_id', 'varchar(255)');
@@ -81,23 +81,23 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
      *
      * @param String $orderNumber
      *
-     * @return bool
+     * @return string
      */
-    public function getPaymillCancelled($orderNumber)
+    public function getPaymillRefund($orderNumber)
     {
         $orderId = $this->_getOrderIdByOrderNumber($orderNumber);
-        $sql = "SELECT paymill_cancelled
+        $sql = "SELECT paymill_refund
                 FROM s_order_attributes a, s_order o
                 WHERE o.id = a.orderID
                 AND o.id = ?
-                AND a.paymill_cancelled IS NOT NULL";
+                AND a.paymill_refund IS NOT NULL";
         try {
-            $hasBeenCancelled = Shopware()->Db()->fetchOne($sql, array($orderId));
+            $refundId = Shopware()->Db()->fetchOne($sql, array($orderId));
         } catch (Exception $exception) {
-            $hasBeenCancelled = null;
+            $refundId = null;
         }
 
-        return $hasBeenCancelled == '1';
+        return $refundId;
     }
 
     /**
@@ -242,28 +242,27 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
      * Sets the payment cancelled flag for the given order. This flag is used to mark transaction completely refunded
      *
      * @param string $orderNumber
-     * @param bool   $paymillCancelled
+     * @param string $refundId
      *
      * @return bool
      */
-    public function setPaymillCancelled($orderNumber, $paymillCancelled)
+    public function setPaymillRefund($orderNumber, $refundId)
     {
         $orderId = $this->_getOrderIdByOrderNumber($orderNumber);
-        $paymillCancelled = $paymillCancelled ? '1': '0';
-        $sql = "INSERT INTO s_order_attributes(orderID,paymill_cancelled)
+        $sql = "INSERT INTO s_order_attributes(orderID,paymill_refund)
                 VALUES ( ?, ?)
                 ON DUPLICATE KEY
-                UPDATE orderID = ?, paymill_cancelled = ?";
+                UPDATE orderID = ?, paymill_refund = ?";
 
         try {
-            Shopware()->Db()->query($sql, array($orderId, $paymillCancelled, $orderId, $paymillCancelled));
+            Shopware()->Db()->query($sql, array($orderId, $refundId, $orderId, $refundId));
             $result = true;
-            $message = "Successfully saved cancellation flag for order $orderNumber";
+            $message = "Successfully saved refund id for order $orderNumber";
         } catch (Exception $exception) {
             $result = false;
-            $message = "Failed saving cancellation flag for order $orderNumber";
+            $message = "Failed saving refund id for order $orderNumber";
         }
-        $this->_loggingManager->log($message,var_export($paymillCancelled, true));
+        $this->_loggingManager->log($message,var_export($refundId, true));
         return $result;
     }
 

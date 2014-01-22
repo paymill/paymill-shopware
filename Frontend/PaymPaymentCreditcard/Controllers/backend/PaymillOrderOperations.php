@@ -98,8 +98,9 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
         $orderId = $this->Request()->getParam("orderId");
         $orderNumber = $modelHelper->getOrderNumberById($orderId);
         $isTransaction = $modelHelper->getPaymillTransactionId($orderNumber) !== "";
-        $notCanceled = !($modelHelper->getPaymillCancelled($orderNumber));
-        $success = $isTransaction && $notCanceled;
+        $refundId = $modelHelper->getPaymillRefund($orderNumber);
+        $notCancelled = empty($refundId);
+        $success = $isTransaction && $notCancelled;
 
         $this->View()->assign(array('success' => $success));
     }
@@ -107,8 +108,6 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
     /**
      * Action Listener to execute the capture for applicable transactions
      *
-     * @todo Add translations and exception handling for different cases
-     * @todo Add logging
      */
     public function refundAction()
     {
@@ -136,7 +135,7 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
 
         //Validate result and prepare feedback
         if ($result = $this->_validateRefundResponse($response)) {
-            $modelHelper->setPaymillCancelled($orderNumber, true);
+            $modelHelper->setPaymillRefund($orderNumber, $response['id']);
             $this->_updatePaymentStatus(20, $this->Request()->getParam("orderId"));
         }
 
@@ -181,7 +180,6 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
      */
     private function _updatePaymentStatus($statusId, $orderId)
     {
-
         $order = Shopware()->Modules()->Order();
         $order->setPaymentStatus($orderId, $statusId, false);
     }
