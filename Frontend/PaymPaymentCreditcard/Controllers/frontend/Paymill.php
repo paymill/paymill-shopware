@@ -80,6 +80,13 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $paymentId = $modelHelper->getPaymillPaymentId($this->getPaymentShortName(), $userId);
 
         if ($clientId != "") {
+
+            $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+            $privateKey = trim($swConfig->get("privateKey"));
+            $apiUrl = "https://api.paymill.com/v2/";
+            require_once dirname(dirname(dirname(__FILE__))) . '/lib/Services/Paymill/Clients.php';
+            $client = new Services_Paymill_Clients($privateKey, $apiUrl);
+            $client->update(array('id' => $clientId, 'email' => $user['additional']['user']['email']));
             $paymentProcessor->setClientId($clientId);
         }
 
