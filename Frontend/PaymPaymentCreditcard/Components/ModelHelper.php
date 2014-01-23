@@ -388,4 +388,34 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
     {
         return Shopware()->Db()->fetchOne("SELECT ordernumber FROM s_order WHERE id = ?", array($orderId));
     }
+
+    /**
+     * @param $orderNumber
+     *
+     * @return bool
+     */
+    public function getPaymillCancelled($orderNumber)
+    {
+        $orderId = $this->_getOrderIdByOrderNumber($orderNumber);
+        $preCheckSql = "SHOW COLUMNS FROM `s_order_attributes` LIKE 'paymill_cancelled'";
+        $executeQuery = Shopware()->Db()->fetchOne($preCheckSql);
+        if(isset($executeQuery)){
+            $sql = "SELECT paymill_cancelled
+                FROM s_order_attributes a, s_order o
+                WHERE o.id = a.orderID
+                      AND o.id = ?
+                AND a.paymill_cancelled IS NOT NULL";
+            try {
+                $hasBeenCancelled = Shopware()->Db()->fetchOne($sql, array($orderId));
+            } catch (Exception $exception) {
+                $hasBeenCancelled = null;
+            }
+        } else {
+            $hasBeenCancelled = null;
+        }
+
+        return $hasBeenCancelled === '1';
+
+    }
+
 }

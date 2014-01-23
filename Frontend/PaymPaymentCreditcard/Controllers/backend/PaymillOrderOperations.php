@@ -99,7 +99,9 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
         $orderNumber = $modelHelper->getOrderNumberById($orderId);
         $isTransaction = $modelHelper->getPaymillTransactionId($orderNumber) !== "";
         $refundId = $modelHelper->getPaymillRefund($orderNumber);
-        $notCancelled = empty($refundId);
+        $refundAvailableFlag = !($modelHelper->getPaymillCancelled($orderNumber));
+
+        $notCancelled = ($refundId != 0) && $refundAvailableFlag;
         $success = $isTransaction && $notCancelled;
 
         $this->View()->assign(array('success' => $success));
