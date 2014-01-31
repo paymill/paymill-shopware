@@ -64,6 +64,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper
         );
     }
 
+    /**
+     * Restores all configurations from a past installation
+     * @return mixed
+     */
     public function loadData()
     {
         $this->_createConfigTable();

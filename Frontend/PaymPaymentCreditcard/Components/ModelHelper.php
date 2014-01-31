@@ -390,6 +390,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
     }
 
     /**
+     * Returns the state of the cancellation flag removed in patch 1.2.0
+     * It is currently used for update compatibility and may get removed in the future
+     *
      * @param $orderNumber
      *
      * @return bool
