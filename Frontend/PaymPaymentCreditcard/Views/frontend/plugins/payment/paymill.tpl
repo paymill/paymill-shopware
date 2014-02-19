@@ -26,6 +26,7 @@
     API_ERRORS["PAYMILL_field_invalid_bank_data"] = '{s namespace=Paymill name=PAYMILL_field_invalid_bank_data}{/s}';
 </script >
 <script type = "text/javascript" src = "https://bridge.paymill.com/" ></script >
+<script type = "text/javascript" src = "{link file='frontend/_resources/javascript/Iban.js'}" ></script >
 <script type = "text/javascript" >
 function debug(message)
 {
@@ -122,7 +123,8 @@ function validate()
             result = false;
         }
         if (isSepaActive()) {
-            if ($('#paymill_iban').val() === '') {
+            iban = new Iban();
+            if (!iban.validate($('#paymill_iban').val())) {
                 errorsElv.append("<li>{s namespace=Paymill name=paymill_error_text_invalid_iban}Please enter a valid iban{/s}</li>");
                 result = false;
             }
