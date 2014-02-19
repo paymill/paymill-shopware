@@ -62,7 +62,7 @@
     background: url('image/32x20_carta-si.png') no-repeat center right !important;
     }
 
-.tooltip {
+.paymill-tooltip {
     margin-left:   3px;
     font-size:     11px;
     color:         #e2e2e2;
