@@ -199,6 +199,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $view->setScope(Enlight_Template_Manager::SCOPE_PARENT);
         $view->pigmbhErrorMessage = $pigmbhErrorMessage;
         $view->pigmbhErrorClass = $class;
+        $view->pigmbhTemplateActive = $templateActive;
     }
 
     /**
