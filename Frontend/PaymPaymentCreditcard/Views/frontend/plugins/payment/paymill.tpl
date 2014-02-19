@@ -208,7 +208,7 @@
                     }
                 }
                 if (hasDummyData()) {
-                    var form = $("#basketButton").parent().parent();
+                    var form = $("#basketButton").closest('form');
                     form.get(0).submit();
                 }
                 else {
@@ -282,7 +282,7 @@
             alert(errorText);
         } else {
             debug("Received token from Paymill API: " + result.token);
-            var form = $("#basketButton").parent().parent();
+            var form = $("#basketButton").closest('form');
             var token = result.token;
             form.append("<input type='hidden' name='paymillToken' value='" + token + "'/>");
             form.get(0).submit();

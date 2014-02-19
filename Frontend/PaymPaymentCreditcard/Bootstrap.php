@@ -173,13 +173,32 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             return;
         }
 
+        $isConexcoActiveSql = "SELECT active FROM s_core_plugins WHERE name='SwfResponsiveTemplate'";
+        $isConexcoActive = (int)Shopware()->Db()->fetchOne($isConexcoActiveSql) === 1;
+        if ($isConexcoActive) {
+            $templateConfig = Shopware()->Plugins()->Frontend()->SwfResponsiveTemplate()->Config();
+            $templateActive = $templateConfig->get('SwfResponsiveTemplateActive');
+        } else {
+            $templateActive = false;
+        }
+
         $pigmbhErrorMessage = Shopware()->Session()->pigmbhErrorMessage;
+        $class = $templateActive ? 'pm_error_replica' : '';
         unset(Shopware()->Session()->pigmbhErrorMessage);
-        $content = '{if $pigmbhErrorMessage} <div class="grid_20">' . '<div class="error">' . '<div class="center">' . '<strong> {$pigmbhErrorMessage} </strong>' . '</div>' . '</div>' . '</div> {/if}';
+        $content = '{if $pigmbhErrorMessage} ' .
+                   '<div class="grid_20 {$pigmbhErrorClass}">' .
+                   '<div class="error">' .
+                   '<div class="center">' .
+                   '<strong> {$pigmbhErrorMessage} </strong>' .
+                   '</div>' .
+                   '</div>' .
+                   '</div> ' .
+                   '{/if}';
 
         $view->extendsBlock("frontend_index_content_top", $content, "append");
         $view->setScope(Enlight_Template_Manager::SCOPE_PARENT);
         $view->pigmbhErrorMessage = $pigmbhErrorMessage;
+        $view->pigmbhErrorClass = $class;
     }
 
     /**

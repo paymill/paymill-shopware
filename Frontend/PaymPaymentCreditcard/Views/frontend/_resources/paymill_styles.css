@@ -18,58 +18,47 @@
     text-decoration: underline;
     }
 
-.paymill-card-number-visa
-{
+.paymill-card-number-visa {
     background: url('image/32x20_visa.png') no-repeat center right !important;
     }
 
-.paymill-card-number-mastercard
-{
+.paymill-card-number-mastercard {
     background: url('image/32x20_mastercard.png') no-repeat center right !important;
     }
 
-.paymill-card-number-amex
-{
+.paymill-card-number-amex {
     background: url('image/32x20_amex.png') no-repeat center right !important;
     }
 
-.paymill-card-number-jcb
-{
+.paymill-card-number-jcb {
     background: url('image/32x20_jcb.png') no-repeat center right !important;
     }
 
-.paymill-card-number-maestro
-{
+.paymill-card-number-maestro {
     background: url('image/32x20_maestro.png') no-repeat center right !important;
     }
 
-.paymill-card-number-unionpay
-{
+.paymill-card-number-unionpay {
     background: url('image/32x20_unionpay.png') no-repeat center right !important;
     }
 
-.paymill-card-number-diners
-{
+.paymill-card-number-diners {
     background: url('image/32x20_dinersclub.png') no-repeat center right !important;
     }
 
-.paymill-card-number-discover
-{
+.paymill-card-number-discover {
     background: url('image/32x20_discover.png') no-repeat center right !important;
     }
 
-.paymill-card-number-carte-bleue
-{
+.paymill-card-number-carte-bleue {
     background: url('image/32x20_carte-bleue.png') no-repeat center right !important;
     }
 
-.paymill-card-number-dankort
-{
+.paymill-card-number-dankort {
     background: url('image/32x20_dankort.png') no-repeat center right !important;
     }
 
-.paymill-card-number-carta-si
-{
+.paymill-card-number-carta-si {
     background: url('image/32x20_carta-si.png') no-repeat center right !important;
     }
 
@@ -80,4 +69,20 @@
     padding:       0 5px;
     border-radius: 100px;
     background:    #636363;
+    }
+
+.pm_error_replica {
+    border-width:   1px;
+    text-align:     center;
+    font-weight:    bold;
+    border-color:   #df7373;
+    background:     #f7e9e9;
+    box-shadow:     0 0 4px #f0d5dc;
+    color:          #8a1f11;
+    padding:        .8em;
+    margin-bottom:  1em;
+    border:         2px solid #dddddd;
+    outline:        0;
+    font-size:      100%;
+    vertical-align: baseline;
     }
