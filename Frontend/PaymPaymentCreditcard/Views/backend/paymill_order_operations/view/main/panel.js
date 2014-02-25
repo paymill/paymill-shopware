@@ -7,70 +7,142 @@
  */
     //{namespace name=backend/order/main}
 Ext.require([
-    'Ext.grid.*',
-    'Ext.data.*',
-    'Ext.panel.*'
+    'Ext.grid.*', 'Ext.data.*', 'Ext.panel.*'
 ]);
 
 //{block name="backend/order/view/detail/paymill"}
 Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
 
-    extend:'Ext.form.Panel',
-    autoScroll:true,
-    initComponent: function() {
+    extend:        'Ext.form.Panel',
+    autoScroll:    true,
+    initComponent: function ()
+    {
         var me = this;
+        var id = me.record.get('id');
+        var transactionStore = Ext.create('Shopware.apps.PaymillOrderOperations.store.Paymilltransaction');
         me.items = [
-            Ext.create('Ext.panel.Panel',{
-                width:'100%',
-                height:'100%',
+            Ext.create('Ext.panel.Panel', {
+                width:     '100%',
+                height:    '100%',
                 bodyStyle: {
                     background: '#F0F2F4'
                 },
-                items:[
+                items:     [
                     {
-                        xtype:'fieldset',
+                        xtype:       'fieldset',
                         collapsible: false,
-                        items :[
-                            Ext.create('Ext.panel.Panel',{
-                                width:'100%',
-                                layout:'column',
-                                items:[
+                        items:       [
+                            Ext.create('Ext.grid.Panel', {
+                                store:     transactionStore.load({
+                                    params: {
+                                        'orderId': id
+                                    }
+                                }),
+                                listeners: {
+                                    activate: function (tab)
                                     {
-                                        xtype: 'fieldcontainer',
+                                        var me = this;
+                                        var store = transactionStore.load({
+                                            params: {
+                                                'orderId': id
+                                            }
+                                        });
+                                        me.reconfigure(store);
+                                    }
+                                },
+                                columns:   [
+                                    {
+                                        header:    'Date',
+                                        dataIndex: 'entryDate',
+                                        flex:      1
+                                    },
+                                    {
+                                        header:    'Description',
+                                        dataIndex: 'description',
+                                        flex:      4
+                                    },
+                                    {
+                                        header:    'Amount',
+                                        dataIndex: 'amount',
+                                        flex:      1
+                                    }
+                                ]
+                            })
+
+                        ]
+                    },
+                    {
+                        xtype:       'fieldset',
+                        collapsible: false,
+                        items:       [
+                            Ext.create('Ext.panel.Panel', {
+                                width:  '100%',
+                                layout: 'column',
+                                items:  [
+                                    {
+                                        xtype:       'fieldcontainer',
                                         defaultType: 'displayfield',
-                                        width:'50%',
-                                        items: [
+                                        width:       '50%',
+                                        height:      50,
+                                        border:      1,
+                                        style:       {
+                                            borderColor: 'LightGray',
+                                            borderStyle: 'solid',
+                                            background:  '#F0F2F4'
+                                        },
+                                        items:       [
                                             {
-                                                value       : "{s namespace=paymill name=paymill_backend_order_operations_capture_description}{/s}"
+                                                value: "{s namespace=paymill name=paymill_backend_order_operations_capture_description}{/s}"
                                             }
                                         ]
-                                    },{
-                                        xtype: 'fieldcontainer',
+                                    },
+                                    {
+                                        xtype:       'fieldcontainer',
                                         defaultType: 'displayfield',
-                                        width:'50%',
-                                        items: [
+                                        width:       '50%',
+                                        height:      50,
+                                        border:      1,
+                                        style:       {
+                                            borderColor: 'LightGray',
+                                            borderStyle: 'solid',
+                                            background:  '#F0F2F4'
+                                        },
+                                        items:       [
                                             {
-                                                value       : "{s namespace=paymill name=paymill_backend_order_operations_refund_description}{/s}"
+                                                value: "{s namespace=paymill name=paymill_backend_order_operations_refund_description}{/s}"
                                             }
                                         ]
                                     }
                                 ]
                             }),
 
-                            Ext.create('Ext.panel.Panel',{
-                                width:'100%',
-                                layout:'column',
-                                items: [
+                            Ext.create('Ext.panel.Panel', {
+                                width:  '100%',
+                                layout: 'column',
+                                items:  [
                                     {
-                                        xtype: 'fieldcontainer',
+                                        xtype:       'fieldcontainer',
                                         defaultType: 'displayfield',
-                                        id: 'captureButtonSlot',
-                                        width:'50%'
-                                    },{
-                                        xtype: 'fieldcontainer',
+                                        id:          'captureButtonSlot',
+                                        width:       '50%',
+                                        border:      1,
+                                        style:       {
+                                            borderColor: 'LightGray',
+                                            borderStyle: 'solid',
+                                            background:  '#F0F2F4',
+                                        }
+                                    },
+                                    {
+                                        xtype:       'fieldcontainer',
                                         defaultType: 'displayfield',
-                                        id: 'refundButtonSlot',
-                                        width:'50%'
+                                        id:          'refundButtonSlot',
+                                        width:       '50%',
+                                        border:      1,
+                                        style:       {
+                                            borderColor: 'LightGray',
+                                            borderStyle: 'solid',
+                                            background:  '#F0F2F4'
+                                        }
                                     }
                                 ]
                             })
@@ -85,17 +157,19 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
         this.displayCaptureButton();
     },
 
-    canCapture: function(){
+    canCapture: function ()
+    {
         var id = this.record.get('id');
         var success = false;
         Ext.Ajax.request({
-            url: '{url controller=PaymillOrderOperations action=canCapture}',
-            method:'POST',
-            async:false,
-            params: {
-                orderId:id
+            url:     '{url controller=PaymillOrderOperations action=canCapture}',
+            method:  'POST',
+            async:   false,
+            params:  {
+                orderId: id
             },
-            success: function(response){
+            success: function (response)
+            {
                 var decodedResponse = Ext.decode(response.responseText);
                 success = decodedResponse.success;
             }
@@ -103,17 +177,19 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
         return success;
     },
 
-    capture: function(){
+    capture: function ()
+    {
         var id = this.record.get('id');
         var me = this;
         Ext.Ajax.request({
-            url: '{url controller=PaymillOrderOperations action=capture}',
-            method:'POST',
-            async:false,
-            params: {
-                orderId:id
+            url:     '{url controller=PaymillOrderOperations action=capture}',
+            method:  'POST',
+            async:   false,
+            params:  {
+                orderId: id
             },
-            success: function(response){
+            success: function (response)
+            {
                 var decodedResponse = Ext.decode(response.responseText);
                 var messageText = "";
                 if (decodedResponse.success) {
@@ -122,7 +198,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                     messageText = "{s namespace=Paymill name=paymill_backend_order_operations_capture_failure}Transaction could not be captured: {/s}";
                     messageText += decodedResponse.code;
                 }
-                if(decodedResponse.success){
+                if (decodedResponse.success) {
                     me.displayCaptureButton();
                     me.displayRefundButton();
                 }
@@ -131,17 +207,19 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
         });
     },
 
-    canRefund: function(){
+    canRefund: function ()
+    {
         var id = this.record.get('id');
         var success = false;
         Ext.Ajax.request({
-            url: '{url controller=PaymillOrderOperations action=canRefund}',
-            method:'POST',
-            async:false,
-            params: {
-                orderId:id
+            url:     '{url controller=PaymillOrderOperations action=canRefund}',
+            method:  'POST',
+            async:   false,
+            params:  {
+                orderId: id
             },
-            success: function(response){
+            success: function (response)
+            {
                 var decodedResponse = Ext.decode(response.responseText);
                 success = decodedResponse.success;
 
@@ -150,17 +228,19 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
         return success;
     },
 
-    refund: function(){
+    refund:               function ()
+    {
         var id = this.record.get('id');
         var me = this;
         Ext.Ajax.request({
-            url: '{url controller=PaymillOrderOperations action=refund}',
-            method:'POST',
-            async:false,
-            params: {
-                orderId:id
+            url:     '{url controller=PaymillOrderOperations action=refund}',
+            method:  'POST',
+            async:   false,
+            params:  {
+                orderId: id
             },
-            success: function(response){
+            success: function (response)
+            {
                 var decodedResponse = Ext.decode(response.responseText);
                 var messageText = "";
                 if (decodedResponse.success) {
@@ -169,7 +249,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                     messageText = "{s namespace=Paymill name=paymill_backend_order_operations_refund_failure}Transaction could not be refunded: {/s}";
                     messageText += decodedResponse.code;
                 }
-                if(decodedResponse.success){
+                if (decodedResponse.success) {
                     me.displayRefundButton();
                     me.displayCaptureButton();
                 }
@@ -177,30 +257,34 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
             }
         });
     },
-    displayRefundButton: function(){
+    displayRefundButton:  function ()
+    {
         var me = this;
-        var button =  new Array();
+        var button = new Array();
         button.push(Ext.create('Ext.Button', {
-            text: '{s namespace=paymill name=paymill_backend_order_operations_refund_button}Refund{/s}',
-            scale: 'medium',
-            margin: '0 0 0 10',
+            text:     '{s namespace=paymill name=paymill_backend_order_operations_refund_button}Refund{/s}',
+            scale:    'medium',
+            margin:   '0 0 0 10',
             disabled: !(me.canRefund()),
-            handler: function() {
+            handler:  function ()
+            {
                 me.refund();
             }
         }));
         Ext.ComponentManager.get('refundButtonSlot').removeAll();
         Ext.ComponentManager.get('refundButtonSlot').add(button);
     },
-    displayCaptureButton: function(){
+    displayCaptureButton: function ()
+    {
         var me = this;
-        var button =  new Array();
+        var button = new Array();
         button.push(Ext.create('Ext.Button', {
-            text: '{s namespace=paymill name=paymill_backend_order_operations_capture_button}Capture{/s}',
-            scale: 'medium',
-            margin: '0 0 0 10',
+            text:     '{s namespace=paymill name=paymill_backend_order_operations_capture_button}Capture{/s}',
+            scale:    'medium',
+            margin:   '0 0 0 10',
             disabled: !(me.canCapture()),
-            handler: function() {
+            handler:  function ()
+            {
                 me.capture();
             }
         }));

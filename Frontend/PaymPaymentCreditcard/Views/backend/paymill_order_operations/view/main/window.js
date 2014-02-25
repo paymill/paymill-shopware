@@ -20,10 +20,10 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Window', {
                 historyStore:       me.historyStore,
                 record:             me.record,
                 orderStatusStore:   me.orderStatusStore,
-                paymentStatusStore: me.paymentStatusStore
+                paymentStatusStore: me.paymentStatusStore,
             }));
         }
-        return tabPanel;
+        return          tabPanel;
     },
     displayTab:     function ()
     {
