@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Paymill Order Operations
  *
@@ -9,6 +10,76 @@
  */
 class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Controllers_Backend_ExtJs
 {
+    /**
+     * Returns the store of the transaction overview
+     */
+    public function loadStoreAction()
+    {
+        $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+        $apiKey = trim($swConfig->get("privateKey"));
+        $apiEndpoint = "https://api.paymill.com/v2/";
+        $orderId = $this->Request()->getParam("orderId");
+        $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
+
+        $orderNumber = $modelHelper->getOrderNumberById($orderId);
+
+        $success = true;
+        $result = array();
+
+        $preAuthId = $modelHelper->getPaymillPreAuthorization($orderNumber);
+        $transactionId = $modelHelper->getPaymillTransactionId($orderNumber);
+        $refundId = $modelHelper->getPaymillRefund($orderNumber);
+        $cancelled = $modelHelper->getPaymillCancelled($orderNumber);
+
+        if ($preAuthId !== "" && $preAuthId !== null) { //List PreAuth
+            require_once dirname(dirname(dirname(__FILE__))) . '/lib/Services/Paymill/Preauthorizations.php';
+            $preAuthObj = new Services_Paymill_Preauthorizations($apiKey, $apiEndpoint);
+            $response = $preAuthObj->getOne($preAuthId);
+
+            $result[] = array(
+                'entryDate'   => date('d.M.Y H:i:s', $response['created_at']),
+                'description' => 'PreAuthorization ' . $response['id'],
+                'amount'      => $response['amount'] / 100
+            );
+        }
+
+        if ($transactionId !== "" && $transactionId !== null) { //List Transaction
+            require_once dirname(dirname(dirname(__FILE__))) . '/lib/Services/Paymill/Transactions.php';
+            $transactionObj = new Services_Paymill_Transactions($apiKey, $apiEndpoint);
+            $response = $transactionObj->getOne($transactionId);
+
+            $result[] = array(
+                'entryDate'   => date('d.M.Y H:i:s', $response['created_at']),
+                'description' => 'Transaction ' . $response['id'],
+                'amount'      => $response['origin_amount'] / 100
+            );
+        }
+
+        if ($refundId !== "" && $refundId !== null) { //List Refund
+            require_once dirname(dirname(dirname(__FILE__))) . '/lib/Services/Paymill/Refunds.php';
+            $refundObj = new Services_Paymill_Refunds($apiKey, $apiEndpoint);
+            $response = $refundObj->getOne($refundId);
+            $result[] = array(
+                'entryDate'   => date('d.M.Y H:i:s', $response['updated_at']),
+                'description' => 'Refund ' . $response['id'],
+                'amount'      => $response['amount'] / 100
+            );
+        }
+
+        if ($cancelled) { //List cancellation
+            $transactionObj = new Services_Paymill_Transactions($apiKey, $apiEndpoint);
+            $response = $transactionObj->getOne($transactionId);
+
+            $result[] = array(
+                'entryDate'   => date('d.M.Y H:i:s', $response['updated_at']),
+                'description' => 'Transaction refunded completely',
+                'amount'      => '-'
+            );
+        }
+
+        $this->View()->assign(array('success' => $success, 'data' => $result, 'debug' => var_export($refundId, true)));
+    }
+
     /**
      * Action Listener to determine if the Paymill Order Operations Tab will be displayed
      */
@@ -69,8 +140,8 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
 
         //Create Transaction
         $parameter = array(
-            'amount' => $preAuthObject['amount'],
-            'currency' => $preAuthObject['currency'],
+            'amount'      => $preAuthObject['amount'],
+            'currency'    => $preAuthObject['currency'],
             "description" => $preAuthObject['client']['email'] . ' ' . Shopware()->Config()->get('shopname')
         );
 
@@ -81,7 +152,7 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
             $result = $paymentProcessor->capture();
             $modelHelper->setPaymillTransactionId($orderNumber, $paymentProcessor->getTransactionId());
             $this->View()->assign(array('success' => $result));
-            if($result){
+            if ($result) {
                 $this->_updatePaymentStatus(12, $this->Request()->getParam("orderId"));
             }
         } catch (Exception $exception) {
@@ -127,7 +198,7 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
         //Create Transaction
         $parameter = array(
             'transactionId' => $transactionId,
-            'params' => array(
+            'params'        => array(
                 'amount'      => $transaction['amount'],
                 'description' => $transaction['client']['email'] . " " . Shopware()->Config()->get('shopname')
             )
@@ -165,7 +236,8 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
         }
 
         if (isset($refund['data']['response_code']) && $refund['data']['response_code'] !== 20000) {
-            $loggingManager->log("An Error occurred during refund creation: " . $refund['data']['response_code'], var_export($refund, true));
+            $loggingManager->log("An Error occurred during refund creation: " .
+                                 $refund['data']['response_code'], var_export($refund, true));
             $responseCodeOK = false;
         } else {
             $responseCodeOK = true;
@@ -178,7 +250,7 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
      * Sets the status of the given payment
      *
      * @param integer $statusId
-     * @param string $orderId
+     * @param string  $orderId
      */
     private function _updatePaymentStatus($statusId, $orderId)
     {
