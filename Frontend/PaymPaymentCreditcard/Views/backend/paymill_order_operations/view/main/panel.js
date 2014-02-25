@@ -29,6 +29,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                 },
                 items:     [
                     Ext.create('Ext.grid.Panel', {
+                        id: 'transactionGrid',
                         store:     transactionStore.load({
                             params: {
                                 'orderId': id
@@ -124,6 +125,13 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                 }
                 if (decodedResponse.success) {
                     me.displayButtons();
+                    var transactionStore = Ext.create('Shopware.apps.PaymillOrderOperations.store.Paymilltransaction');
+                    var store = transactionStore.load({
+                        params: {
+                            'orderId': id
+                        }
+                    });
+                    Ext.ComponentManager.get('transactionGrid').reconfigure(store);
                 }
                 alert(messageText);
             }
@@ -174,7 +182,13 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                 }
                 if (decodedResponse.success) {
                     me.displayButtons();
-                    me.displayButtons();
+                    var transactionStore = Ext.create('Shopware.apps.PaymillOrderOperations.store.Paymilltransaction');
+                    var store = transactionStore.load({
+                        params: {
+                            'orderId': id
+                        }
+                    });
+                    Ext.ComponentManager.get('transactionGrid').reconfigure(store);
                 }
                 alert(messageText);
             }

@@ -39,7 +39,7 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
             $result[] = array(
                 'entryDate'   => date('d.M.Y H:i:s', $response['created_at']),
                 'description' => 'PreAuthorization ' . $response['id'],
-                'amount'      => $response['amount'] / 100
+                'amount'      => ($response['amount'] / 100) . ' ' . $response['currency']
             );
         }
 
@@ -47,11 +47,11 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
             require_once dirname(dirname(dirname(__FILE__))) . '/lib/Services/Paymill/Transactions.php';
             $transactionObj = new Services_Paymill_Transactions($apiKey, $apiEndpoint);
             $response = $transactionObj->getOne($transactionId);
-
+            $currency = $response['currency'];
             $result[] = array(
                 'entryDate'   => date('d.M.Y H:i:s', $response['created_at']),
                 'description' => 'Transaction ' . $response['id'],
-                'amount'      => $response['origin_amount'] / 100
+                'amount'      => ($response['origin_amount'] / 100) . ' ' . $currency
             );
         }
 
@@ -62,18 +62,7 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
             $result[] = array(
                 'entryDate'   => date('d.M.Y H:i:s', $response['updated_at']),
                 'description' => 'Refund ' . $response['id'],
-                'amount'      => $response['amount'] / 100
-            );
-        }
-
-        if ($cancelled) { //List cancellation
-            $transactionObj = new Services_Paymill_Transactions($apiKey, $apiEndpoint);
-            $response = $transactionObj->getOne($transactionId);
-
-            $result[] = array(
-                'entryDate'   => date('d.M.Y H:i:s', $response['updated_at']),
-                'description' => 'Transaction refunded completely',
-                'amount'      => '-'
+                'amount'      => ($response['amount'] / 100) . ' ' . $currency
             );
         }
 
