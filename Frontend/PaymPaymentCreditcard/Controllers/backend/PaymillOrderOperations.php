@@ -172,7 +172,7 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
         $refundId = $modelHelper->getPaymillRefund($orderNumber);
         $refundAvailableFlag = !($modelHelper->getPaymillCancelled($orderNumber));
 
-        $notCancelled = ($refundId != 0) && $refundAvailableFlag;
+        $notCancelled = ($refundId === "") && $refundAvailableFlag;
         $success = $isTransaction && $notCancelled;
 
         $this->View()->assign(array('success' => $success));
