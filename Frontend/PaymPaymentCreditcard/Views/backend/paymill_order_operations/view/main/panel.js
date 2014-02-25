@@ -28,133 +28,57 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                     background: '#F0F2F4'
                 },
                 items:     [
-                    {
-                        xtype:       'fieldset',
-                        collapsible: false,
-                        items:       [
-                            Ext.create('Ext.grid.Panel', {
-                                store:     transactionStore.load({
+                    Ext.create('Ext.grid.Panel', {
+                        store:     transactionStore.load({
+                            params: {
+                                'orderId': id
+                            }
+                        }),
+                        listeners: {
+                            activate: function (tab)
+                            {
+                                var me = this;
+                                var store = transactionStore.load({
                                     params: {
                                         'orderId': id
                                     }
-                                }),
-                                listeners: {
-                                    activate: function (tab)
-                                    {
-                                        var me = this;
-                                        var store = transactionStore.load({
-                                            params: {
-                                                'orderId': id
-                                            }
-                                        });
-                                        me.reconfigure(store);
-                                    }
-                                },
-                                columns:   [
-                                    {
-                                        header:    'Date',
-                                        dataIndex: 'entryDate',
-                                        flex:      1
-                                    },
-                                    {
-                                        header:    'Description',
-                                        dataIndex: 'description',
-                                        flex:      4
-                                    },
-                                    {
-                                        header:    'Amount',
-                                        dataIndex: 'amount',
-                                        flex:      1
-                                    }
-                                ]
-                            })
-
+                                });
+                                me.reconfigure(store);
+                            }
+                        },
+                        columns:   [
+                            {
+                                header:    'Date',
+                                dataIndex: 'entryDate',
+                                flex:      1
+                            },
+                            {
+                                header:    'Description',
+                                dataIndex: 'description',
+                                flex:      4
+                            },
+                            {
+                                header:    'Amount',
+                                dataIndex: 'amount',
+                                flex:      1
+                            }
                         ]
-                    },
-                    {
-                        xtype:       'fieldset',
-                        collapsible: false,
-                        items:       [
-                            Ext.create('Ext.panel.Panel', {
-                                width:  '100%',
-                                layout: 'column',
-                                items:  [
-                                    {
-                                        xtype:       'fieldcontainer',
-                                        defaultType: 'displayfield',
-                                        width:       '50%',
-                                        height:      50,
-                                        border:      1,
-                                        style:       {
-                                            borderColor: 'LightGray',
-                                            borderStyle: 'solid',
-                                            background:  '#F0F2F4'
-                                        },
-                                        items:       [
-                                            {
-                                                value: "{s namespace=paymill name=paymill_backend_order_operations_capture_description}{/s}"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype:       'fieldcontainer',
-                                        defaultType: 'displayfield',
-                                        width:       '50%',
-                                        height:      50,
-                                        border:      1,
-                                        style:       {
-                                            borderColor: 'LightGray',
-                                            borderStyle: 'solid',
-                                            background:  '#F0F2F4'
-                                        },
-                                        items:       [
-                                            {
-                                                value: "{s namespace=paymill name=paymill_backend_order_operations_refund_description}{/s}"
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }),
-
-                            Ext.create('Ext.panel.Panel', {
-                                width:  '100%',
-                                layout: 'column',
-                                items:  [
-                                    {
-                                        xtype:       'fieldcontainer',
-                                        defaultType: 'displayfield',
-                                        id:          'captureButtonSlot',
-                                        width:       '50%',
-                                        border:      1,
-                                        style:       {
-                                            borderColor: 'LightGray',
-                                            borderStyle: 'solid',
-                                            background:  '#F0F2F4',
-                                        }
-                                    },
-                                    {
-                                        xtype:       'fieldcontainer',
-                                        defaultType: 'displayfield',
-                                        id:          'refundButtonSlot',
-                                        width:       '50%',
-                                        border:      1,
-                                        style:       {
-                                            borderColor: 'LightGray',
-                                            borderStyle: 'solid',
-                                            background:  '#F0F2F4'
-                                        }
-                                    }
-                                ]
-                            })
-                        ]
+                    }), {
+                        xtype:  'fieldset',
+                        width:  '100%',
+                        id:     'buttonSlot',
+                        layout: {
+                            type:  'hbox',
+                            pack:  'end',
+                            align: 'middle'
+                        }
                     }
                 ]
             })
 
         ];
         this.callParent(arguments);
-        this.displayRefundButton();
-        this.displayCaptureButton();
+        this.displayButtons();
     },
 
     canCapture: function ()
@@ -199,8 +123,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                     messageText += decodedResponse.code;
                 }
                 if (decodedResponse.success) {
-                    me.displayCaptureButton();
-                    me.displayRefundButton();
+                    me.displayButtons();
                 }
                 alert(messageText);
             }
@@ -228,7 +151,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
         return success;
     },
 
-    refund:               function ()
+    refund:         function ()
     {
         var id = this.record.get('id');
         var me = this;
@@ -250,46 +173,41 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                     messageText += decodedResponse.code;
                 }
                 if (decodedResponse.success) {
-                    me.displayRefundButton();
-                    me.displayCaptureButton();
+                    me.displayButtons();
+                    me.displayButtons();
                 }
                 alert(messageText);
             }
         });
     },
-    displayRefundButton:  function ()
+    displayButtons: function ()
     {
         var me = this;
         var button = new Array();
         button.push(Ext.create('Ext.Button', {
             text:     '{s namespace=paymill name=paymill_backend_order_operations_refund_button}Refund{/s}',
             scale:    'medium',
-            margin:   '0 0 0 10',
             disabled: !(me.canRefund()),
             handler:  function ()
             {
                 me.refund();
             }
         }));
-        Ext.ComponentManager.get('refundButtonSlot').removeAll();
-        Ext.ComponentManager.get('refundButtonSlot').add(button);
-    },
-    displayCaptureButton: function ()
-    {
-        var me = this;
-        var button = new Array();
+
+        button.push({ xtype: 'splitter' });
+
         button.push(Ext.create('Ext.Button', {
             text:     '{s namespace=paymill name=paymill_backend_order_operations_capture_button}Capture{/s}',
             scale:    'medium',
-            margin:   '0 0 0 10',
             disabled: !(me.canCapture()),
             handler:  function ()
             {
                 me.capture();
             }
         }));
-        Ext.ComponentManager.get('captureButtonSlot').removeAll();
-        Ext.ComponentManager.get('captureButtonSlot').add(button);
+
+        Ext.ComponentManager.get('buttonSlot').removeAll();
+        Ext.ComponentManager.get('buttonSlot').add(button);
     }
 });
 //{/block}
