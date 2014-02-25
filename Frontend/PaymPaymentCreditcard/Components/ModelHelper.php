@@ -29,7 +29,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             //Add Order Properties
             $models->addAttribute('s_order_attributes', 'paymill', 'pre_authorization', 'varchar(255)');
             $models->addAttribute('s_order_attributes', 'paymill', 'transaction', 'varchar(255)');
-            $models->addAttribute('s_order_attributes', 'paymill', 'refund', 'varchar(255)', false, 0);
+            $models->addAttribute('s_order_attributes', 'paymill', 'refund', 'varchar(255)');
 
             //Add User Properties
             $models->addAttribute('s_user_attributes', 'paymill', 'client_id', 'varchar(255)');
@@ -40,8 +40,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             $bootstrap->Application()->Models()->generateAttributeModels(array('s_order_attributes'));
             $bootstrap->Application()->Models()->generateAttributeModels(array('s_user_attributes'));
         } catch (Exception $exception) {
-            Shopware()->Log()->Err("Cannot edit shopware models. ". $exception->getMessage());
-            throw new Exception("Cannot edit shopware models. ". $exception->getMessage());
+            Shopware()->Log()->Err("Cannot edit shopware models. " . $exception->getMessage());
+            throw new Exception("Cannot edit shopware models. " . $exception->getMessage());
         }
     }
 
@@ -55,6 +55,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
 
     /**
      * Returns the transaction Id for the given order
+     *
      * @param $orderNumber
      *
      * @return mixed
@@ -94,10 +95,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
         try {
             $refundId = Shopware()->Db()->fetchOne($sql, array($orderId));
         } catch (Exception $exception) {
-            $refundId = null;
+            $refundId = "";
         }
 
-        return $refundId;
+        if($refundId === '0'){
+            $refundId = "";
+        }
+
+        return $refundId ? $refundId : "";
     }
 
     /**
@@ -121,9 +126,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             $clientId = Shopware()->Db()->fetchOne($sql, array($userId));
             $client = new Services_Paymill_Clients(trim($swConfig->get("privateKey")), 'https://api.paymill.com/v2/');
             $clientData = $client->getOne($clientId);
-            if(!isset($clientData['id'])){
+            if (!isset($clientData['id'])) {
                 $clientId = "";
-                $this->setPaymillClientId($userId,"");
+                $this->setPaymillClientId($userId, "");
             }
         } catch (Exception $exception) {
             $clientId = "";
@@ -170,12 +175,12 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             $payment = new Services_Paymill_Payments(trim($swConfig->get("privateKey")), 'https://api.paymill.com/v2/');
             $paymentData = $payment->getOne($paymentId);
 
-            if(!isset($paymentData['id'])){
+            if (!isset($paymentData['id'])) {
                 $paymentId = "";
             }
 
-            if(isset($paymentData['client'])){
-                if($paymentData['client'] !== $this->getPaymillClientId($userId)){
+            if (isset($paymentData['client'])) {
+                if ($paymentData['client'] !== $this->getPaymillClientId($userId)) {
                     $paymentId = "";
                 }
             }
@@ -234,7 +239,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             $result = false;
             $message = "Failed saving Transaction Id for order $orderNumber";
         }
-        $this->_loggingManager->log($message,var_export($transactionId, true));
+        $this->_loggingManager->log($message, var_export($transactionId, true));
+
         return $result;
     }
 
@@ -262,7 +268,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             $result = false;
             $message = "Failed saving refund id for order $orderNumber";
         }
-        $this->_loggingManager->log($message,var_export($refundId, true));
+        $this->_loggingManager->log($message, var_export($refundId, true));
+
         return $result;
     }
 
@@ -291,12 +298,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             $result = false;
             $message = "Failed saving PreAuthorization Id for order $orderNumber";
         }
-        $this->_loggingManager->log($message,var_export($paymillPreAuthorization, true));
+        $this->_loggingManager->log($message, var_export($paymillPreAuthorization, true));
+
         return $result;
     }
 
     /**
      * Sets the payment Id for the given payment and user.
+     *
      * @param $paymentShortTag
      * @param $userId
      * @param $paymillPaymentId
@@ -332,17 +341,19 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
         try {
             Shopware()->Db()->query($sql, array($userId, $paymillPaymentId, $userId, $paymillPaymentId));
             $result = true;
-            $message ="Successfully saved $paymentName Transaction Id for user $userId";
+            $message = "Successfully saved $paymentName Transaction Id for user $userId";
         } catch (Exception $exception) {
             $result = false;
-            $message ="Failed saving $paymentName Transaction Id for user $userId";
+            $message = "Failed saving $paymentName Transaction Id for user $userId";
         }
-        $this->_loggingManager->log($message,var_export($paymillPaymentId, true));
+        $this->_loggingManager->log($message, var_export($paymillPaymentId, true));
+
         return $result;
     }
 
     /**
      * Saves the customers client id into the user model
+     *
      * @param $userId
      * @param $paymillClientId
      *
@@ -358,17 +369,19 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
         try {
             Shopware()->Db()->query($sql, array($userId, $paymillClientId, $userId, $paymillClientId));
             $result = true;
-            $message ="Successfully saved client id for user $userId";
+            $message = "Successfully saved client id for user $userId";
         } catch (Exception $exception) {
             $result = false;
-            $message ="Failed saving client id for user $userId";
+            $message = "Failed saving client id for user $userId";
         }
-        $this->_loggingManager->log($message,var_export($paymillClientId, true));
+        $this->_loggingManager->log($message, var_export($paymillClientId, true));
+
         return $result;
     }
 
     /**
      * Returns the OrderId associated with the given Number
+     *
      * @param $orderNumber
      *
      * @return string
@@ -380,6 +393,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
 
     /**
      * Returns the OrderNumber associated with the given Id
+     *
      * @param $orderId
      *
      * @return string
@@ -402,7 +416,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
         $orderId = $this->_getOrderIdByOrderNumber($orderNumber);
         $preCheckSql = "SHOW COLUMNS FROM `s_order_attributes` LIKE 'paymill_cancelled'";
         $executeQuery = Shopware()->Db()->fetchOne($preCheckSql);
-        if(isset($executeQuery)){
+        if (isset($executeQuery)) {
             $sql = "SELECT paymill_cancelled
                 FROM s_order_attributes a, s_order o
                 WHERE o.id = a.orderID
@@ -418,7 +432,5 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
         }
 
         return $hasBeenCancelled === '1';
-
     }
-
 }
