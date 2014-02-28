@@ -391,23 +391,23 @@ function detectCreditcardBranding(creditcardNumber)
                 </div >
             {else}
                 <p class = "none" >
-                    <label >{s namespace=Paymill name=paymill_frontend_form_holder_cc}Credit Card Holder *{/s}</label >
+                    <label >{s namespace=Paymill name=frontend_creditcard_label_holder}Credit Card Holder *{/s}</label >
                     <input id = "card-holder" type = "text" size = "20" class = "text"
                            value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
                 </p >
                 <p class = "none" >
-                    <label >{s namespace=Paymill name=paymill_frontend_form_number_cc}Credit Card Number *{/s}</label >
+                    <label >{s namespace=Paymill name=frontend_creditcard_label_number}Credit Card Number *{/s}</label >
                     <input id = "card-number" type = "text" size = "20" class = "text"
                            value = "{$paymillCardNumber}" />
                 </p >
                 <p class = "none" >
-                    <label >{s namespace=Paymill name=paymill_frontend_form_cvc}CVC *{/s}</label >
+                    <label >{s namespace=Paymill name=frontend_creditcard_label_cvc}CVC *{/s}</label >
                     <input id = "card-cvc" type = "text" size = "4" class = "text" value = "{$paymillCvc}" />
                 <span class = "paymill-tooltip"
-                      title = "{s namespace=Paymill name=paymill_cvc_tooltip} What is a CVV/CVC number? Prospective credit cards will have a 3 to 4-digit number, usually on the back of the card. It ascertains that the payment is carried out by the credit card holder and the card account is legitimate. On Visa the CVV (Card Verification Value) appears after and to the right of your card number. Same goes for Mastercard's CVC (Card Verfication Code), which also appears after and to the right of  your card number, and has 3-digits. Diners Club, Discover, and JCB credit and debit cards have a three-digit card security code which also appears after and to the right of your card number. The American Express CID (Card Identification Number) is a 4-digit number printed on the front of your card. It appears above and to the right of your card number. On Maestro the CVV appears after and to the right of your number. If you don’t have a CVV for your Maestro card you can use 000.{/s}" >?</span >
+                      title = "{s namespace=Paymill name=frontend_creditcard_tooltip_cvc} What is a CVV/CVC number? Prospective credit cards will have a 3 to 4-digit number, usually on the back of the card. It ascertains that the payment is carried out by the credit card holder and the card account is legitimate. On Visa the CVV (Card Verification Value) appears after and to the right of your card number. Same goes for Mastercard's CVC (Card Verfication Code), which also appears after and to the right of  your card number, and has 3-digits. Diners Club, Discover, and JCB credit and debit cards have a three-digit card security code which also appears after and to the right of your card number. The American Express CID (Card Identification Number) is a 4-digit number printed on the front of your card. It appears above and to the right of your card number. On Maestro the CVV appears after and to the right of your number. If you don’t have a CVV for your Maestro card you can use 000.{/s}" >?</span >
                 </p >
                 <p class = "none" >
-                    <label >{s namespace=Paymill name=paymill_frontend_form_expdate}Valid until (MM/YYYY) *{/s}</label >
+                    <label >{s namespace=Paymill name=frontend_creditcard_label_valid}Valid until (MM/YYYY) *{/s}</label >
                     <input id = "card-expiry-month" type = "text" style = "width: 30px; display: inline-block;"
                            class = "text"
                            value = "{$paymillMonth}" />
@@ -432,7 +432,7 @@ function detectCreditcardBranding(creditcardNumber)
                 {if {config name=paymillSepaActive}}
                     <div class = "form-group" >
                         <label class = "col-lg-4 control-label"
-                               for = "paymill_iban" >{s namespace=Paymill name=paymill_frontend_form_iban}IBAN *{/s}</label >
+                               for = "paymill_iban" >{s namespace=Paymill name=frontend_directdebit_label_iban}IBAN *{/s}</label >
 
                         <div class = "col-lg-6" >
                             <input id = "paymill_iban" type = "text" size = "20" class = "form-control"
@@ -441,7 +441,7 @@ function detectCreditcardBranding(creditcardNumber)
                     </div >
                     <div class = "form-group" >
                         <label class = "col-lg-4 control-label"
-                               for = "paymill_bic" >{s namespace=Paymill name=paymill_frontend_form_bic}BIC *{/s}</label >
+                               for = "paymill_bic" >{s namespace=Paymill name=frontend_directdebit_label_bic}BIC{/s} *</label >
 
                         <div class = "col-lg-6" >
                             <input id = "paymill_bic" type = "text" size = "20" class = "form-control"
@@ -470,29 +470,29 @@ function detectCreditcardBranding(creditcardNumber)
                 {/if}
             {else}
                 <p class = "none" >
-                    <label for = "paymill_accountholder" >{s namespace=Paymill name=paymill_frontend_form_holder_elv}Account Holder *{/s}</label >
+                    <label for = "paymill_accountholder" >{s namespace=Paymill name=frontend_directdebit_label_holder}Account Holder{/s} *</label >
                     <input id = "paymill_accountholder" type = "text" size = "20" class = "text"
                            value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
                 </p >
                 {if {config name=paymillSepaActive}}
                     <p class = "none" >
-                        <label for = "paymill_iban" >{s namespace=Paymill name=paymill_frontend_form_iban}IBAN *{/s}</label >
+                        <label for = "paymill_iban" >{s namespace=Paymill name=frontend_directdebit_label_iban}IBAN{/s} *</label >
                         <input id = "paymill_iban" type = "text" size = "4" class = "text"
                                value = "{$paymillIban}" />
                     </p >
                     <p class = "none" >
-                        <label for = "paymill_bic" >{s namespace=Paymill name=paymill_frontend_form_bic}BIC *{/s}</label >
+                        <label for = "paymill_bic" >{s namespace=Paymill name=frontend_directdebit_label_bic}BIC{/s} *</label >
                         <input id = "paymill_bic" type = "text" size = "4" class = "text"
                                value = "{$paymillBic}" />
                     </p >
                 {else}
                     <p class = "none" >
-                        <label for = "paymill_accountnumber" >{s namespace=Paymill name=paymill_frontend_form_number_elv}Account Number *{/s}</label >
+                        <label for = "paymill_accountnumber" >{s namespace=Paymill name=frontend_directdebit_label_number}Account Number{/s} *</label >
                         <input id = "paymill_accountnumber" type = "text" size = "4" class = "text"
                                value = "{$paymillAccountNumber}" />
                     </p >
                     <p class = "none" >
-                        <label for = "paymill_banknumber" >{s namespace=Paymill name=paymill_frontend_form_bankcode}Bankcode *{/s}</label >
+                        <label for = "paymill_banknumber" >{s namespace=Paymill name=frontend_directdebit_label_bankcode}Bankcode{/s} *</label >
                         <input id = "paymill_banknumber" type = "text" size = "4" class = "text"
                                value = "{$paymillBankCode}" />
                     </p >
