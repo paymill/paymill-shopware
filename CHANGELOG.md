@@ -1,4 +1,9 @@
 #Release Notes
+##1.3.0
+- Added improved iban validation
+- Added support for various languages
+- Added support for the conexco responsive template
+
 ##1.2.0
 - Added additional validation to the fast checkout process
 - Implemented optional SEPA direct debit form. Only payments from germany are supported
