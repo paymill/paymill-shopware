@@ -10,14 +10,13 @@
  */
 class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper
 {
-
     private $_configTranslationMapping = array(
-        'publicKey'           => 'paymill_config_public_key_label',
-        'privateKey'          => 'paymill_config_private_key_label',
-        'paymillPreAuth'      => 'paymill_config_preauthorize_label',
-        'paymillDebugging'    => 'paymill_config_debugging_label',
-        'paymillFastCheckout' => 'paymill_config_fast_checkout_label',
-        'paymillLogging'      => 'paymill_config_logging_label',
+        'publicKey'           => 'config_publicKey_label',
+        'privateKey'          => 'config_privateKey_label',
+        'paymillPreAuth'      => 'config_preAuth_label',
+        'paymillDebugging'    => 'config_debugging_label',
+        'paymillFastCheckout' => 'config_fastCheckout_label',
+        'paymillLogging'      => 'config_logging_label',
         'paymillSepaActive'   => 'paymill_config_sepa_active_label'
     );
 
@@ -25,9 +24,11 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelp
 
     /**
      * Creates an instance of the translation helper
+     *
      * @param $form
      */
-    public function __construct($form){
+    public function __construct($form)
+    {
         $this->_form = $form;
     }
 
@@ -43,19 +44,19 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelp
             $form = $this->_form;
             $translationStore = $this->_getSnippets();
 
-            foreach($translationStore as $locale => $snippets) {
+            foreach ($translationStore as $locale => $snippets) {
                 $shopRepository = Shopware()->Models()->getRepository('\Shopware\Models\Shop\Locale');
-                $localeModel = $shopRepository->findOneBy(array( 'locale' => $locale ));
+                $localeModel = $shopRepository->findOneBy(array('locale' => $locale));
 
-                foreach($snippets as $elementName => $snippet) {
-                    if($localeModel === null){
+                foreach ($snippets as $elementName => $snippet) {
+                    if ($localeModel === null) {
                         continue;
                     }
                     $elementModel = $form->getElement($elementName);
-                    if($elementModel === null) {
+                    if ($elementModel === null) {
                         continue;
                     }
-                    $this->_addNewConfigTranslation($localeModel,$snippet, $elementModel);
+                    $this->_addNewConfigTranslation($localeModel, $snippet, $elementModel);
                 }
             }
         } catch (Exception $exception) {
@@ -66,8 +67,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelp
 
     /**
      * Simplifies the usage of the setLabel and addTranslation method calls
-     * @param $localeModel
-     * @param string  $translationSnippet
+     *
+     * @param                                 $localeModel
+     * @param string                          $translationSnippet
      * @param \Shopware\Models\Config\Element $elementModel
      */
     private function _addNewConfigTranslation($localeModel, $translationSnippet, $elementModel)
@@ -80,24 +82,29 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelp
 
     /**
      * Returns an array of translation snippets. array[language][elementName][snippet]
+     *
      * @return array
      */
-    private function _getSnippets(){
+    private function _getSnippets()
+    {
         $translationStore = array();
         $sql = "SELECT value FROM s_core_snippets s, s_core_locales l
                 WHERE s.localeID = l.id
                 AND l.locale = ?
                 AND `name` = ?";
 
-        foreach($this->_configTranslationMapping as $elementName => $translationName){
-            $translationStore['de_DE'][$elementName] = Shopware()->Db()->fetchOne($sql,array( 'de_DE', $translationName));
-            $translationStore['en_GB'][$elementName] = Shopware()->Db()->fetchOne($sql,array( 'en_GB', $translationName));
+        foreach ($this->_configTranslationMapping as $elementName => $translationName) {
+            $translationStore['de_DE'][$elementName] = Shopware()->Db()->fetchOne($sql, array('de_DE',
+                                                                                              $translationName));
+            $translationStore['en_GB'][$elementName] = Shopware()->Db()->fetchOne($sql, array('en_GB',
+                                                                                              $translationName));
         }
 
         return $translationStore;
     }
 
-    public function dropSnippets(){
+    public function dropSnippets()
+    {
         $sql = "DELETE FROM s_core_snippets WHERE namespace = 'Paymill';";
         Shopware()->DB()->query($sql);
     }

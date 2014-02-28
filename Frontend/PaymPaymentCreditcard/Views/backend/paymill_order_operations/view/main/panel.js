@@ -49,17 +49,17 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                         },
                         columns:   [
                             {
-                                header:    'Date',
+                                header:    '{s namespace=Paymill name=log_date_title}Date{/s}',
                                 dataIndex: 'entryDate',
                                 flex:      1
                             },
                             {
-                                header:    'Description',
+                                header:    '{s namespace=Paymill name=transaction_label}Transaction{/s}',
                                 dataIndex: 'description',
                                 flex:      4
                             },
                             {
-                                header:    'Amount',
+                                header:    '{s namespace=Paymill name=amount_label}Amount{/s}',
                                 dataIndex: 'amount',
                                 flex:      1
                             }
@@ -118,9 +118,9 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                 var decodedResponse = Ext.decode(response.responseText);
                 var messageText = "";
                 if (decodedResponse.success) {
-                    messageText = "{s namespace=Paymill name=paymill_backend_order_operations_capture_success}Transaction captured successfully.{/s}";
+                    messageText = "{s namespace=Paymill name=feedback_capture_success}Transaction captured successfully.{/s}";
                 } else {
-                    messageText = "{s namespace=Paymill name=paymill_backend_order_operations_capture_failure}Transaction could not be captured: {/s}";
+                    messageText = "{s namespace=Paymill name=feedback_capture_failure}Transaction could not be captured: {/s}";
                     messageText += decodedResponse.code;
                 }
                 if (decodedResponse.success) {
@@ -175,9 +175,9 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                 var decodedResponse = Ext.decode(response.responseText);
                 var messageText = "";
                 if (decodedResponse.success) {
-                    messageText = "{s namespace=Paymill name=paymill_backend_order_operations_refund_success}Transaction refunded successfully.{/s}";
+                    messageText = "{s namespace=Paymill name=feedback_refund_success}Transaction refunded successfully.{/s}";
                 } else {
-                    messageText = "{s namespace=Paymill name=paymill_backend_order_operations_refund_failure}Transaction could not be refunded: {/s}";
+                    messageText = "{s namespace=Paymill name=feedback_search_failure}Transaction could not be refunded: {/s}";
                     messageText += decodedResponse.code;
                 }
                 if (decodedResponse.success) {
@@ -199,7 +199,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
         var me = this;
         var button = new Array();
         button.push(Ext.create('Ext.Button', {
-            text:     '{s namespace=paymill name=paymill_backend_order_operations_refund_button}Refund{/s}',
+            text:     '{s namespace=paymill name=refund_label}Refund{/s}',
             scale:    'medium',
             disabled: !(me.canRefund()),
             handler:  function ()
@@ -211,7 +211,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
         button.push({ xtype: 'splitter' });
 
         button.push(Ext.create('Ext.Button', {
-            text:     '{s namespace=paymill name=paymill_backend_order_operations_capture_button}Capture{/s}',
+            text:     '{s namespace=paymill name=capture_label}Capture{/s}',
             scale:    'medium',
             disabled: !(me.canCapture()),
             handler:  function ()
