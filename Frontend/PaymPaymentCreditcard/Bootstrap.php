@@ -251,7 +251,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                                       .'<li style="list-style: inherit;">Optional configuration for authorization and manual capture with credit card payments</li>'
                                       .'<li style="list-style: inherit;">Optional fast checkout configuration allowing your customers not to enter their payment detail over and over during checkout</li>'
                                       .'<li style="list-style: inherit;">Improved payment form with visual feedback for your customers</li>'
-                                      .'<li style="list-style: inherit;">Supported Languages: German, English</li>'
+                                      .'<li style="list-style: inherit;">Supported Languages: German, English, Italian, French, Spanish, Portuguese</li>'
                                       .'<li style="list-style: inherit;">Backend Log with custom View accessible from your shop backend</li>'
                                       .'</ul>'
         );
