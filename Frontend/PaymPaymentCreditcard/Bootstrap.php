@@ -413,13 +413,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $snippets = Shopware()->Db()->fetchAll("
                         SELECT localeID, name, value
                         FROM s_core_snippets
-                        WHERE namespace = 'Paymill' AND (name = 'paymill_credit_card' OR name = 'paymill_direct_debit')
+                        WHERE namespace = 'Paymill' AND (name = 'frontend_creditcard' OR name = 'frontend_directdebit')
                         GROUP BY `localeID`,`value`"
             );
 
             foreach ($snippets as $snippet) {
                 $translationObject->write($snippet['localeID'], "config_payment", $snippet['name'] ===
-                                                                                  'paymill_direct_debit' ? $elvId : $ccId, array('description' => $snippet['value']), 1);
+                                                                                  'frontend_directdebit' ? $elvId : $ccId, array('description' => $snippet['value']), 1);
             }
         } catch (Exception $exception) {
             Shopware()->Log()->Err("Can not create translation for payment names." . $exception->getMessage());
