@@ -39,12 +39,18 @@ class Services_Paymill_PaymentProcessor
 
     /**
      * Creates an object of the PaymentProcessor class.
-     *
-     * @param String                            $privateKey
-     * @param String                            $apiUrl
-     * @param String                            $libBase
-     * @param array                             $params
-     * @param Services_Paymill_LoggingInterface $loggingClassInstance Instance of Object implementing the Services_Paymill_PaymentProcessorInterface. If not set, there will be no logging.
+     * @param String <b>$privateKey</b> Paymill-PrivateKey
+     * @param String <b>$apiUrl</b> Paymill-Api Url
+     * @param String <b>$libBase</b> Path to the lib Base (Can be null, Default Path will be used)
+     * @param array <b>$params</b>( <br />
+     *    <b>token</b>,               generated Token <br />
+     *    <b>amount</b>,              Basketamount <br />
+     *    <b>currency</b>,            Transaction currency <br />
+     *    <b>name</b>,                Customer name <br />
+     *    <b>email</b>,               Customer emailaddress <br />
+     *    <b>description</b>,         Description for transactions <br />
+     * ) <p color='red'><b>(If not set here, the use of setters is required for the class to work)</b></p>
+     * @param object $loggingClassInstance Instance of Object implementing the Services_Paymill_PaymentProcessorInterface. If not set, there will be no logging.
      */
     public function __construct($privateKey = null, $apiUrl = null, $libBase = null, $params = null, Services_Paymill_LoggingInterface $loggingClassInstance = null)
     {
@@ -63,19 +69,19 @@ class Services_Paymill_PaymentProcessor
     /**
      * Creates a Paymill-Client with the given Data
      *
-     * @internal param array $params
+     * @param array $params
      * @return boolean
-*/
+     */
     private function _createClient()
     {
         if (isset($this->_clientId)) {
             $this->_log("Client using: " . $this->_clientId);
         } else {
             $client = $this->_clientsObject->create(
-                    array(
-                        'email' => $this->_email,
-                        'description' => $this->_description
-                    )
+                array(
+                    'email' => $this->_email,
+                    'description' => $this->_description
+                )
             );
 
             $this->_validateResult($client, 'Client');
@@ -88,19 +94,19 @@ class Services_Paymill_PaymentProcessor
     /**
      * Creates a Paymill-Payment with the given Data
      *
-     * @internal param array $params
+     * @param array $params
      * @return boolean
-*/
+     */
     private function _createPayment()
     {
         if (isset($this->_paymentId)) {
             $this->_log("Payment using: " . $this->_paymentId);
         } else {
             $payment = $this->_paymentsObject->create(
-                    array(
-                        'token' => $this->_token,
-                        'client' => $this->_clientId
-                    )
+                array(
+                    'token' => $this->_token,
+                    'client' => $this->_clientId
+                )
             );
 
             $this->_validateResult($payment, 'Payment');
@@ -113,9 +119,9 @@ class Services_Paymill_PaymentProcessor
     /**
      * Creates a Paymill-Transaction with the given Data
      *
-     * @internal param array $params
+     * @param array $params
      * @return boolean
-*/
+     */
     private function _createTransaction()
     {
         $parameter = array(
@@ -136,19 +142,19 @@ class Services_Paymill_PaymentProcessor
     /**
      * Creates a Paymill-Transaction with the given Data
      *
-     * @internal param array $params
+     * @param array $params
      * @return boolean
-*/
+     */
     private function _createPreauthorization()
     {
         $preAuth = $this->_preauthObject->create(
-                array(
-                    'amount' => $this->_preAuthAmount,
-                    'currency' => $this->_currency,
-                    'description' => $this->_description,
-                    'payment' => $this->_paymentId,
-                    'client' => $this->_clientId,
-                )
+            array(
+                'amount' => $this->_preAuthAmount,
+                'currency' => $this->_currency,
+                'description' => $this->_description,
+                'payment' => $this->_paymentId,
+                'client' => $this->_clientId,
+            )
         );
         $this->_validateResult($preAuth, 'Preauthorization');
         $this->_preauthId = $preAuth['preauthorization']['id'];
@@ -186,9 +192,9 @@ class Services_Paymill_PaymentProcessor
 
     /**
      * Validates the array passed as an argument to be processPayment() compliant
-     * @internal param mixed $parameter
+     * @param mixed $parameter
      * @return boolean
-*/
+     */
     private function _validateParameter()
     {
         if ($this->_preAuthAmount == null) {
@@ -243,13 +249,10 @@ class Services_Paymill_PaymentProcessor
     /**
      * Validates the created Paymill-Objects
      *
-     * @param        $paymillObject
+     * @param array $transaction
      * @param string $type
-     *
-     * @throws Exception
-     * @internal param array $transaction
      * @return boolean
-*/
+     */
     private function _validateResult($paymillObject, $type)
     {
         $this->_lastResponse = $paymillObject;
@@ -258,17 +261,17 @@ class Services_Paymill_PaymentProcessor
             if (empty($paymillObject['data']['response_code'])) {
                 $paymillObject['data']['response_code'] = 0;
             }
-            
+
             throw new Exception("Invalid Result Exception: Invalid ResponseCode", $paymillObject['data']['response_code']);
         }
-        
+
         if (isset($paymillObject['response_code']) && $paymillObject['response_code'] !== 20000) {
             $this->_log("An Error occured: " . $paymillObject['response_code'], var_export($paymillObject, true));
             if (empty($paymillObject['response_code'])) {
                 $paymillObject['response_code'] = 0;
             }
-            
-            throw new Exception("Invalid Result Exception: Invalid ResponseCode", $paymillObject['response_code']);
+
+            throw new Exception("Invalid Result Exception: Invalid ResponseCode", (int)$paymillObject['response_code']);
         }
 
         if (!isset($paymillObject['id']) && !isset($paymillObject['data']['id'])) {
@@ -304,10 +307,10 @@ class Services_Paymill_PaymentProcessor
     }
 
     /**
-     * Executes the Capture Process
-     * @param $captureNow
+     * Creates a transaction when capturenow is true otherwise a preauthorisation will be created
      *
-     * @return bool
+     * @param boolean $captureNow
+     * @return boolean
      */
     private function _processPreAuthCapture($captureNow)
     {
@@ -321,9 +324,8 @@ class Services_Paymill_PaymentProcessor
     /**
      * Executes the Payment Process
      *
-     * @param bool $captureNow
      * @return boolean
-*/
+     */
     final public function processPayment($captureNow = true)
     {
         $this->_initiatePhpWrapperClasses();
@@ -359,8 +361,9 @@ class Services_Paymill_PaymentProcessor
     }
 
     /**
-     * Executes capture
-     * @return bool
+     * Captures from an existing preauthorisation
+     *
+     * @return boolean
      */
     final public function capture()
     {
@@ -391,6 +394,23 @@ class Services_Paymill_PaymentProcessor
             'name' => $this->_name,
             'source' => $this->_source
         );
+    }
+
+    /**
+     * Validates the Id by getting the object with the ID from Paymill
+     *
+     * @param string $id
+     * @param Service_Paymill_Base $object
+     * @return boolean
+     */
+    private function isIdValid($id, $object)
+    {
+        $result = $object->getOne($id);
+        if (array_key_exists('id', $result)) {
+            return $result['id'] === $id;
+        } else {
+            return false;
+        }
     }
 
     /*     * **************************************************************************************************************
@@ -447,10 +467,6 @@ class Services_Paymill_PaymentProcessor
         return $this->_lastResponse;
     }
 
-    /**
-     * Returns the error code
-     * @return mixed
-     */
     public function getErrorCode()
     {
         return $this->_errorCode;
@@ -466,7 +482,10 @@ class Services_Paymill_PaymentProcessor
      */
     public function setClientId($clientId = null)
     {
-        $this->_clientId = $clientId;
+        $this->_initiatePhpWrapperClasses();
+        if ($this->isIdValid($clientId, $this->_clientsObject)) {
+            $this->_clientId = $clientId;
+        }
     }
 
     /**
@@ -475,7 +494,10 @@ class Services_Paymill_PaymentProcessor
      */
     public function setPaymentId($paymentId = null)
     {
-        $this->_paymentId = $paymentId;
+        $this->_initiatePhpWrapperClasses();
+        if ($this->isIdValid($paymentId, $this->_paymentsObject)) {
+            $this->_paymentId = $paymentId;
+        }
     }
 
     /**
@@ -562,8 +584,8 @@ class Services_Paymill_PaymentProcessor
     /**
      * Sets up the Logger Object.
      * <b>The Logger object can be any class implementing the Services_Paymill_PaymentProcessorInterface.</b>
-     * @param Services_Paymill_LoggingInterface $logger
-*/
+     * @param any $logger
+     */
     public function setLogger(Services_Paymill_LoggingInterface $logger = null)
     {
         $this->_logger = $logger;

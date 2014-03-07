@@ -18,7 +18,6 @@ class Services_Paymill_Transactions extends Services_Paymill_Base
      *
      * @param string $clientId
      *
-     * @throws Services_Paymill_Exception
      * @return array item deleted
      */
     public function delete($clientId = null)
