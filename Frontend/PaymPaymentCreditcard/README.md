@@ -1,11 +1,11 @@
 Paymill-Shopware
 ==================
 
-Payment plugin for Shopware Community Edition Version 4.0.0 - 4.1.3
+Payment plugin for Shopware Community Edition Version 4.0.0 - 4.2.1
 
 ## Installation from this git repository
 
-    https://github.com/Paymill/Zahlungsformular/archive/master.zip
+    https://github.com/paymill/paymill-shopware/archive/master.zip
 
 - Download and unzip the Zip file.
 - Go to the directory you just unzipped the Plugin into, and copy the "Frontend" Folder into the Community Directory of your Shopware installation ("Shopware Directory"\engine\Shopware\Plugins\Community)
@@ -13,7 +13,7 @@ Payment plugin for Shopware Community Edition Version 4.0.0 - 4.1.3
 - Finally activate the plugin and customize it to your needs under Settings > Payment methods.
 
 ## Update your Installation using this repository
-    https://github.com/Paymill/Zahlungsformular/archive/master.zip
+    https://github.com/paymill/paymill-shopware/archive/master.zip
 
 - Download and unzip the Zip file.
 - Go to the directory you just unzipped the Plugin into, and copy the "Frontend" Folder into the Community Directory of your Shopware installation ("Shopware Directory"\engine\Shopware\Plugins\Community)

@@ -27,6 +27,7 @@
 </script >
 <script type = "text/javascript" src = "https://bridge.paymill.com/" ></script >
 <script type = "text/javascript" src = "{link file='frontend/_resources/javascript/Iban.js'}" ></script >
+<script type = "text/javascript" src = "{link file='frontend/_resources/javascript/BrandDetection.js'}" ></script >
 <script type = "text/javascript" >
 function debug(message)
 {
@@ -158,23 +159,24 @@ $(document).ready(function ()
 
     $('#card-number').keyup(function ()
     {
-        var brand = detectCreditcardBranding($('#card-number').val());
+        $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
+        var detector = new BrandDetection();
+        var brand = detector.detect($('#card-number').val());
         console.log("Brand detected: " + brand);
+
+        if (detector.validate($('#card-number').val())) {
+            suffix = '';
+        } else {
+            suffix = '-temp';
+        }
+
         switch (brand) {
             case 'unknown':
                 $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
                 break;
             case 'carte bleue':
                 $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
-                $('#card-number').addClass("paymill-card-number-" + 'carte-bleue');
-                break;
-            case 'china unionpay':
-                $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
-                $('#card-number').addClass("paymill-card-number-" + 'unionpay');
-                break;
-            case 'diners club':
-                $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
-                $('#card-number').addClass("paymill-card-number-" + 'diners');
+                $('#card-number').addClass("paymill-card-number-" + 'carte-bleue' + suffix);
                 break;
             case 'maestro':
                 VALIDATE_CVC = false;
@@ -183,10 +185,12 @@ $(document).ready(function ()
             case 'discover':
             case 'jcb':
             case 'amex':
+            case 'china-unionpay':
+            case 'diners-club':
             case 'mastercard':
             case 'visa':
                 $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
-                $('#card-number').addClass("paymill-card-number-" + brand);
+                $('#card-number').addClass("paymill-card-number-" + brand + suffix);
                 break;
 
         }

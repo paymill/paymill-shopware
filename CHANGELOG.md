@@ -1,8 +1,9 @@
 #Release Notes
 ##1.3.0
+- Added Support for Conexco Responsive Template
 - Added improved iban validation
 - Added support for various languages
-- Added support for the conexco responsive template
+- Added improved early pan detection
 
 ##1.2.0
 - Added additional validation to the fast checkout process

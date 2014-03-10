@@ -5,14 +5,11 @@
  */
 class Services_Paymill_Exception extends Exception
 {
-    /**
-     * Constructor for exception object
-     *
-     * @param string $message
-     * @param int    $code
-     *
-     * @return \Services_Paymill_Exception
-     */
+  /**
+   * Constructor for exception object
+   *
+   * @return void
+   */
   public function __construct($message, $code)
   {
         parent::__construct($message, $code);

@@ -18,7 +18,6 @@ class Services_Paymill_Payments extends Services_Paymill_Base
      *
      * @param array $itemData
      *
-     * @throws Services_Paymill_Exception
      * @return array item updated or null
      */
     public function update(array $itemData = array())

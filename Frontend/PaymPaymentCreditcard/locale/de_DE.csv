@@ -47,8 +47,8 @@ feedback_error_directdebit_parent;"Bitte geben Sie Ihre Bankdaten ein. Aus Siche
 feedback_error_general_unknown;"Während Ihrer Zahlung ist ein Fehler aufgetreten."
 feedback_error_general_unknown_payment;"Zahlart konnte nicht identifiziert werden. Bitte kontaktieren Sie den Support."
 feedback_general_affirmation;"Sind Sie sicher?"
-feedback_info_creditcard_slogan;"Sichere Kreditkartenzahlung powered by "
-feedback_info_directdebit_slogan;"ELV powered by "
+feedback_info_creditcard_slogan;"Sichere Kreditkartenzahlung powered by"
+feedback_info_directdebit_slogan;"ELV powered by"
 feedback_info_general_required;"Die mit einem * markierten Felder sind Pflichtfelder."
 feedback_refund_failure;"Gutschrift fehlgeschlagen"
 feedback_refund_success;"Gutschrift erfolgreich"
@@ -81,3 +81,125 @@ module_title;"PAYMILL Kreditkartenzahlung & ELV"
 operations_title;"PAYMILL Transaktions Optionen"
 refund_description;"Erfolgreiche Transaktionen können hier rückerstattet werden."
 refund_label;Gutschrift
+config_sepa_active_label;"SEPA Formular anzeigen"
+config_sepa_active_description;"Momentan werden nur deutsche Bankdaten unterstützt"
+feedback_error_sepa_iban;"Bitte geben Sie eine gültige IBAN an."
+feedback_error_sepa_bic;"Bitte geben Sie eine gültige BIC an."
+frontend_directdebit_label_iban;IBAN
+frontend_directdebit_label_bic;BIC
+TEXT_INFO_API_VERSION;"API Version"
+config_order_state_label;Bestellungstatus
+config_transaction_order_status_id_label;"API Ergebnisse"
+config_transaction_order_status_id_description;"API Ergebnisse in diesem Bestellstatus für Bestellungen speichern."
+config_webhooks_label;"Webhooks aktivieren"
+config_webhooks_description;"Gutschriften aus dem Paymill Cockpit automatisch mit meinem Shop synchronisieren"
+config_webhooks_create;"Webhooks anlegen"
+config_webhooks_remove;"Webhooks entfernen"
+config_webhooks_url;"Registrierte Webhook-URL"
+config_payment_date;"Bestellung als bezahlt markieren"
+config_buttonSolution;"Button-Lösung aktivieren"
+feedback_month_january;Januar
+feedback_month_february;Februar
+feedback_month_march;März
+feedback_month_april;April
+feedback_month_may;Mai
+feedback_month_june;Juni
+feedback_month_july;Juli
+feedback_month_august;August
+feedback_month_september;September
+feedback_month_october;Oktober
+feedback_month_november;November
+feedback_month_december;Dezemper
+feedback_config_saved;"Ihre Änderungen wurden erfolgreich gespeichert"
+feedback_config_permission;"Sie haben keine Berechtingung die Einstellungen zu Ändern"
+feedback_config_error_differentamount;"Token Toleranz Wert muss ein gültiges Format haben"
+feedback_config_error_publickey;"Bitte geben Sie Ihren Public Key an."
+feedback_config_error_privatekey;"Bitte geben Sie Ihren Private Key an."
+config_breadcrumb_payment;Zahlung
+config_zone_label;"Erlaubte Steuerzonen"
+config_zone_description;"Bitte geben Sie die Zonen einzeln an und trennen Sie diese durch Kommas (z.B. US, UK (Lassen Sie das Feld leer um alle Zonen zu erlauben.))"
+log_search_details;"Show Details"
+log_detail_title;Details
+config_payment_header;Zahlungskonfiguration
+config_general_header;Hauptkonfiguration
+config_save;Speichern
+config_payment_cc;"Kreditkartenzahlung aktivieren"
+config_payment_elv;"ELV aktivieren"
+frontend_cart_empty;"Ihr Warenkorb ist leer."
+frontend_redirect_order_overview;Bestellungsübersicht
+frontend_redirect_paymentselection;Zahlartenauswahl
+frontend_order_now;Bestellung
+frontend_thank_you;"Vielen Dank für Ihre Bestellung"
+token_error;"Während Ihrer Zahlung ist ein Fehler aufgetreten."
+hooks_headline;"PAYMILL Hooks"
+text_message;Nachricht
+text_debug;"Debug Informationen"
+text_date;Datum
+send_invoice_mail;"Rechnungsemail senden"
+error_text_invalid_token;"Der folgende Fehler ist aufgetreten:"
+Basic_Setting;"Paymill Grundeinstellungen"
+error_text_no_entry_selected;"Bitte wählen Sie einen Eintrag aus"
+action_delete;"Auswahl löschen"
+backend_log_dev_info_additional;"Detail Debug Informationen"
+checkout_generating_invoice;"Rechnung wird generiert"
+log_action_success;"Ihre Operation war erfolgreich"
+checkout_desc;Beschreibung
+PAYMILL_40000;"General problem with data."
+PAYMILL_40001;"General problem with payment data."
+PAYMILL_40100;"Problem with credit card data."
+PAYMILL_40101;"Problem with cvv."
+PAYMILL_40102;"Card expired or not yet valid."
+PAYMILL_40103;"Limit exceeded."
+PAYMILL_40104;"Card invalid."
+PAYMILL_40105;"Expiry date not valid."
+PAYMILL_40106;"Credit card brand required."
+PAYMILL_40200;"Problem with bank account data."
+PAYMILL_40201;"Bank account data combination mismatch."
+PAYMILL_40202;"User authentication failed."
+PAYMILL_40300;"Problem with 3d secure data."
+PAYMILL_40301;"Currency / amount mismatch"
+PAYMILL_40400;"Problem with input data."
+PAYMILL_40401;"Amount too low or zero."
+PAYMILL_40402;"Usage field too long."
+PAYMILL_40403;"Currency not allowed."
+PAYMILL_50000;"General problem with backend."
+PAYMILL_50001;"Country blacklisted."
+PAYMILL_50002;"IP blacklisted."
+PAYMILL_50100;"Technical error with credit card."
+PAYMILL_50101;"Error limit exceeded."
+PAYMILL_50102;"Card declined by authorization system."
+PAYMILL_50103;"Manipulation or stolen card."
+PAYMILL_50104;"Card restricted"
+PAYMILL_50105;"Invalid card configuration data."
+PAYMILL_50200;"Technical error with bank account."
+PAYMILL_50201;"Card blacklisted."
+PAYMILL_50300;"Technical error with 3D secure."
+PAYMILL_50400;"Decline because of risk issues."
+PAYMILL_50500;"General timeout."
+PAYMILL_50501;"Timeout on side of the acquirer."
+PAYMILL_50502;"Risk management transaction timeout"
+PAYMILL_50600;"Duplicate transaction."
+PAYMILL_10001;"General undefined response."
+PAYMILL_10002;"Still waiting on something."
+PAYMILL_20000;"General success response."
+internal_server_error;"The communication with the psp failed."
+invalid_public_key;"The public key is invalid."
+invalid_payment_data;"Paymentmethod, card type currency or country not authorized"
+unknown_error;"Unknown Error"
+3ds_cancelled;"3-D Secure process has been canceled by the user"
+field_invalid_card_number;"Invalid Credit Card Number"
+field_invalid_card_exp_year;"Invalid Expiry Year"
+field_invalid_card_exp_month;"Invalid Expiry Month"
+field_invalid_card_exp;"Credit Card not valid"
+field_invalid_card_cvc;"Invalid CVC"
+field_invalid_card_holder;"Invalid Card Holder"
+field_invalid_amount_int;"Missing amount for 3-D Secure"
+field_invalid_amount;"Missing amount for 3-D Secure"
+field_invalid_currency;"Invalid currency for 3-D Secure"
+field_invalid_account_number;"Invalid Account Number"
+field_invalid_account_holder;"Invalid Account Holder"
+field_invalid_bank_code;"Invalid bank code"
+field_invalid_iban;"Invalid IBAN"
+field_invalid_bic;"Invalid BIC"
+field_invalid_country;"Invalid country for sepa transactions"
+field_invalid_bank_data;"Invalid bank data"
