@@ -436,7 +436,7 @@ function detectCreditcardBranding(creditcardNumber)
                 {if {config name=paymillSepaActive}}
                     <div class = "form-group" >
                         <label class = "col-lg-4 control-label"
-                               for = "paymill_iban" >{s namespace=Paymill name=frontend_directdebit_label_iban}IBAN *{/s}</label >
+                               for = "paymill_iban" >{s namespace=Paymill name=frontend_directdebit_label_iban}IBAN{/s} *</label >
 
                         <div class = "col-lg-6" >
                             <input id = "paymill_iban" type = "text" size = "20" class = "form-control"
