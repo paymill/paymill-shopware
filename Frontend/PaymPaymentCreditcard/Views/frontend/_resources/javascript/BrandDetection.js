@@ -82,6 +82,7 @@ BrandDetection.prototype.detect = function(cardnumber)
         for (var cardinfo in this.creditcard) {
             if (this.creditcard[cardinfo].pattern.test(cardnumber)) {
                 brand = cardinfo;
+                break;
             }
         }
     }
