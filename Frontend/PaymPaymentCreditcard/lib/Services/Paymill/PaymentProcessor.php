@@ -467,6 +467,10 @@ class Services_Paymill_PaymentProcessor
         return $this->_lastResponse;
     }
 
+    /**
+     * Returns the code of the last error occurred during the payment process
+     * @return mixed
+     */
     public function getErrorCode()
     {
         return $this->_errorCode;

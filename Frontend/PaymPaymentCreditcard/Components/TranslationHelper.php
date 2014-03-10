@@ -103,6 +103,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelp
         return $translationStore;
     }
 
+    /**
+     * Removes all Snippets created by the plugin installation routine
+     */
     public function dropSnippets()
     {
         $sql = "DELETE FROM s_core_snippets WHERE namespace = 'Paymill';";

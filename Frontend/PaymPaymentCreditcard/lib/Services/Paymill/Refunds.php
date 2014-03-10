@@ -47,7 +47,11 @@ class Services_Paymill_Refunds extends Services_Paymill_Base
     }
 
     /**
-     * {@inheritDoc}
+     * Updates resource item
+     * @param array $itemData
+     *
+     * @return array|void
+     * @throws Services_Paymill_Exception
      */
     public function update(array $itemData = array())
     {
