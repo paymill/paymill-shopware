@@ -27,6 +27,7 @@
 </script >
 <script type = "text/javascript" src = "https://bridge.paymill.com/" ></script >
 <script type = "text/javascript" src = "{link file='frontend/_resources/javascript/Iban.js'}" ></script >
+<script type = "text/javascript" src = "{link file='frontend/_resources/javascript/BrandDetection.js'}" ></script >
 <script type = "text/javascript" >
 function debug(message)
 {
@@ -158,18 +159,15 @@ $(document).ready(function ()
 
     $('#card-number').keyup(function ()
     {
-        var brand = paymill.cardType($('#card-number').val());
-        brand = brand.toLowerCase();
-        $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
-        $('#card-cvc').val("");
-        if (brand !== 'unknown') {
+        var detector = new BrandDetection();
+        var brand = detector.detect($('#card-number').val());
+        console.log("Brand detected: " + brand);
+
+        if (detector.validate($('#card-number').val())) {
             suffix = '';
         } else {
             suffix = '-temp';
         }
-
-        brand = detectCreditcardBranding($('#card-number').val());
-        console.log("Brand detected: " + brand);
 
         switch (brand) {
             case 'unknown':
