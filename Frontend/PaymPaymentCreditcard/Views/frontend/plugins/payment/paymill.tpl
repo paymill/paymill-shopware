@@ -159,6 +159,7 @@ $(document).ready(function ()
 
     $('#card-number').keyup(function ()
     {
+        $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
         var detector = new BrandDetection();
         var brand = detector.detect($('#card-number').val());
         console.log("Brand detected: " + brand);
@@ -177,14 +178,6 @@ $(document).ready(function ()
                 $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
                 $('#card-number').addClass("paymill-card-number-" + 'carte-bleue' + suffix);
                 break;
-            case 'china unionpay':
-                $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
-                $('#card-number').addClass("paymill-card-number-" + 'unionpay' + suffix);
-                break;
-            case 'diners club':
-                $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
-                $('#card-number').addClass("paymill-card-number-" + 'diners' + suffix);
-                break;
             case 'maestro':
                 VALIDATE_CVC = false;
             case 'dankort':
@@ -192,6 +185,8 @@ $(document).ready(function ()
             case 'discover':
             case 'jcb':
             case 'amex':
+            case 'china-unionpay':
+            case 'diners-club':
             case 'mastercard':
             case 'visa':
                 $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
