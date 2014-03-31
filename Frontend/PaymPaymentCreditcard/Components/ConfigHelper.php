@@ -42,8 +42,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper
         $sepaFlag = $swConfig->get("paymillSepaActive") == true;
 
         $sql = "UPDATE paymill_config_data SET"
-               . "`publicKey` = ?,"
-               . "`privateKey` = ?,"
                . "`paymillPreAuth` = ?,"
                . "`paymillDebugging` = ?,"
                . "`paymillLogging` = ?,"
@@ -51,17 +49,39 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper
                . "`paymillSepaActive` = ?"
                . "WHERE id = 1";
         Shopware()->Db()->query(
-            $sql,
+        $sql,
             array(
-                 $publicKey,
-                 $privateKey,
-                 $preAuthFlag?1:0,
-                 $debuggingFlag?1:0,
-                 $loggingFlag?1:0,
-                 $fastCheckoutFlag?1:0,
-                 $sepaFlag?1:0
+                $preAuthFlag ? 1 : 0,
+                $debuggingFlag ? 1 : 0,
+                $loggingFlag ? 1 : 0,
+                $fastCheckoutFlag ? 1 : 0,
+                $sepaFlag ? 1 : 0
             )
         );
+
+        if ($publicKey != '' && $publicKey != null) {
+            $sql = "UPDATE paymill_config_data SET"
+                   . "`publicKey` = ?"
+                   . "WHERE id = 1";
+            Shopware()->Db()->query(
+            $sql,
+                array(
+                    $publicKey
+                )
+            );
+        }
+
+        if ($privateKey != '' && $privateKey != null) {
+            $sql = "UPDATE paymill_config_data SET"
+                   . "`privateKey` = ?"
+                   . "WHERE id = 1";
+            Shopware()->Db()->query(
+            $sql,
+                array(
+                    $privateKey
+                )
+            );
+        }
     }
 
     /**

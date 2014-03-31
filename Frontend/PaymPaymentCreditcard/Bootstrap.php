@@ -407,9 +407,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         try {
             $translationObject = new Shopware_Components_Translation();
             $ccPayment = $this->Payments()->findOneBy(array('name' => 'paymillcc'));
-            $ccId = $ccPayment->getId();
             $elvPayment = $this->Payments()->findOneBy(array('name' => 'paymilldebit'));
-            $elvId = $elvPayment->getId();
+
             $snippets = Shopware()->Db()->fetchAll("
                         SELECT localeID, name, value
                         FROM s_core_snippets
@@ -417,9 +416,41 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                         GROUP BY `localeID`,`value`"
             );
 
+            $sortedSnippets = array();
             foreach ($snippets as $snippet) {
-                $translationObject->write($snippet['localeID'], "config_payment", $snippet['name'] ===
-                                                                                  'frontend_directdebit' ? $elvId : $ccId, array('description' => $snippet['value']), 1);
+                if (!isset($sortedSnippets[$snippet['localeID']])) {
+                    $sortedSnippets[$snippet['localeID']] = array();
+                }
+                $sortedSnippets[$snippet['localeID']][$snippet['name']] = $snippet['value'];
+            }
+
+            $shopIds = Shopware()->Db()->fetchAll("
+                        SELECT ID
+                        FROM s_core_shops;"
+            );
+
+            foreach ($shopIds as $shopId) {
+                $id = $shopId['ID'];
+
+                $isNotDefaultShop = Shopware()->Db()->fetchOne("
+                            SELECT count(*)
+                            FROM s_core_shops
+                            WHERE id = ?
+                            AND `default` = 0;",
+                            array($id)
+                );
+
+                $languageId = Shopware()->Db()
+                              ->fetchOne("SELECT locale_id FROM s_core_shops WHERE id = ?;", array($id));
+                $snippets = $sortedSnippets[$languageId];
+                if ($isNotDefaultShop === '1') {
+                    $translationObject->write($id, "config_payment",$ccPayment->getId(), array('description' => $snippets['frontend_creditcard']), 1);
+                    $translationObject->write($id, "config_payment",$elvPayment->getId(), array('description' => $snippets['frontend_directdebit']), 1);
+                } else {
+                    $sql = "UPDATE s_core_paymentmeans SET  description =  ? WHERE  id = ?;";
+                    Shopware()->Db()->query($sql, array($snippets['frontend_creditcard'], $ccPayment->getId()));
+                    Shopware()->Db()->query($sql, array($snippets['frontend_directdebit'], $elvPayment->getId()));
+                }
             }
         } catch (Exception $exception) {
             Shopware()->Log()->Err("Can not create translation for payment names." . $exception->getMessage());
