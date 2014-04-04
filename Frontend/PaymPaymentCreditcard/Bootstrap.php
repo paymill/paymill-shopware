@@ -299,6 +299,19 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         }
     }
 
+    private function solveKnownIssue()
+    {
+        try {
+            //Deleting translation for mainshop which causes in not be able to change it via backend
+            Shopware()->Db()->delete('s_core_translations', 'objecttype="config_payment"' .
+                ' AND objectkey=1' .
+                ' AND objectlanguage=1' .
+                ' AND objectdata=\'a:2:{i:8;a:1:{s:11:"description";s:3:"ELV";}i:7;a:1:{s:11:"description";s:11:"Kreditkarte";}}\'');
+        } catch (Exception $exception) {
+            throw new Exception($exception->getMessage());
+        }
+    }
+
     /**
      * Performs the necessary installation steps
      *
@@ -318,6 +331,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $this->_translatePaymentNames();
             $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper($this->Form());
             $translationHelper->createPluginConfigTranslation();
+            $this->solveKnownIssue();
         } catch (Exception $exception) {
             $this->uninstall();
             throw new Exception($exception->getMessage());
@@ -456,8 +470,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         }
         return $sortedSnippets;
     }
-
-
 
     /**
      * Disables the plugin
