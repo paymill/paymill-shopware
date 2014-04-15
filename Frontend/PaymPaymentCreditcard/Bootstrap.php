@@ -303,10 +303,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     {
         try {
             //Deleting translation for mainshop which causes in not be able to change it via backend
-            Shopware()->Db()->delete('s_core_translations', 'objecttype="config_payment"' .
-                ' AND objectkey=1' .
-                ' AND objectlanguage=1' .
-                ' AND objectdata=\'a:2:{i:8;a:1:{s:11:"description";s:3:"ELV";}i:7;a:1:{s:11:"description";s:11:"Kreditkarte";}}\'');
+            Shopware()->Db()->delete('s_core_translations', Shopware()->Db()->quoteInto('objecttype = ?', "config_payment")
+                . ' AND ' . Shopware()->Db()->quoteInto('objectkey = ?', 1)
+                . ' AND ' . Shopware()->Db()->quoteInto('objectlanguage = ?', "1")
+            );
         } catch (Exception $exception) {
             throw new Exception($exception->getMessage());
         }
