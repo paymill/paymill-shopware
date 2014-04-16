@@ -1,4 +1,8 @@
 #Release Notes
+
+##1.3.1
+- Fixed Translation Bug for mainshop
+
 ##1.3.0
 - Added Support for Conexco Responsive Template
 - Added improved iban validation
@@ -26,7 +30,7 @@
 - Implemented improved error feedback
 - Added Snippets to support the improved feedback
 - Fixed a bug causing the cvc tooltip to be english in all languages
-- Removed logging for successful installations and updates 
+- Removed logging for successful installations and updates
 
 ##1.1.0
 - Lib has been updated
