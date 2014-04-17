@@ -299,6 +299,11 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         }
     }
 
+    /**
+     * Fixes a known issue.
+     *
+     * @throws Exception
+     */
     private function solveKnownIssue()
     {
         try {
@@ -438,6 +443,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         }
     }
 
+    /**
+     * Update the translation of a payment
+     *
+     * @param integer $shopId
+     * @param integer $paymentId
+     * @param string $description
+     * @param integer $default
+     */
     private function updatePaymentTranslation($shopId, $paymentId, $description, $default)
     {
         if ($default) {
@@ -453,6 +466,11 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         }
     }
 
+    /**
+     * Returns a sorted array of all snippets
+     *
+     * @return array
+     */
     private function getSortedSnippets()
     {
         $snippets = Shopware()->Db()->select()
