@@ -159,15 +159,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $arguments->getSubject()->View()->Template()->assign("publicKey", trim($swConfig->get("publicKey")));
         $arguments->getSubject()->View()->Template()->assign("sepaActive", $swConfig->get("paymillSepaActive"));
         $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
-
-        try {
-            Shopware()->Session()->paymillTotalAmount = $totalAmount;
-            $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
-            $arguments->getSubject()->View()->Template()->assign("publicKey", trim($swConfig->get("publicKey")));
-            $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
-        } catch (Exception $exception) {
-            Shopware()->Session()->paymillTotalAmount = $totalAmount;
-        }
+        $arguments->getSubject()->View()->Template()->assign("showBrandIconLabel", $this->showLabelForCreditcardbrandIcons());
 
         if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
             return;
@@ -200,6 +192,12 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $view->pigmbhErrorMessage = $pigmbhErrorMessage;
         $view->pigmbhErrorClass = $class;
         $view->pigmbhTemplateActive = $templateActive;
+    }
+
+    private function showLabelForCreditcardbrandIcons()
+    {
+        $config = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+        return $config->get("paymillBrandIconAmex") || $config->get("paymillBrandIconCartaSi") || $config->get("paymillBrandIconCarteBleue") || $config->get("paymillBrandIconDankort") || $config->get("paymillBrandIconDinersclub") || $config->get("paymillBrandIconDiscover") || $config->get("paymillBrandIconJcb") || $config->get("paymillBrandIconMaestro") || $config->get("paymillBrandIconMastercard") || $config->get("paymillBrandIconUnionpay") || $config->get("paymillBrandIconVisa");
     }
 
     /**
@@ -581,6 +579,17 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $form->setElement('checkbox', 'paymillFastCheckout', array('label' => 'Save data for FastCheckout', 'value' => $data['paymillFastCheckout'] == 1));
             $form->setElement('checkbox', 'paymillLogging', array('label' => 'Activate logging', 'value' => $data['paymillLogging'] == 1));
             $form->setElement('checkbox', 'paymillSepaActive', array('label' => 'Show new SEPA Form', 'value' => $data['paymillSepaActive'] == 1));
+            $form->setElement('checkbox', 'paymillBrandIconAmex', array('label' => 'Show icon for American Express', 'value' => $data['paymillBrandIconAmex'] == 1));
+            $form->setElement('checkbox', 'paymillBrandIconCartaSi', array('label' => 'Show icon for Carta Si', 'value' => $data['paymillBrandIconCartaSi'] == 1));
+            $form->setElement('checkbox', 'paymillBrandIconCarteBleue', array('label' => 'Show icon for Carte Bleue', 'value' => $data['paymillBrandIconCarteBleue'] == 1));
+            $form->setElement('checkbox', 'paymillBrandIconDankort', array('label' => 'Show icon for Dankort', 'value' => $data['paymillBrandIconDankort'] == 1));
+            $form->setElement('checkbox', 'paymillBrandIconDinersclub', array('label' => 'Show icon for Dinersclub', 'value' => $data['paymillBrandIconDinersclub'] == 1));
+            $form->setElement('checkbox', 'paymillBrandIconDiscover', array('label' => 'Show icon for Discover', 'value' => $data['paymillBrandIconDiscover'] == 1));
+            $form->setElement('checkbox', 'paymillBrandIconJcb', array('label' => 'Show icon for JCB', 'value' => $data['paymillBrandIconJcb'] == 1));
+            $form->setElement('checkbox', 'paymillBrandIconMaestro', array('label' => 'Show icon for Maestro', 'value' => $data['paymillBrandIconMaestro'] == 1));
+            $form->setElement('checkbox', 'paymillBrandIconMastercard', array('label' => 'Show icon for Mastercard', 'value' => $data['paymillBrandIconMastercard'] == 1));
+            $form->setElement('checkbox', 'paymillBrandIconUnionpay', array('label' => 'Show icon for China Unionpay', 'value' => $data['paymillBrandIconUnionpay'] == 1));
+            $form->setElement('checkbox', 'paymillBrandIconVisa', array('label' => 'Show icon for Visa', 'value' => $data['paymillBrandIconVisa'] == 1));
         } catch (Exception $exception) {
             Shopware()->Log()->Err("There was an error creating the plugin configuration. " . $exception->getMessage());
             throw new Exception("There was an error creating the plugin configuration. " . $exception->getMessage());
