@@ -600,7 +600,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $form->setElement('checkbox', 'paymillDebugging', array('label' => 'Activate debugging', 'value' => $data['paymillDebugging'] == 1));
             $form->setElement('checkbox', 'paymillFastCheckout', array('label' => 'Save data for FastCheckout', 'value' => $data['paymillFastCheckout'] == 1));
             $form->setElement('checkbox', 'paymillLogging', array('label' => 'Activate logging', 'value' => $data['paymillLogging'] == 1));
-            $form->setElement('checkbox', 'paymillSepaActive', array('label' => 'Show new SEPA Form', 'value' => $data['paymillSepaActive'] == 1));
             $form->setElement('checkbox', 'paymillBrandIconAmex', array('label' => 'Show icon for American Express', 'value' => $data['paymillBrandIconAmex'] == 1));
             $form->setElement('checkbox', 'paymillBrandIconCartaSi', array('label' => 'Show icon for Carta Si', 'value' => $data['paymillBrandIconCartaSi'] == 1));
             $form->setElement('checkbox', 'paymillBrandIconCarteBleue', array('label' => 'Show icon for Carte Bleue', 'value' => $data['paymillBrandIconCarteBleue'] == 1));
