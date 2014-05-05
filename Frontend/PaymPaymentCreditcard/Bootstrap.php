@@ -129,13 +129,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         if ($paymentIdElv != "") {
             $elvPayment = new Services_Paymill_Payments($privateKey, $apiUrl);
             $paymentObject = $elvPayment->getOne($paymentIdElv);
-            $view->paymillIban = $paymentObject['iban'];
-            $view->paymillBic = $paymentObject['bic'];
-            $view->paymillAccountNumber = $paymentObject['account'];
-            $view->paymillBankCode = $paymentObject['code'];
+            $view->paymillAccountNumber = $paymentObject['iban'] != null ? $paymentObject['iban'] : $paymentObject['account'];
+            $view->paymillBankCode = $paymentObject['bic'] != null ? $paymentObject['bic'] : $paymentObject['code'];
         } else {
-            $view->paymillIban = "";
-            $view->paymillBic = "";
             $view->paymillAccountNumber = "";
             $view->paymillBankCode = "";
         }
@@ -375,7 +371,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $containerData = $view->getTemplateVars('Containers');
         $containerData['Content_Info']['value'] .= 'PLACEHOLDER';
         $view->assign('Containers', $containerData);
-
     }
 
     /**
