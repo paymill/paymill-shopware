@@ -206,7 +206,12 @@ $(document).ready(function ()
                         }
                         if (getPayment() === 'paymilldebit') { //If ELV
                             if (isSepa()) {
-                                SepaObj.popUp('sepaCallback');
+                                //SepaObj.popUp('sepaCallback'); 
+                                paymill.createToken({
+                                    iban:        $('#paymill_iban').val(),
+                                    bic:          $('#paymill_bic').val(),
+                                    accountholder: $('#paymill_accountholder').val()
+                                }, PaymillResponseHandler);
                             } else {
                                 paymill.createToken({
                                     number:        $('#paymill_iban').val(),
