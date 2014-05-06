@@ -2,6 +2,7 @@
 <script type = "text/javascript" >
     var PAYMILL_PUBLIC_KEY = '{$publicKey}';
     var VALIDATE_CVC = true;
+    var ActiveBrands = {$CreditcardBrands|@json_encode};
     var API_ERRORS = new Array();
     API_ERRORS["PAYMILL_internal_server_error"] = '{s namespace=Paymill name=PAYMILL_internal_server_error}{/s}';
     API_ERRORS["PAYMILL_invalid_public_key"] = '{s namespace=Paymill name=PAYMILL_invalid_public_key}{/s}';
@@ -150,37 +151,14 @@ $(document).ready(function ()
         $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
         var detector = new BrandDetection();
         var brand = detector.detect($('#card-number').val());
-        console.log("Brand detected: " + brand);
 
         if (detector.validate($('#card-number').val())) {
             suffix = '';
         } else {
             suffix = '-temp';
         }
-
-        switch (brand) {
-            case 'unknown':
-                $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
-                break;
-            case 'carte bleue':
-                $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
-                $('#card-number').addClass("paymill-card-number-" + 'carte-bleue' + suffix);
-                break;
-            case 'maestro':
-                VALIDATE_CVC = false;
-            case 'dankort':
-            case 'carta-si':
-            case 'discover':
-            case 'jcb':
-            case 'amex':
-            case 'china-unionpay':
-            case 'diners-club':
-            case 'mastercard':
-            case 'visa':
-                $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
-                $('#card-number').addClass("paymill-card-number-" + brand + suffix);
-                break;
-
+        if($.inArray(brand, ActiveBrands) !== -1){
+            $('#card-number').addClass("paymill-card-number-" + brand + suffix);
         }
     });
 
@@ -309,20 +287,9 @@ function sepaCallback(success)
 {if $Controller != "account"}
     <div class = "debit" >
         {if $payment_mean.name == 'paymillcc'}
-            {if $showBrandIconLabel}{s namespace=Paymill name=frontend_creditcard_label_icons}The following Creditcard are supported{/s}:<br>{/if}
-            {if {config name=paymillBrandIconVisa}}<div class="paymill-card-icon paymill-card-number-visa"></div>{/if}
-            {if {config name=paymillBrandIconMastercard}}<div class="paymill-card-icon paymill-card-number-mastercard"></div>{/if}
-            {if {config name=paymillBrandIconAmex}}<div class="paymill-card-icon paymill-card-number-amex"></div>{/if}
-            {if {config name=paymillBrandIconJcb}}<div class="paymill-card-icon paymill-card-number-jcb"></div>{/if}
-            {if {config name=paymillBrandIconMaestro}}<div class="paymill-card-icon paymill-card-number-maestro"></div>{/if}
-            {if {config name=paymillBrandIconDinersclub}}<div class="paymill-card-icon paymill-card-number-diners-club"></div>{/if}
-            {if {config name=paymillBrandIconDiscover}}<div class="paymill-card-icon paymill-card-number-discover"></div>{/if}
-            {if {config name=paymillBrandIconUnionpay}}<div class="paymill-card-icon paymill-card-number-china-unionpay"></div>{/if}
-            {if {config name=paymillBrandIconDankort}}<div class="paymill-card-icon paymill-card-number-dankort"></div>{/if}
-            {if {config name=paymillBrandIconCartaSi}}<div class="paymill-card-icon paymill-card-number-carta-si"></div>{/if}
-            {if {config name=paymillBrandIconCarteBleue}}<div class="paymill-card-icon paymill-card-number-carte-bleue"></div>{/if}
-
-
+            {foreach from=$CreditcardBrands item=brand}
+                <div class="paymill-card-icon paymill-card-number-{$brand}"></div>
+            {/foreach}
             {if $pigmbhTemplateActive == 1}
                 <div class = "form-group" >
                     <label class = "col-lg-4 control-label"
