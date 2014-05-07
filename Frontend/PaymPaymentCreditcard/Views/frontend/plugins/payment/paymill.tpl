@@ -29,7 +29,6 @@
 <script type = "text/javascript" src = "https://bridge.paymill.com/" ></script >
 <script type = "text/javascript" src = "{link file='frontend/_resources/javascript/Iban.js'}" ></script >
 <script type = "text/javascript" src = "{link file='frontend/_resources/javascript/BrandDetection.js'}" ></script >
-<script type = "text/javascript" src = "{link file='frontend/_resources/javascript/Sepa.js'}" ></script >
 <script type = "text/javascript" >
 function debug(message)
 {
@@ -145,7 +144,6 @@ function validate()
 $(document).ready(function ()
 {
     var paymill_form_id = "payment_mean{$payment_mean.id}";
-    var SepaObj = new Sepa('dummySEPA');
     $('#card-number').keyup(function ()
     {
         $("#card-number")[0].className = $("#card-number")[0].className.replace(/paymill-card-number-.*/g, '');
@@ -206,7 +204,6 @@ $(document).ready(function ()
                         }
                         if (getPayment() === 'paymilldebit') { //If ELV
                             if (isSepa()) {
-                                //SepaObj.popUp('sepaCallback');
                                 paymill.createToken({
                                     iban:        $('#paymill_iban').val(),
                                     bic:          $('#paymill_bic').val(),
@@ -258,22 +255,6 @@ function PaymillResponseHandler(error, result)
 function isSepa() {
     var reg = new RegExp(/^\D\D/);
     return reg.test($('#paymill_iban').val());
-}
-function sepaCallback(success)
-{
-    if (success) {
-        $("#paymill_form").append("<input type='hidden' name='paymillFastcheckout' value='" + false + "'/>");
-        var params = {
-            iban: $('#paymill_iban').val(),
-            bic: $('#paymill_bic').val(),
-            accountholder: $('#paymill_iban').val()
-        };
-        paymill.createToken(params, PaymillResponseHandler);
-    } else {
-        $("#paymill_submit").removeAttr('disabled');
-        $(".paymill_error").html(PAYMILL_TRANSLATION.paymill_invalid_mandate_checkbox);
-        $(".paymill_error").show(500);
-    }
 }
 </script >
 
