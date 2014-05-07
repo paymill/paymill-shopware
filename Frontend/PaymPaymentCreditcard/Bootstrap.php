@@ -368,7 +368,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-<<<<<<< HEAD
      * Adds Sepa-Information to Invoice
      *
      * @param Enlight_Hook_HookArgs $arguments
@@ -388,8 +387,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
-=======
->>>>>>> parent of f799838... PSW-69 : prenotification is elv/sepa only now
      * Performs the necessary uninstall steps
      *
      * @return boolean
