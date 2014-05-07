@@ -206,7 +206,7 @@ $(document).ready(function ()
                         }
                         if (getPayment() === 'paymilldebit') { //If ELV
                             if (isSepa()) {
-                                //SepaObj.popUp('sepaCallback'); 
+                                //SepaObj.popUp('sepaCallback');
                                 paymill.createToken({
                                     iban:        $('#paymill_iban').val(),
                                     bic:          $('#paymill_bic').val(),
@@ -293,7 +293,9 @@ function sepaCallback(success)
     <div class = "debit" >
         {if $payment_mean.name == 'paymillcc'}
             {foreach from=$CreditcardBrands item=brand}
-                <div class="paymill-card-icon paymill-card-number-{$brand}"></div>
+                {if $brand != ''}
+                    <div class="paymill-card-icon paymill-card-number-{$brand}"></div>
+                {/if}
             {/foreach}
             {if $pigmbhTemplateActive == 1}
                 <div class = "form-group" >
@@ -316,7 +318,7 @@ function sepaCallback(success)
                 </div >
                 <div class = "form-group" >
                 <span class = "col-lg-4 control-label" >
-                <label for = "card-cvc" >{s namespace=Paymill name=frontend_creditcard_label_cvc}CVC {/s}</label >
+                <label for = "card-cvc" >{s namespace=Paymill name=frontend_creditcard_label_cvc}CVC {/s} *</label >
                 <span class = "paymill-tooltip"
                       title = "{s namespace=Paymill name=frontend_creditcard_tooltip_cvc}What is a CVV/CVC number? Prospective credit cards will have a 3 to 4-digit number, usually on the back of the card. It ascertains that the payment is carried out by the credit card holder and the card account is legitimate. On Visa the CVV (Card Verification Value) appears after and to the right of your card number. Same goes for Mastercard's CVC (Card Verfication Code), which also appears after and to the right of  your card number, and has 3-digits. Diners Club, Discover, and JCB credit and debit cards have a three-digit card security code which also appears after and to the right of your card number. The American Express CID (Card Identification Number) is a 4-digit number printed on the front of your card. It appears above and to the right of your card number. On Maestro the CVV appears after and to the right of your number. If you don’t have a CVV for your Maestro card you can use 000.{/s}" >?</span >
                 </span >
@@ -342,23 +344,23 @@ function sepaCallback(success)
                 </div >
             {else}
                 <p class = "none" >
-                    <label >{s namespace=Paymill name=frontend_creditcard_label_holder}Credit Card Holder *{/s}</label >
+                    <label >{s namespace=Paymill name=frontend_creditcard_label_holder}Credit Card Holder{/s} *</label >
                     <input id = "card-holder" type = "text" size = "20" class = "text"
                            value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
                 </p >
                 <p class = "none" >
-                    <label >{s namespace=Paymill name=frontend_creditcard_label_number}Credit Card Number *{/s}</label >
+                    <label >{s namespace=Paymill name=frontend_creditcard_label_number}Credit Card Number{/s} *</label >
                     <input id = "card-number" type = "text" size = "20" class = "text"
                            value = "{$paymillCardNumber}" />
                 </p >
                 <p class = "none" >
-                    <label >{s namespace=Paymill name=frontend_creditcard_label_cvc}CVC *{/s}</label >
+                    <label >{s namespace=Paymill name=frontend_creditcard_label_cvc}CVC{/s} *</label >
                     <input id = "card-cvc" type = "text" size = "4" class = "text" value = "{$paymillCvc}" />
                 <span class = "paymill-tooltip"
                       title = "{s namespace=Paymill name=frontend_creditcard_tooltip_cvc} What is a CVV/CVC number? Prospective credit cards will have a 3 to 4-digit number, usually on the back of the card. It ascertains that the payment is carried out by the credit card holder and the card account is legitimate. On Visa the CVV (Card Verification Value) appears after and to the right of your card number. Same goes for Mastercard's CVC (Card Verfication Code), which also appears after and to the right of  your card number, and has 3-digits. Diners Club, Discover, and JCB credit and debit cards have a three-digit card security code which also appears after and to the right of your card number. The American Express CID (Card Identification Number) is a 4-digit number printed on the front of your card. It appears above and to the right of your card number. On Maestro the CVV appears after and to the right of your number. If you don’t have a CVV for your Maestro card you can use 000.{/s}" >?</span >
                 </p >
                 <p class = "none" >
-                    <label >{s namespace=Paymill name=frontend_creditcard_label_valid}Valid until (MM/YYYY) *{/s}</label >
+                    <label >{s namespace=Paymill name=frontend_creditcard_label_valid}Valid until (MM/YYYY){/s} *</label >
                     <input id = "card-expiry-month" type = "text" style = "width: 30px; display: inline-block;"
                            class = "text"
                            value = "{$paymillMonth}" />
