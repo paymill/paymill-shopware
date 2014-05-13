@@ -216,7 +216,6 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $orderModel = Shopware()->Models()->find('Shopware\Models\Order\Order', $this->util->getOrderIdByNumber($orderNumber));
         $orderModelAttribute = $orderModel->getAttribute();
         $orderModelAttribute->setPaymillSepaDate($timeStamp);
-        $orderModelAttribute->setAttribute1("TEST");
         Shopware()->Models()->persist($orderModelAttribute);
         Shopware()->Models()->flush($orderModelAttribute);
     }

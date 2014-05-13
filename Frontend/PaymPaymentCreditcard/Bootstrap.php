@@ -30,6 +30,13 @@
 class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
 
+    private $util;
+
+    public function init()
+    {
+        $this->util = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_Util();
+    }
+
     /**
      * Returns the controller path
      *
@@ -157,7 +164,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
         $arguments->getSubject()->View()->Template()->assign("CreditcardBrands", $this->getEnabledCreditcardbrands());
 
-        if ($paymentName === "paymilldebit") {
+        if ($paymentName === "paymilldebit" && Shopware()->Session()->sOrderVariables['sOrderNumber']) {
+            $orderModel = Shopware()->Models()->find('Shopware\Models\Order\Order', $this->util->getOrderIdByNumber(Shopware()->Session()->sOrderVariables['sOrderNumber']));
+            $orderModelAttribute = $orderModel->getAttribute();
+            $arguments->getSubject()->View()->Template()->assign("sepaDate", date('d.m.Y',$orderModelAttribute->getPaymillSepaDate()));
             $view->extendsBlock("frontend_checkout_finishs_transaction_number", "{include file='frontend/Paymillfinish.tpl'}", "after");
         }
         if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
