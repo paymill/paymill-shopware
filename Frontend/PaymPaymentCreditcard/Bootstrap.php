@@ -157,6 +157,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
         $arguments->getSubject()->View()->Template()->assign("CreditcardBrands", $this->getEnabledCreditcardbrands());
 
+        if ($paymentName === "paymilldebit") {
+            $view->extendsBlock("frontend_checkout_finishs_transaction_number", "{include file='frontend/Paymillfinish.tpl'}", "after");
+        }
         if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
             return;
         }
@@ -182,7 +185,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             '</div>' .
             '</div> ' .
             '{/if}';
-
         $view->extendsBlock("frontend_index_content_top", $content, "append");
         $view->setScope(Enlight_Template_Manager::SCOPE_PARENT);
         $view->pigmbhErrorMessage = $pigmbhErrorMessage;
@@ -642,6 +644,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Backend_PaymillOrderOperations', 'paymillBackendControllerOperations');
             $this->subscribeEvent('Shopware_Modules_Admin_UpdateAccount_FilterEmailSql', 'onUpdateCustomerEmail');
             $this->subscribeEvent('Enlight_Controller_Action_PostDispatch_Backend_Order', 'extendOrderDetailView');
+            $this->subscribeEvent('Shopware_Components_Document::assignValues::after', 'beforeCreatingDocument');
         } catch (Exception $exception) {
             Shopware()->Log()->Err("There was an error registering the plugins events. " . $exception->getMessage());
             throw new Exception("There was an error registering the plugins events. " . $exception->getMessage());
