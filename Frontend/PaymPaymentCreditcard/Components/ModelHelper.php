@@ -30,6 +30,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             $models->addAttribute('s_order_attributes', 'paymill', 'pre_authorization', 'varchar(255)');
             $models->addAttribute('s_order_attributes', 'paymill', 'transaction', 'varchar(255)');
             $models->addAttribute('s_order_attributes', 'paymill', 'refund', 'varchar(255)');
+            $models->addAttribute('s_order_attributes', 'paymill', 'sepa_date', 'int(11)');
 
             //Add User Properties
             $models->addAttribute('s_user_attributes', 'paymill', 'client_id', 'varchar(255)');

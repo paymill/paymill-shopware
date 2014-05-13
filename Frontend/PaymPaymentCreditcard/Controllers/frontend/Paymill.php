@@ -29,6 +29,18 @@
  */
 class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_Frontend_Payment
 {
+
+    private $util;
+    private $config;
+
+
+    public function init(){
+        $this->util = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_Util();
+        $this->config = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+    }
+
+
+
     /**
      * Frontend index action controller
      */
@@ -37,7 +49,6 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         //Initialise variables
         $user = Shopware()->Session()->sOrderVariables['sUserData'];
         $sState = array('reserviert' => 18, 'bezahlt' => 12);
-        $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $processId = md5(time()." ". $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname']);
         Shopware()->Session()->paymillProcessId = $processId;
         $loggingManager = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
@@ -61,7 +72,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
 
         // process the payment
         $userId = $user['billingaddress']['userID'];
-        $paymentShortcut = $this->getPaymentShortName() == 'paymillcc' ? 'cc' : 'elv';
+        $paymentShortcut = $this->getPaymentShortName();
         $params = array(
             'token'            => $paymillToken,
             'authorizedAmount' => (int)Shopware()->Session()->paymillTotalAmount,
@@ -81,8 +92,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
 
         if ($clientId != "") {
 
-            $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
-            $privateKey = trim($swConfig->get("privateKey"));
+            $privateKey = trim($this->config->get("privateKey"));
             $apiUrl = "https://api.paymill.com/v2/";
             require_once dirname(dirname(dirname(__FILE__))) . '/lib/Services/Paymill/Clients.php';
             $client = new Services_Paymill_Clients($privateKey, $apiUrl);
@@ -96,8 +106,8 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             }
         }
 
-        $preAuthOption = $swConfig->get("paymillPreAuth");
-        $isCCPayment = $paymentShortcut === 'cc';
+        $preAuthOption = $this->config->get("paymillPreAuth");
+        $isCCPayment = $paymentShortcut === 'paymillcc';
         $captureNow = !($preAuthOption && $isCCPayment);
         $result = $paymentProcessor->processPayment($captureNow);
 
@@ -115,7 +125,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $modelHelper->setPaymillClientId($userId, $clientId);
 
         //Save Fast Checkout Data
-        $isFastCheckoutEnabled = $swConfig->get("paymillFastCheckout");
+        $isFastCheckoutEnabled = $this->config->get("paymillFastCheckout");
         if ($isFastCheckoutEnabled) {
             $paymentId = $paymentProcessor->getPaymentId();
             $modelHelper->setPaymillPaymentId($this->getPaymentShortName(), $userId, $paymentId);
@@ -134,6 +144,10 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         }
 
         $this->_updateTransaction($orderNumber, $paymentProcessor, $loggingManager);
+
+        if(!$isCCPayment){
+            $this->_setSEPADate();
+        }
 
         // reset the session field
         Shopware()->Session()->paymillTransactionToken = null;
@@ -194,5 +208,16 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $sql = "SELECT value FROM s_core_snippets WHERE shopID = ? AND `name` = ?";
         $result = Shopware()->Db()->fetchOne( $sql, array( $shopId, $snippetName ) );
         return $result? $result : $default;
+    }
+
+    private function _setSEPADate(){
+        $timeStamp = strtotime("+ " . $this->config->get('paymillSepaDate') . " DAYS");
+        $orderNumber = $this->getOrderNumber();
+        $orderModel = Shopware()->Models()->find('Shopware\Models\Order\Order', $this->util->getOrderIdByNumber($orderNumber));
+        $orderModelAttribute = $orderModel->getAttribute();
+        $orderModelAttribute->setPaymillSepaDate($timeStamp);
+        $orderModelAttribute->setAttribute1("TEST");
+        Shopware()->Models()->persist($orderModelAttribute);
+        Shopware()->Models()->flush($orderModelAttribute);
     }
 }
