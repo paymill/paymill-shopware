@@ -29,6 +29,7 @@ config_tokenTolerance_description;"Wert der bei Generierung des PAYMILL Tokens a
 config_tokenTolerance_label;"Token Toleranz Wert"
 currency_description;"Kürzel der Währung (z.B. EUR)"
 currency_label;Währung
+feedback_customer_sepa;"Tage bis zum Einzug"
 feedback_capture_failure;"Belastung fehlgeschlagen"
 feedback_capture_success;"Belastung erfolgreich"
 feedback_deleteLogEntry_failure;"Löschvorgang fehlgeschlagen"

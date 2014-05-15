@@ -57,6 +57,7 @@ currency_description;"Abréviation de la devise (EUR par exemple)"
 currency_label;Devise
 error_text_invalid_token;"L'erreur suivante est survenue :"
 error_text_no_entry_selected;"Veuillez sélectionner une entrée"
+feedback_customer_sepa;"Days until the debit"
 feedback_capture_failure;"La capture a échoué"
 feedback_capture_success;"Capture réussie"
 feedback_config_error_differentamount;"La valeur de tolérance du token doit être un nombre valide"

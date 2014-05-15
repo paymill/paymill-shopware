@@ -167,7 +167,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         if ($paymentName === "paymilldebit" && Shopware()->Session()->sOrderVariables['sOrderNumber']) {
             $orderModel = Shopware()->Models()->find('Shopware\Models\Order\Order', $this->util->getOrderIdByNumber(Shopware()->Session()->sOrderVariables['sOrderNumber']));
             $orderModelAttribute = $orderModel->getAttribute();
-            $arguments->getSubject()->View()->Template()->assign("sepaDate", date('d.m.Y',$orderModelAttribute->getPaymillSepaDate()));
+            $arguments->getSubject()->View()->Template()->assign("sepaDate", date('d.m.Y', $orderModelAttribute->getPaymillSepaDate()));
             $view->extendsBlock("frontend_checkout_finishs_transaction_number", "{include file='frontend/Paymillfinish.tpl'}", "after");
         }
         if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
@@ -353,6 +353,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $this->_createForm();
             $this->_addTranslationSnippets();
             $this->_createEvents();
+            $this->_updateOrderMail();
             $this->_applyBackendViewModifications();
             $this->_translatePaymentNames();
             $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper($this->Form());
@@ -412,7 +413,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
         $orderModel = Shopware()->Models()->find('Shopware\Models\Order\Order', $this->util->getOrderIdByNumber($context['sOrderNumber']));
         $paymillSepaDate = $orderModel->getAttribute()->getPaymillSepaDate();
-        if(isset($paymillSepaDate)){
+        if (isset($paymillSepaDate)) {
             $context['paymillSepaDate'] = date("d.m.Y", $paymillSepaDate);
             $mail = Shopware()->TemplateMail()->createMail('sORDER', $context);
             $arguments->setReturn($mail);
@@ -698,6 +699,50 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         } catch (Exception $exception) {
             Shopware()->Log()->Err("can not create menu entry." . $exception->getMessage());
             throw new Exception("can not create menu entry." . $exception->getMessage());
+        }
+    }
+
+    private function _updateOrderMail()
+    {
+        $sql = Shopware()->Db()->select()
+            ->from('s_core_config_mails', array('content', 'contentHTML'))
+            ->where('`name`=?', array("sORDER"));
+        $orderMail = Shopware()->Db()->fetchRow($sql);
+
+        $snippets = Shopware()->Db()->select()
+            ->from('s_core_snippets', array('shopID', 'value'))
+            ->where('`name`=?', array('feedback_customer_sepa'))
+            ->query()
+            ->fetchAll();
+        foreach ($snippets as $snippet) {
+            $additionalContent = '{$additional.payment.additionaldescription}'. "\n"
+                . '{if $additional.payment.name == "paymilldebit"}%BR%'
+                . $snippet['value'] . ': {$paymillSepaDate}'. "\n"
+                . '{/if}' . "\n";
+            $content = preg_replace('/%BR%/', "\n", $additionalContent);
+            $contentHTML = preg_replace('/%BR%/', "<br/>\n", $additionalContent);
+
+            if ($snippet['shopID'] === '1'
+                && !preg_match('/\$paymillSepaDate/', $orderMail['content'])
+                && !preg_match('/\$paymillSepaDate/', $orderMail['contentHTML'])) {
+                $orderMail['content'] = preg_replace('/\\{\\$additional\\.payment\\.additionaldescription\\}/', $content, $orderMail['content']);
+                $orderMail['contentHTML'] = preg_replace('/\\{\\$additional\\.payment\\.additionaldescription\\}/', $contentHTML, $orderMail['contentHTML']);
+                Shopware()->Db()->update('s_core_config_mails', $orderMail);
+            }
+
+            $translationObject = new Shopware_Components_Translation();
+            $translation = $translationObject->read($snippet['shopID'], "config_mails", 2);
+            if ( (array_key_exists('content',$translation)
+                || array_key_exists('content',$translation))
+                && $snippet['shopID'] !== '1'
+                && !preg_match('/\$paymillSepaDate/', $translation['content'])
+                && !preg_match('/\$paymillSepaDate/', $translation['contentHtml'])) {
+                $translation['content'] = preg_replace('/\\{\\$additional\\.payment\\.additionaldescription\\}/', $content, $translation['content']);
+                $translation['contentHtml'] = preg_replace('/\\{\\$additional\\.payment\\.additionaldescription\\}/', $contentHTML, $translation['contentHtml']);
+                $translationObject->write(
+                    $snippet['shopID'], "config_mails", 2, $translation
+                );
+            }
         }
     }
 

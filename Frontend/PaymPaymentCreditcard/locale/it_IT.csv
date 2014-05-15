@@ -57,6 +57,7 @@ currency_description;"Abbreviazione di valuta (ad es.: EUR)"
 currency_label;Valuta
 error_text_invalid_token;"Si è verificato il seguente errore:"
 error_text_no_entry_selected;"Selezionare una voce"
+feedback_customer_sepa;"Days until the debit"
 feedback_capture_failure;"Acquisizione non riuscita"
 feedback_capture_success;"Acquisizione riuscita"
 feedback_config_error_differentamount;"Il valore di tolleranza del token deve essere un numero valido"
