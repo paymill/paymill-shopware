@@ -399,6 +399,27 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
+     * Adds Sepa-Information to Order confirmation mail
+     *
+     * @param Enlight_Event_EventArgs $arguments
+     */
+    public function beforeSendingMail(Enlight_Event_EventArgs $arguments)
+    {
+        $context = $arguments->get('context');
+        if ($context['additional']['payment']['name'] != 'paymilldebit' || !isset($context['sOrderNumber'])) {
+            return;
+        }
+
+        $orderModel = Shopware()->Models()->find('Shopware\Models\Order\Order', $this->util->getOrderIdByNumber($context['sOrderNumber']));
+        $paymillSepaDate = $orderModel->getAttribute()->getPaymillSepaDate();
+        if(isset($paymillSepaDate)){
+            $context['paymillSepaDate'] = date("d.m.Y", $paymillSepaDate);
+            $mail = Shopware()->TemplateMail()->createMail('sORDER', $context);
+            $arguments->setReturn($mail);
+        }
+    }
+
+    /**
      * Performs the necessary uninstall steps
      *
      * @return boolean
@@ -655,6 +676,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $this->subscribeEvent('Shopware_Modules_Admin_UpdateAccount_FilterEmailSql', 'onUpdateCustomerEmail');
             $this->subscribeEvent('Enlight_Controller_Action_PostDispatch_Backend_Order', 'extendOrderDetailView');
             $this->subscribeEvent('Shopware_Components_Document::assignValues::after', 'beforeCreatingDocument');
+            $this->subscribeEvent('Shopware_Modules_Order_SendMail_Create', 'beforeSendingMail');
         } catch (Exception $exception) {
             Shopware()->Log()->Err("There was an error registering the plugins events. " . $exception->getMessage());
             throw new Exception("There was an error registering the plugins events. " . $exception->getMessage());
