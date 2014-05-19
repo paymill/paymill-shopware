@@ -417,6 +417,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $context['paymillSepaDate'] = date("d.m.Y", $paymillSepaDate);
             $mail = Shopware()->TemplateMail()->createMail('sORDER', $context);
             $arguments->setReturn($mail);
+            return $mail;
         }
     }
 
@@ -678,6 +679,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $this->subscribeEvent('Enlight_Controller_Action_PostDispatch_Backend_Order', 'extendOrderDetailView');
             $this->subscribeEvent('Shopware_Components_Document::assignValues::after', 'beforeCreatingDocument');
             $this->subscribeEvent('Shopware_Modules_Order_SendMail_Create', 'beforeSendingMail');
+            $this->subscribeEvent('Shopware_Modules_Order_SaveOrderAttributes_FilterSQL', 'insertOrderAttribute');
         } catch (Exception $exception) {
             Shopware()->Log()->Err("There was an error registering the plugins events. " . $exception->getMessage());
             throw new Exception("There was an error registering the plugins events. " . $exception->getMessage());
@@ -744,6 +746,17 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 );
             }
         }
+    }
+
+    public function insertOrderAttribute(Enlight_Event_EventArgs $args){
+        $subject = $args->getSubject();
+        if(!$this->Config()->get('paymillSepaDate') && $subject->sUserData['additional']['payment']['name'] === "paymilldebit"){
+            return;
+        }
+        $timeStamp = strtotime("+ " . $this->Config()->get('paymillSepaDate') . " DAYS");
+        $attributeSql = preg_replace('/attribute6/', 'attribute6, paymill_sepa_date', $args->getReturn());
+        $attributeSql = preg_replace('/\)$/', ",$timeStamp  )", $attributeSql);
+        $args->setReturn($attributeSql);
     }
 
 }

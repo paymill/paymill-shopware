@@ -134,9 +134,9 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         //Create the order
         $statusId = $captureNow ? $sState['bezahlt']: $sState['reserviert'];
         $transactionId = $captureNow ? $paymentProcessor->getTransactionId() : $paymentProcessor->getPreauthId();
+
         $orderNumber = $this->saveOrder($transactionId, md5($transactionId), $statusId);
         $loggingManager->log("Finish order.", "Ordernumber: " . $orderNumber, "using TransactionId: " . $transactionId);
-
         if ($captureNow) {
             $modelHelper->setPaymillTransactionId($orderNumber, $paymentProcessor->getTransactionId());
         } else {
@@ -144,10 +144,6 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         }
 
         $this->_updateTransaction($orderNumber, $paymentProcessor, $loggingManager);
-
-        if(!$isCCPayment){
-            $this->_setSEPADate();
-        }
 
         // reset the session field
         Shopware()->Session()->paymillTransactionToken = null;
@@ -210,13 +206,4 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         return $result? $result : $default;
     }
 
-    private function _setSEPADate(){
-        $timeStamp = strtotime("+ " . $this->config->get('paymillSepaDate') . " DAYS");
-        $orderNumber = $this->getOrderNumber();
-        $orderModel = Shopware()->Models()->find('Shopware\Models\Order\Order', $this->util->getOrderIdByNumber($orderNumber));
-        $orderModelAttribute = $orderModel->getAttribute();
-        $orderModelAttribute->setPaymillSepaDate($timeStamp);
-        Shopware()->Models()->persist($orderModelAttribute);
-        Shopware()->Models()->flush($orderModelAttribute);
-    }
 }
