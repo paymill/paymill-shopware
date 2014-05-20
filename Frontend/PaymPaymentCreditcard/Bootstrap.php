@@ -168,7 +168,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $orderModel = Shopware()->Models()->find('Shopware\Models\Order\Order', $this->util->getOrderIdByNumber(Shopware()->Session()->sOrderVariables['sOrderNumber']));
             $orderModelAttribute = $orderModel->getAttribute();
             $arguments->getSubject()->View()->Template()->assign("sepaDate", date('d.m.Y', $orderModelAttribute->getPaymillSepaDate()));
-            $view->extendsBlock("frontend_checkout_finishs_transaction_number", "{include file='frontend/Paymillfinish.tpl'}", "after");
+            $view->extendsBlock("frontend_checkout_finishs_transaction_number", "{include file='frontend/Paymillfinish.tpl'}", "append");
         }
         if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
             return;
