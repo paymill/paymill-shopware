@@ -29,9 +29,14 @@
  */
 class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
-
+    /**
+     * @var Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_Util
+     */
     private $util;
 
+    /**
+     * initiates this class
+     */
     public function init()
     {
         $this->util = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_Util();
@@ -202,6 +207,11 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $view->pigmbhTemplateActive = $templateActive;
     }
 
+    /**
+     * Returns all enabled brands
+     *
+     * @return array
+     */
     private function getEnabledCreditcardbrands()
     {
         $config = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
@@ -704,6 +714,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         }
     }
 
+    /**
+     * Extends all orderMail-templates
+     */
     private function _updateOrderMail()
     {
         $sql = Shopware()->Db()->select()
@@ -748,6 +761,12 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         }
     }
 
+    /**
+     * Adds an Attribte to s_order for sepa
+     *
+     * @param Enlight_Event_EventArgs $args
+     * @return string
+     */
     public function insertOrderAttribute(Enlight_Event_EventArgs $args){
         $subject = $args->getSubject();
         if(!$this->Config()->get('paymillSepaDate') && $subject->sUserData['additional']['payment']['name'] === "paymilldebit"){
