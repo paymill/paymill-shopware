@@ -1,4 +1,13 @@
 #Release Notes
+
+##1.4.0
+ - united SEPA and regular ELV forms
+ - added backend option to show credit card logos in frontend
+ - added prenotification in order mail for direct debit
+
+##1.3.1
+- Fixed Translation Bug for mainshop
+
 ##1.3.0
 - Added Support for Conexco Responsive Template
 - Added improved iban validation
@@ -26,7 +35,7 @@
 - Implemented improved error feedback
 - Added Snippets to support the improved feedback
 - Fixed a bug causing the cvc tooltip to be english in all languages
-- Removed logging for successful installations and updates 
+- Removed logging for successful installations and updates
 
 ##1.1.0
 - Lib has been updated
