@@ -639,7 +639,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
             $form->setElement('text', 'publicKey', array('label' => 'Public Key', 'required' => true, 'value' => $data['publicKey']));
             $form->setElement('text', 'privateKey', array('label' => 'Private Key', 'required' => true, 'value' => $data['privateKey']));
-            $form->setElement('number', 'paymillSepaDate', array('label' => 'SEPA Datum', 'required' => true, 'value' => 7, 'attributes' => array('minValue' => 0)));
+            $form->setElement('number', 'paymillSepaDate', array('label' => 'Days until debit', 'required' => true, 'value' => 7, 'attributes' => array('minValue' => 0)));
             $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => $data['paymillPreAuth'] == 1));
             $form->setElement('checkbox', 'paymillDebugging', array('label' => 'Activate debugging', 'value' => $data['paymillDebugging'] == 1));
             $form->setElement('checkbox', 'paymillFastCheckout', array('label' => 'Save data for FastCheckout', 'value' => $data['paymillFastCheckout'] == 1));
@@ -713,7 +713,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
         $snippets = Shopware()->Db()->select()
             ->from('s_core_snippets', array('shopID', 'value'))
-            ->where('`name`=?', array('feedback_customer_sepa'))
+            ->where('`name`=?', array('feedback_info_sepa_date'))
             ->query()
             ->fetchAll();
         foreach ($snippets as $snippet) {

@@ -6,6 +6,7 @@ amount_label;Amount
 backend_log_dev_info_additional;"Additional Developer Information"
 capture_description;"If the amount has been authorized during checkout, the amount can be charged here."
 capture_label;Charge
+config_sepa_date;"Days until the debit"
 checkout_desc;"Description text"
 checkout_generating_invoice;"Invoice is beeing generated"
 config_acceptedCurrencies_description;"If nothing has been selected, all currencies will be accepted"
@@ -57,7 +58,7 @@ currency_description;"Abbreviation of currency (e.g. EUR)"
 currency_label;Currency
 error_text_invalid_token;"The following error occurred:"
 error_text_no_entry_selected;"Please select an entry"
-feedback_customer_sepa;"Days until the debit"
+feedback_info_sepa_date;"The direct debit is drawn to the following date"
 feedback_capture_failure;"Capture failed"
 feedback_capture_success;"Capture successful"
 feedback_config_error_differentamount;"Token tolerance value must be a valid number"

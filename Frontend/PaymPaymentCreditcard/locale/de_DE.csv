@@ -2,6 +2,7 @@ amount_description;"Betrag in kleinster verfügbarer Schreibweise (z.B. 100 für
 amount_label;Betrag
 capture_description;"Sofern eine Bestellung im Checkout autorisiert worden ist,  kann hier der Betrag belastet werden."
 capture_label;Belastung
+config_sepa_date;"Tage bis zum Einzug"
 config_acceptedCurrencies_description;"Wenn keine Auswahl getroffen wurde, werden alle Währungen akzeptiert."
 config_acceptedCurrencies_label;"Akzeptierte Währungen"
 config_activate_text;Aktivieren
@@ -29,7 +30,7 @@ config_tokenTolerance_description;"Wert der bei Generierung des PAYMILL Tokens a
 config_tokenTolerance_label;"Token Toleranz Wert"
 currency_description;"Kürzel der Währung (z.B. EUR)"
 currency_label;Währung
-feedback_customer_sepa;"Tage bis zum Einzug"
+feedback_info_sepa_date;"Die Lastschrift wird zu dem folgenden Termin eingezogen"
 feedback_capture_failure;"Belastung fehlgeschlagen"
 feedback_capture_success;"Belastung erfolgreich"
 feedback_deleteLogEntry_failure;"Löschvorgang fehlgeschlagen"

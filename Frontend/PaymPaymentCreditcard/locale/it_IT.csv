@@ -6,6 +6,7 @@ amount_label;Importo
 backend_log_dev_info_additional;"Informazioni aggiuntive sviluppatore"
 capture_description;"Se l'importo è stato autorizzato al momento del pagamento, l'importo può essere addebitato qui."
 capture_label;Addebito
+config_sepa_date;"Days until the debit"
 checkout_desc;Descrizione
 checkout_generating_invoice;"Fattura creata"
 config_acceptedCurrencies_description;"Se non è stato selezionato nulla, saranno accettate tutte le valute"
@@ -57,7 +58,7 @@ currency_description;"Abbreviazione di valuta (ad es.: EUR)"
 currency_label;Valuta
 error_text_invalid_token;"Si è verificato il seguente errore:"
 error_text_no_entry_selected;"Selezionare una voce"
-feedback_customer_sepa;"Days until the debit"
+feedback_info_sepa_date;"The direct debit is drawn to the following date"
 feedback_capture_failure;"Acquisizione non riuscita"
 feedback_capture_success;"Acquisizione riuscita"
 feedback_config_error_differentamount;"Il valore di tolleranza del token deve essere un numero valido"
