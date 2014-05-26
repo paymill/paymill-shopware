@@ -29,6 +29,12 @@
  */
 class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
+
+    /**
+     * @var string
+     */
+    private $version = "1.4.1";
+
     /**
      * @var Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_Util
      */
@@ -240,7 +246,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function getVersion()
     {
-        return "1.4.0";
+        return $this->version;
     }
 
     /**
@@ -272,7 +278,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             'link' => 'https://www.paymill.com',
             'copyright' => 'Copyright (c) 2013, PayIntelligent GmbH',
             'label' => 'Paymill',
-            'description' => '<h2>Payment plugin for Shopware Community Edition Version 4.0.0 - 4.1.3</h2>'
+            'description' => '<h2>Payment plugin for Shopware Community Edition Version 4.0.0 - 4.2.3</h2>'
             . '<ul>'
             . '<li style="list-style: inherit;">PCI DSS compatibility</li>'
             . '<li style="list-style: inherit;">Payment means: Credit Card (Visa, Visa Electron, Mastercard, Maestro, Diners, Discover, JCB, AMEX, China Union Pay), Direct Debit (ELV)</li>'
@@ -457,11 +463,37 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     {
         try {
             switch ($oldVersion) {
+                case "1.0.0":
+                case "1.0.1":
+                case "1.0.2":
+                case "1.0.3":
+                case "1.0.4":
+                case "1.0.5":
+                case "1.0.6":
+                case "1.1.0":
+                case "1.1.1":
+                case "1.1.2":
+                case "1.1.3":
+                case "1.1.4":
+                case "1.2.0":
+                    $this->uninstall();
+                    $this->install();
+                    break;
+                case "1.3.0":
+                    $this->solveKnownIssue();
+                case "1.3.1":
+                case "1.4.0":
+                    // add new config for CreditcardBrands
+                    $this->_createForm();
+                    // add new events for preNotification
+                    $this->_createEvents();
                 default:
-                    $updateSuccess = $this->uninstall();
-                    $updateSuccess = $updateSuccess ? $this->install() : false;
-                    return $updateSuccess;
+                    // update translation
+                    $this->_addTranslationSnippets();
+                    $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper($this->Form());
+                    $translationHelper->createPluginConfigTranslation();
             }
+            return true;
         } catch (Exception $exception) {
             Shopware()->Log()->Err($exception->getMessage());
             throw new Exception($exception->getMessage());
@@ -730,16 +762,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             ->query()
             ->fetchAll();
         foreach ($snippets as $snippet) {
-            $additionalContent = '{$additional.payment.additionaldescription}'. "\n"
+            $additionalContent = '{$additional.payment.additionaldescription}' . "\n"
                 . '{if $additional.payment.name == "paymilldebit"}%BR%'
-                . $snippet['value'] . ': {$paymillSepaDate}'. "\n"
+                . $snippet['value'] . ': {$paymillSepaDate}' . "\n"
                 . '{/if}' . "\n";
             $content = preg_replace('/%BR%/', "\n", $additionalContent);
             $contentHTML = preg_replace('/%BR%/', "<br/>\n", $additionalContent);
 
-            if ($snippet['shopID'] === '1'
-                && !preg_match('/\$paymillSepaDate/', $orderMail['content'])
-                && !preg_match('/\$paymillSepaDate/', $orderMail['contentHTML'])) {
+            if ($snippet['shopID'] === '1' && !preg_match('/\$paymillSepaDate/', $orderMail['content']) && !preg_match('/\$paymillSepaDate/', $orderMail['contentHTML'])) {
                 $orderMail['content'] = preg_replace('/\\{\\$additional\\.payment\\.additionaldescription\\}/', $content, $orderMail['content']);
                 $orderMail['contentHTML'] = preg_replace('/\\{\\$additional\\.payment\\.additionaldescription\\}/', $contentHTML, $orderMail['contentHTML']);
                 Shopware()->Db()->update('s_core_config_mails', $orderMail);
@@ -747,11 +777,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
             $translationObject = new Shopware_Components_Translation();
             $translation = $translationObject->read($snippet['shopID'], "config_mails", 2);
-            if ( (array_key_exists('content',$translation)
-                || array_key_exists('content',$translation))
-                && $snippet['shopID'] !== '1'
-                && !preg_match('/\$paymillSepaDate/', $translation['content'])
-                && !preg_match('/\$paymillSepaDate/', $translation['contentHtml'])) {
+            if ((array_key_exists('content', $translation) || array_key_exists('content', $translation)) && $snippet['shopID'] !== '1' && !preg_match('/\$paymillSepaDate/', $translation['content']) && !preg_match('/\$paymillSepaDate/', $translation['contentHtml'])) {
                 $translation['content'] = preg_replace('/\\{\\$additional\\.payment\\.additionaldescription\\}/', $content, $translation['content']);
                 $translation['contentHtml'] = preg_replace('/\\{\\$additional\\.payment\\.additionaldescription\\}/', $contentHTML, $translation['contentHtml']);
                 $translationObject->write(
@@ -767,9 +793,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      * @param Enlight_Event_EventArgs $args
      * @return string
      */
-    public function insertOrderAttribute(Enlight_Event_EventArgs $args){
+    public function insertOrderAttribute(Enlight_Event_EventArgs $args)
+    {
         $subject = $args->getSubject();
-        if(!$this->Config()->get('paymillSepaDate') && $subject->sUserData['additional']['payment']['name'] === "paymilldebit"){
+        if (!$this->Config()->get('paymillSepaDate') && $subject->sUserData['additional']['payment']['name'] === "paymilldebit") {
             return;
         }
         $timeStamp = strtotime("+ " . $this->Config()->get('paymillSepaDate') . " DAYS");

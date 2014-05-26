@@ -1,5 +1,8 @@
 #Release Notes
 
+##1.4.1
+ - added improved update-method
+
 ##1.4.0
  - united SEPA and regular ELV forms
  - added backend option to show credit card logos in frontend
