@@ -34,6 +34,9 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
     private $config;
 
 
+    /**
+     * initiates the class
+     */
     public function init(){
         $this->util = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_Util();
         $this->config = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();

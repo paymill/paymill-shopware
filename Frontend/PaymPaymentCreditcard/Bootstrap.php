@@ -31,11 +31,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 {
 
     /**
-     * @var string
-     */
-    private $version = "1.4.1";
-
-    /**
      * @var Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_Util
      */
     private $util;
@@ -46,6 +41,16 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     public function init()
     {
         $this->util = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_Util();
+    }
+
+    /**
+     * Returns the version
+     *
+     * @return string
+     */
+    public function getVersion()
+    {
+        return "1.4.1";
     }
 
     /**
@@ -239,15 +244,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         return ($arrayLength === 0 || $arrayLength === 11) ? $shouldBe : $result;
     }
 
-    /**
-     * Returns the version
-     *
-     * @return string
-     */
-    public function getVersion()
-    {
-        return $this->version;
-    }
 
     /**
      * Return the path of the backend controller
