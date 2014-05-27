@@ -50,7 +50,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function getVersion()
     {
-        return "1.4.1";
+        return "1.4.2";
     }
 
     /**
@@ -483,6 +483,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                     $this->_createForm();
                     // add new events for preNotification
                     $this->_createEvents();
+                case "1.4.1":
+                    Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
                 default:
                     // update translation
                     $this->_addTranslationSnippets();
