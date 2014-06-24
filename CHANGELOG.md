@@ -1,5 +1,8 @@
 #Release Notes
 
+##1.4.3
+ - Hotfix: fixed overwriting of email templates
+
 ##1.4.2
  - fixed Update bug from version 1.3.0 or higher to 1.4.1
 
