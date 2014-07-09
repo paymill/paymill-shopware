@@ -103,28 +103,36 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager 
         //Cast arguments to int to avoid insecure values
         $start = (int)$start;
         $limit = (int)$limit;
-
-
-        //Build SQL Statement using arguments
-        if($connectedSearch){
-            $read = "SELECT processId FROM  `paymill_log` ";
-        }else{
-            $read = "SELECT * FROM  `paymill_log` ";
+        $preparedArray = array();
+        
+        if($direction !== 'ASC' && $direction !== 'DESC') {
+            $direction = 'DESC';
         }
-
+        
+        $possibleProperty = array('id', 'processId', 'entryDate', 'version', 'merchantInfo', 'devInfo');
+        if(!in_array($property, $possibleProperty)) {
+            $property = 'entryDate';
+        }
+        
         if($searchTerm !== ""){
-            $read .= 'WHERE (merchantInfo LIKE "%' . $searchTerm . '%" OR devInfo LIKE "%' . $searchTerm . '%") ';
+            $searchTerm = '%' . $searchTerm . '%';
+            $sqlWhere = 'WHERE (merchantInfo LIKE ? OR devInfo LIKE ?) ';
+            array_push($preparedArray, $searchTerm);
+            array_push($preparedArray, $searchTerm);
         }
-
-        if($connectedSearch){
-            $read = "SELECT * FROM  `paymill_log` WHERE processId IN (".$read.")";
-
+        
+        if($connectedSearch) {
+            $sqlWhere = "WHERE processId IN (SELECT processId FROM `paymill_log` $sqlWhere)";
         }
+        
+        $sqlSelect = "SELECT * FROM  `paymill_log` ";
+        
+        $sqlOrder = "ORDER BY  `paymill_log`.". $property  ." ". $direction ." LIMIT ". $start .", " . $limit;
 
-        $read .= "ORDER BY  `paymill_log`.". $property  ." ". $direction ." LIMIT ". $start .", " . $limit;
+        $sql = $sqlSelect . $sqlWhere . $sqlOrder;
 
         //Process Select and return result
-        $result = Shopware()->Db()->fetchAll($read);
+        $result = Shopware()->Db()->fetchAll($sql,$preparedArray);
         
         return $result;
     }
