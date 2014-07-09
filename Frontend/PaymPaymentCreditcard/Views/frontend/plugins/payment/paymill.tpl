@@ -174,6 +174,7 @@ $(document).ready(function ()
                         return false;
                     }
                 }
+                $("#basketButton").prop( "disabled",true);
                 if (hasDummyData()) {
                     var form = $("#basketButton").closest('form');
                     form.get(0).submit();
@@ -221,8 +222,10 @@ $(document).ready(function ()
                             }
                         } catch (e) {
                             alert("Ein Fehler ist aufgetreten: " + e);
+                            $("#basketButton").prop( "disabled",false);
                         }
                     } else {
+                        $("#basketButton").prop( "disabled",false);
                         if (getPayment() === 'paymillcc') {
                             $('html, body').animate({
                                 scrollTop: $("#errorsCc").offset().top - 100
@@ -246,6 +249,7 @@ $(document).ready(function ()
             errorText = API_ERRORS["PAYMILL_" + error.apierror];
             debug(errorText);
             alert(errorText);
+            $("#basketButton").prop( "disabled",false);
         } else {
             debug("Received token from Paymill API: " + result.token);
             var form = $("#basketButton").closest('form');
