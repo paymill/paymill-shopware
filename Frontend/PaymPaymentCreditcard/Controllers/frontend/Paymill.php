@@ -83,7 +83,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             'currency'         => $this->getCurrencyShortName(),
             'name'             => $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname'],
             'email'            => $user['additional']['user']['email'],
-            'description'      => $user['additional']['user']['email'] . " " . Shopware()->Config()->get('shopname'),
+            'description'      => substr($user['additional']['user']['email'] . " " . Shopware()->Config()->get('shopname'),0,128),
             'payment'          => $paymentShortcut
         );
 
@@ -171,6 +171,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $transaction = new Services_Paymill_Transactions($privateKey, $apiUrl);
         $description = $orderNumber . " " . $user['additional']['user']['email'] . " " . Shopware()->Config()
                                                                                          ->get('shopname');
+        $description = substr($description,0,128);
         $updateResponse = $transaction->update(array('id'          => $paymentProcessor->getTransactionId(),
                                                      'description' => $description));
 

@@ -302,8 +302,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         //If there is a client for the customer
         if ($clientId !== "") {
             $email = $arguments['email'];
-            $description = Shopware()->Config()->get('shopname') . " " . $user['billingaddress']['customernumber'];
-
+            $description = $user['billingaddress']['customernumber'] . " " . Shopware()->Config()->get('shopname');  
+            $description = substr($description,0,128);
             //Update the client
             $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
             $privateKey = trim($swConfig->get("privateKey"));
