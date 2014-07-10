@@ -121,11 +121,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_CsvReader
                 $shopIds = Shopware()->Db()->fetchAll($shopIdsSql, array($localeId));
                 foreach ($shopIds as $list => $shopId) {
                     foreach ($snippets as $name => $value) {
-                        $name = Shopware()->Db()->quote($name);
-                        $value = Shopware()->Db()->quote($value);
-                        $localeId = Shopware()->Db()->quote($localeId);
-                        $shopId['id'] = Shopware()->Db()->quote($shopId['id']);
-                        $baseString = "('Paymill', ".$name.", ".$value.", ".$localeId.", ".$shopId['id'].", Now(), NOW()),";
+                        $baseString = '("Paymill", "'.$name.'", "'.$value.'", "'.$localeId.'", "'.$shopId['id'].'", Now(), NOW()),';
                         $result .= $baseString;
                     }
                 }
