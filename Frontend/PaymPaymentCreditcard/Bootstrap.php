@@ -794,13 +794,16 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     public function insertOrderAttribute(Enlight_Event_EventArgs $args)
     {
         $subject = $args->getSubject();
-        if (!$this->Config()->get('paymillSepaDate') && $subject->sUserData['additional']['payment']['name'] === "paymilldebit") {
-            return;
+        if ($subject->sUserData['additional']['payment']['name'] === "paymilldebit") {
+            $sepaDays = (int)$this->Config()->get('paymillSepaDate');
+            if($sepaDays < 0) {
+                $sepaDays = 0;
+            }
+            $timeStamp = strtotime("+" . $sepaDays . " DAYS");
+            $attributeSql = preg_replace('/attribute6/', 'attribute6, paymill_sepa_date', $args->getReturn());
+            $attributeSql = preg_replace('/\)$/', ",$timeStamp  )", $attributeSql);
+            $args->setReturn($attributeSql);
         }
-        $timeStamp = strtotime("+ " . $this->Config()->get('paymillSepaDate') . " DAYS");
-        $attributeSql = preg_replace('/attribute6/', 'attribute6, paymill_sepa_date', $args->getReturn());
-        $attributeSql = preg_replace('/\)$/', ",$timeStamp  )", $attributeSql);
-        $args->setReturn($attributeSql);
     }
 
 }
