@@ -50,7 +50,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function getVersion()
     {
-        return "1.4.4";
+        return "1.4.5";
     }
 
     /**
@@ -302,7 +302,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         //If there is a client for the customer
         if ($clientId !== "") {
             $email = $arguments['email'];
-            $description = $user['billingaddress']['customernumber'] . " " . Shopware()->Config()->get('shopname');  
+            $description = $user['billingaddress']['customernumber'] . " " . Shopware()->Config()->get('shopname');
             $description = substr($description,0,128);
             //Update the client
             $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
@@ -484,7 +484,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                     // add new events for preNotification
                     $this->_createEvents();
                 case "1.4.1":
-                    Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
+					Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
                 default:
                     // update translation
                     $this->_addTranslationSnippets();

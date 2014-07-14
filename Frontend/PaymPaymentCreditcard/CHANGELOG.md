@@ -1,5 +1,8 @@
 #Release Notes
 
+##1.4.5
+ - improved SQL Statements for CSV-Reader
+
 ##1.4.4
  - Blocked multiple clicks on the "Pay" Button.
  - Set Customer/Preauthorization/Transaction max. Description length to 128 chars
