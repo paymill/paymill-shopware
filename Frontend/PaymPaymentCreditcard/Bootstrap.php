@@ -181,9 +181,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $arguments->getSubject()->View()->Template()->assign("CreditcardBrands", $this->getEnabledCreditcardbrands());
 
         if ($paymentName === "paymilldebit" && Shopware()->Session()->sOrderVariables['sOrderNumber']) {
-            $orderModel = Shopware()->Models()->find('Shopware\Models\Order\Order', $this->util->getOrderIdByNumber(Shopware()->Session()->sOrderVariables['sOrderNumber']));
-            $orderModelAttribute = $orderModel->getAttribute();
-            $arguments->getSubject()->View()->Template()->assign("sepaDate", date('d.m.Y', $orderModelAttribute->getPaymillSepaDate()));
+            $sepaDate = $this->util->getSepaDate(Shopware()->Session()->sOrderVariables['sOrderNumber']);
+            $arguments->getSubject()->View()->Template()->assign("sepaDate", date('d.m.Y', $sepaDate));
             $view->extendsBlock("frontend_checkout_finishs_transaction_number", "{include file='frontend/Paymillfinish.tpl'}", "append");
         }
         if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
@@ -423,16 +422,15 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             return;
         }
 
-        $orderModel = Shopware()->Models()->find('Shopware\Models\Order\Order', $this->util->getOrderIdByNumber($context['sOrderNumber']));
-        $paymillSepaDate = $orderModel->getAttribute()->getPaymillSepaDate();
-        if (isset($paymillSepaDate)) {
+	$paymillSepaDate = $this->util->getSepaDate($context['sOrderNumber']);
+	if (!empty($paymillSepaDate)) {
             $context['paymillSepaDate'] = date("d.m.Y", $paymillSepaDate);
             $mail = Shopware()->TemplateMail()->createMail('sORDER', $context);
             $arguments->setReturn($mail);
             return $mail;
         }
     }
-
+    
     /**
      * Performs the necessary uninstall steps
      *
