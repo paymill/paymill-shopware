@@ -50,7 +50,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function getVersion()
     {
-        return "1.4.5";
+        return "1.4.6";
     }
 
     /**
