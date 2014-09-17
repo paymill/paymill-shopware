@@ -173,35 +173,41 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
      */
     public function refundAction()
     {
+        $result = false;
+        $code = null;
         require_once dirname(__FILE__) . '/../../lib/Services/Paymill/Transactions.php';
         require_once dirname(__FILE__) . '/../../lib/Services/Paymill/Refunds.php';
         $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $refund = new Services_Paymill_Refunds(trim($swConfig->get("privateKey")), 'https://api.paymill.com/v2/');
-        $transaction = new Services_Paymill_Transactions(trim($swConfig->get("privateKey")), 'https://api.paymill.com/v2/');
+        $transactionObject = new Services_Paymill_Transactions(trim($swConfig->get("privateKey")), 'https://api.paymill.com/v2/');
         $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
         $orderNumber = $modelHelper->getOrderNumberById($this->Request()->getParam("orderId"));
         $transactionId = $modelHelper->getPaymillTransactionId($orderNumber);
 
-        $transaction = $transaction->getOne($transactionId);
+        $transactionResult = $transactionObject->getOne($transactionId);
 
         //Create Transaction
         $parameter = array(
             'transactionId' => $transactionId,
             'params'        => array(
-                'amount'      => $transaction['amount'],
-                'description' => $transaction['client']['email'] . " " . Shopware()->Config()->get('shopname')
+                'amount'      => $transactionResult['amount'],
+                'description' => $transactionResult['client']['email'] . " " . Shopware()->Config()->get('shopname')
             )
         );
 
         $response = $refund->create($parameter);
+        if(isset($response['response_code'])){
+            $code = $response['response_code'];
+        }
 
         //Validate result and prepare feedback
-        if ($result = $this->_validateRefundResponse($response)) {
+        if ($this->_validateRefundResponse($response)) {
+            $result = true;
             $modelHelper->setPaymillRefund($orderNumber, $response['id']);
             $this->_updatePaymentStatus(20, $this->Request()->getParam("orderId"));
         }
 
-        $this->View()->assign(array('success' => $result, 'code' => $response['data']['response_code']));
+        $this->View()->assign(array('success' => $result, 'code' => $code));
     }
 
     /**
@@ -213,26 +219,19 @@ class Shopware_Controllers_Backend_PaymillOrderOperations extends Shopware_Contr
      */
     private function _validateRefundResponse($refund)
     {
-
         $loggingManager = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
+        $responseCodeOK = false;
+        if (isset($refund['id']) && isset($refund['response_code'])) {
+            $responseCodeOK = $refund['response_code'] === 20000;
+        }
 
-        if (!isset($refund['id']) && !isset($refund['data']['id'])) {
+        if($responseCodeOK){
+            $loggingManager->log("Refund created.", $refund['id']);
+        }else{
             $loggingManager->log("No Refund created.", var_export($refund, true));
-            $hasId = false;
-        } else {
-            $loggingManager->log("Refund created.", isset($refund['id']) ? $refund['id'] : $refund['data']['id']);
-            $hasId = true;
         }
 
-        if (isset($refund['data']['response_code']) && $refund['data']['response_code'] !== 20000) {
-            $loggingManager->log("An Error occurred during refund creation: " .
-                                 $refund['data']['response_code'], var_export($refund, true));
-            $responseCodeOK = false;
-        } else {
-            $responseCodeOK = true;
-        }
-
-        return $hasId && $responseCodeOK;
+        return $responseCodeOK;
     }
 
     /**

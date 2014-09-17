@@ -1,5 +1,8 @@
 #Release Notes
 
+##1.4.7
+ - fixed refund
+
 ##1.4.6
  - fixed sepa/elv for shopware 4.1.4
 

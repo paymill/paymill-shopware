@@ -50,7 +50,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function getVersion()
     {
-        return "1.4.6";
+        return "1.4.7";
     }
 
     /**
@@ -430,7 +430,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             return $mail;
         }
     }
-    
+
     /**
      * Performs the necessary uninstall steps
      *
