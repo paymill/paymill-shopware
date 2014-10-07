@@ -32,6 +32,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
 
     private $util;
     private $config;
+    private $logging;
 
 
     /**
@@ -40,6 +41,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
     public function init(){
         $this->util = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_Util();
         $this->config = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
+        $this->logging = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();;
     }
 
 
@@ -54,15 +56,14 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $sState = array('reserviert' => 18, 'bezahlt' => 12);
         $processId = md5(time()." ". $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname']);
         Shopware()->Session()->paymillProcessId = $processId;
-        $loggingManager = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
-        $loggingManager->setProcessId($processId);
+        $this->logging->setProcessId($processId);
 
         // read transaction token from session
         $paymillToken = Shopware()->Session()->paymillTransactionToken;
 
         // check if token present
         if (empty($paymillToken)) {
-            $loggingManager->log("No paymill token was provided. Redirect to payments page.", null);
+            $this->logging->log("No paymill token was provided. Redirect to payments page.", null);
 
             $url = $this->Front()->Router()->assemble(array('action'      => 'payment', 'sTarget' => 'checkout',
                                                             'sViewport'   => 'account', 'appendSession' => true,
@@ -71,7 +72,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             $this->redirect($url . '&paymill_error=1');
         }
 
-        $loggingManager->log("Start processing payment " . $paymillToken === "NoTokenRequired" ? "without" : "with" . " token.", $paymillToken);
+        $this->logging->log("Start processing payment " . $paymillToken === "NoTokenRequired" ? "without" : "with" . " token.", $paymillToken);
 
         // process the payment
         $userId = $user['billingaddress']['userID'];
@@ -114,7 +115,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $captureNow = !($preAuthOption && $isCCPayment);
         $result = $paymentProcessor->processPayment($captureNow);
 
-        $loggingManager->log("Payment processing resulted in: " . ($result ? "Success" : "Failure"), print_r($result, true));
+        $this->logging->log("Payment processing resulted in: " . ($result ? "Success" : "Failure"), print_r($result, true));
 
         // finish the order if payment was successfully processed
         if ($result !== true) {
@@ -124,8 +125,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         }
 
         //Save Client Id
-        $clientId = $paymentProcessor->getClientId();
-        $modelHelper->setPaymillClientId($userId, $clientId);
+        $modelHelper->setPaymillClientId($userId, $paymentProcessor->getClientId());
 
         //Save Fast Checkout Data
         $isFastCheckoutEnabled = $this->config->get("paymillFastCheckout");
@@ -139,14 +139,14 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $transactionId = $captureNow ? $paymentProcessor->getTransactionId() : $paymentProcessor->getPreauthId();
 
         $orderNumber = $this->saveOrder($transactionId, md5($transactionId), $statusId);
-        $loggingManager->log("Finish order.", "Ordernumber: " . $orderNumber, "using TransactionId: " . $transactionId);
+        $this->logging->log("Finish order.", "Ordernumber: " . $orderNumber, "using TransactionId: " . $transactionId);
         if ($captureNow) {
             $modelHelper->setPaymillTransactionId($orderNumber, $paymentProcessor->getTransactionId());
         } else {
             $modelHelper->setPaymillPreAuthorization($orderNumber, $paymentProcessor->getPreauthId());
         }
 
-        $this->_updateTransaction($orderNumber, $paymentProcessor, $loggingManager);
+        $this->_updateTransaction($orderNumber, $paymentProcessor);
 
         // reset the session field
         Shopware()->Session()->paymillTransactionToken = null;
@@ -160,7 +160,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
      * @param $paymentProcessor
      * @param $loggingManager
      */
-    private function _updateTransaction($orderNumber, $paymentProcessor, $loggingManager)
+    private function _updateTransaction($orderNumber, $paymentProcessor)
     {
         //Update Transaction
         require_once dirname(__FILE__) . '/../../lib/Services/Paymill/Transactions.php';
@@ -176,9 +176,9 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
                                                      'description' => $description));
 
         if ($updateResponse['response_code'] === 20000) {
-            $loggingManager->log("Successfully updated the description of " . $paymentProcessor->getTransactionId(), $description);
+            $this->logging->log("Successfully updated the description of " . $paymentProcessor->getTransactionId(), $description);
         } else {
-            $loggingManager->log("There was an error updating the description of " . $paymentProcessor->getTransactionId(), $description);
+            $this->logging->log("There was an error updating the description of " . $paymentProcessor->getTransactionId(), $description);
         }
     }
 
@@ -208,6 +208,26 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $sql = "SELECT value FROM s_core_snippets WHERE shopID = ? AND `name` = ?";
         $result = Shopware()->Db()->fetchOne( $sql, array( $shopId, $snippetName ) );
         return $result? $result : $default;
+    }
+
+    /**
+     * Action to handle webhooks
+     */
+    public function webhookAction(){
+        Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
+        $request = json_decode(file_get_contents('php://input'), true);
+
+        $this->logging->log('Retrieved Refund request', var_export($request, true));
+        $webHookService = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_webhookService();
+        $webHookService->setContext($this);
+        $isValid = $webHookService->validateNotification($request);
+        $this->context->logger->log('validating transaction-id for refund.', $isValid);
+        if($isValid){
+            //change orderstate
+            $transactionId = $webHookService->getTransactionId($request);
+            $this->savePaymentStatus($transactionId, md5($transactionId), 20);
+        }
+
     }
 
 }
