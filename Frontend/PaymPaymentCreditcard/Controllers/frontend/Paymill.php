@@ -219,7 +219,6 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
 
         $this->logging->log('Retrieved Refund request', var_export($request, true));
         $webHookService = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService();
-        $webHookService->setContext($this);
         $transactionId = $webHookService->getTransactionId($request);
 	if(!empty($transactionId)){
             $this->savePaymentStatus($transactionId, md5($transactionId), 20);
