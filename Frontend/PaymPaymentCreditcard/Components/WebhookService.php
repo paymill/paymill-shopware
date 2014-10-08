@@ -1,4 +1,7 @@
 <?php
+require_once dirname(__FILE__) . '/../lib/Services/Paymill/Transactions.php';
+require_once dirname(__FILE__) . '/../lib/Services/Paymill/Webhooks.php';
+
 /**
  * webhookService
  *
@@ -23,6 +26,53 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService
     public function __construct() {
 	$this->config = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $this->logging = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
+    }
+    
+    /**
+     * Registers the webhook for this module
+     * @param string $privateKey
+     * @return null
+     */
+    public function registerWebhookEndpoint($privateKey){
+	if($this->isWebhookAvailable()){
+	    return;
+	}
+	
+	$url = Shopware()->Front()->Router()->assemble(
+	    array(
+		'module' => 'frontend',
+		'action' => 'webhook', 
+		'controller' => 'payment_paymill',
+		'forceSecure' => true
+	    )
+	);
+	$webhook = new Services_Paymill_Webhooks($privateKey, 'https://api.paymill.com/v2/');
+	$result = $webhook->create(array(
+	    'url' => $url,
+            'event_types' => array('refund.succeeded')
+	));
+	if(isset($result['id']) && isset($result['livemode']) && $result['livemode']){
+	    Shopware()->Db()->query('REPLACE INTO `paymill_webhook` VALUES(?)',$result['id']);
+	}
+    }
+    
+    /**
+     * Installs the database to store the webhook id
+     */
+    public static function install(){
+	$sql = "CREATE TABLE IF NOT EXISTS `paymill_webhook` (" .
+                   "`webhook_id` varchar(255) NOT NULL," .
+                   "PRIMARY KEY (`webhook_id`) )";
+	Shopware()->Db()->query($sql);
+    }
+    
+    /**
+     * Checks if the webhook is available
+     * @return boolean
+     */
+    public function isWebhookAvailable(){
+	$sql = "SELECT * FROM `paymill_webhook`";
+	return (bool)Shopware()->Db()->fetchOne($sql);
     }
 
     /**

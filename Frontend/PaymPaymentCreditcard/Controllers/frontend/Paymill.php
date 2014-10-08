@@ -33,6 +33,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
     private $util;
     private $config;
     private $logging;
+    private $webHookService;
 
 
     /**
@@ -42,6 +43,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $this->util = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_Util();
         $this->config = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $this->logging = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager();
+	$this->webHookService = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService();
     }
 
 
@@ -52,7 +54,8 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
     public function indexAction()
     {
         //Initialise variables
-        $user = Shopware()->Session()->sOrderVariables['sUserData'];
+        $privateKey = trim($this->config->get("privateKey"));
+	$user = Shopware()->Session()->sOrderVariables['sUserData'];
         $sState = array('reserviert' => 18, 'bezahlt' => 12);
         $processId = md5(time()." ". $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname']);
         Shopware()->Session()->paymillProcessId = $processId;
@@ -72,6 +75,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             $this->redirect($url . '&paymill_error=1');
         }
 
+	$this->webHookService->registerWebhookEndpoint($privateKey);
         $this->logging->log("Start processing payment " . $paymillToken === "NoTokenRequired" ? "without" : "with" . " token.", $paymillToken);
 
         // process the payment
@@ -95,9 +99,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $paymentId = $modelHelper->getPaymillPaymentId($this->getPaymentShortName(), $userId);
 
         if ($clientId != "") {
-
-            $privateKey = trim($this->config->get("privateKey"));
-            $apiUrl = "https://api.paymill.com/v2/";
+	    $apiUrl = "https://api.paymill.com/v2/";
             require_once dirname(dirname(dirname(__FILE__))) . '/lib/Services/Paymill/Clients.php';
             $client = new Services_Paymill_Clients($privateKey, $apiUrl);
             $client->update(array('id' => $clientId, 'email' => $user['additional']['user']['email']));
@@ -218,8 +220,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $request = json_decode(file_get_contents('php://input'), true);
 
         $this->logging->log('Retrieved Refund request', var_export($request, true));
-        $webHookService = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService();
-        $transactionId = $webHookService->getTransactionId($request);
+        $transactionId = $this->webHookService->getTransactionId($request);
 	if(!empty($transactionId)){
             $this->savePaymentStatus($transactionId, md5($transactionId), 20);
         }
