@@ -259,36 +259,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
     
     /**
-     * Checks if credentials are set and gets the configuration via profile_request
-     *
-     * @param Enlight_Hook_HookArgs $arguments
-     * @return null
-     */
-    public function beforeSavePluginConfig($arguments)
-    {
-        throw new Exception('TEST');
-	echo "TEST";
-	exit;
-	
-	
-	$request = $arguments->getSubject()->Request();
-        $parameter = $request->getParams();
-
-        if ($parameter['name'] !== $this->getName() || $parameter['controller'] !== 'config') {
-            return;
-        }
-
-        foreach ($parameter['elements'] as $element) {
-            if ($element['name'] === 'privateKey') {
-                $privateKey = $element['values'][0]['value'];
-            }
-        }
-	
-	$webhookservice = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService();
-	$webhookservice->registerWebhookEndpoint($privateKey);
-    }
-
-    /**
      * Get Info for the Pluginmanager
      *
      * @return array
@@ -514,6 +484,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                     $this->_createEvents();
                 case "1.4.1":
 		    Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
+		case "1.4.7":
+		    Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService::install();
                 default:
                     // update translation
                     $this->_addTranslationSnippets();
