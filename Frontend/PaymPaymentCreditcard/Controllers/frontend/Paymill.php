@@ -75,7 +75,6 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             $this->redirect($url . '&paymill_error=1');
         }
 
-	$this->webHookService->registerWebhookEndpoint($privateKey);
         $this->logging->log("Start processing payment " . $paymillToken === "NoTokenRequired" ? "without" : "with" . " token.", $paymillToken);
 
         // process the payment

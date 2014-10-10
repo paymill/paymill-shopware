@@ -371,6 +371,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper($this->Form());
             $translationHelper->createPluginConfigTranslation();
             $this->solveKnownIssue();
+	    $this->Plugin()->setActive(true);
         } catch (Exception $exception) {
             $this->uninstall();
             throw new Exception($exception->getMessage());
@@ -721,10 +722,38 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $this->subscribeEvent('Shopware_Components_Document::assignValues::after', 'beforeCreatingDocument');
             $this->subscribeEvent('Shopware_Modules_Order_SendMail_Create', 'beforeSendingMail');
             $this->subscribeEvent('Shopware_Modules_Order_SaveOrderAttributes_FilterSQL', 'insertOrderAttribute');
+	    $this->subscribeEvent('Shopware_Controllers_Backend_Config::saveFormAction::before', 'beforeSavePluginConfig');
         } catch (Exception $exception) {
             Shopware()->Log()->Err("There was an error registering the plugins events. " . $exception->getMessage());
             throw new Exception("There was an error registering the plugins events. " . $exception->getMessage());
         }
+    }
+    
+    /**
+     * Registers the endpoint for the notifications
+     *
+     * @param Enlight_Hook_HookArgs $arguments
+     * @return null
+     */
+    public function beforeSavePluginConfig($arguments)
+    {
+        $request = $arguments->getSubject()->Request();
+        $parameter = $request->getParams();
+
+        if ($parameter['name'] !== $this->getName() || $parameter['controller'] !== 'config') {
+            return;
+        }
+
+        foreach ($parameter['elements'] as $element) {
+            if (in_array($element['name'], array('privateKey')) && empty($element['values'][0]['value'])) {
+                return;
+            }
+            if ($element['name'] === 'privateKey') {
+                $privateKey = $element['values'][0]['value'];
+            }
+        }
+	$webHookService = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService();
+	$webHookService->registerWebhookEndpoint($privateKey);
     }
 
     /**

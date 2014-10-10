@@ -54,6 +54,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService
 	if(isset($result['id']) && isset($result['livemode']) && $result['livemode']){
 	    Shopware()->Db()->query('REPLACE INTO `paymill_webhook` VALUES(?)',$result['id']);
 	}
+	
     }
     
     /**
