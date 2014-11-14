@@ -139,7 +139,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
         $statusId = $captureNow ? $sState['bezahlt']: $sState['reserviert'];
         $transactionId = $captureNow ? $paymentProcessor->getTransactionId() : $paymentProcessor->getPreauthId();
 
-        $orderNumber = $this->saveOrder($transactionId, md5($transactionId), $statusId);
+        $orderNumber = $this->saveOrder($this->createPaymentUniqueId(), md5($this->createPaymentUniqueId()), $statusId);
         $this->logging->log("Finish order.", "Ordernumber: " . $orderNumber, "using TransactionId: " . $transactionId);
         if ($captureNow) {
             $modelHelper->setPaymillTransactionId($orderNumber, $paymentProcessor->getTransactionId());
