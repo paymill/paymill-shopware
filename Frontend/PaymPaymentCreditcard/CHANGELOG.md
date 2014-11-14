@@ -1,5 +1,8 @@
 #Release Notes
 
+##1.5.1
+ - removed transactionId in checkout
+
 ##1.5.0
  - added webhooks for refunds
 
