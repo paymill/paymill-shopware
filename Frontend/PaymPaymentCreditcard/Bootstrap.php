@@ -485,8 +485,15 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                     $this->_createEvents();
                 case "1.4.1":
 		    Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
+		case "1.4.2":
+		case "1.4.3":
+		case "1.4.4":
+		case "1.4.5":
+		case "1.4.6":
 		case "1.4.7":
 		    Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService::install();
+                    // add new events for register Webhook
+                    $this->_createEvents();
                 default:
                     // update translation
                     $this->_addTranslationSnippets();
