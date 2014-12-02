@@ -1,7 +1,7 @@
 Paymill-Shopware
 ==================
 
-Payment plugin for Shopware Community Edition Version 4.0.0 - 4.2.1
+Payment plugin for Shopware Community Edition Version 4.0.0 - 4.3.2
 
 ## Installation from this git repository
 
