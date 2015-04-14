@@ -27,7 +27,7 @@
     API_ERRORS["PAYMILL_field_invalid_country"] = '{s namespace=Paymill name=PAYMILL_field_invalid_country}{/s}';
     API_ERRORS["PAYMILL_field_invalid_bank_data"] = '{s namespace=Paymill name=PAYMILL_field_invalid_bank_data}{/s}';
 </script >
-<script type = "text/javascript" src = "https://bridge.paymill.com/" ></script >
+<script type = "text/javascript" src = "https://bridge.paymill.com/dss3" ></script >
 <script type = "text/javascript" src = "{link file='frontend/_resources/javascript/Iban.js'}" ></script >
 <script type = "text/javascript" src = "{link file='frontend/_resources/javascript/BrandDetection.js'}" ></script >
 <script type = "text/javascript" >
@@ -278,7 +278,7 @@ $(document).ready(function ()
 
 </div >
     {if $Controller != "account"}
-        <div class = "debit" >
+        <div class = "debit" id='paymillFormContainer'>
         {if $payment_mean.name == 'paymillcc'}
             {assign var=showPaymillCCLogos value=false}
             {if {config name=paymillBrandIconAmex}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-amex"></div>{/if}
