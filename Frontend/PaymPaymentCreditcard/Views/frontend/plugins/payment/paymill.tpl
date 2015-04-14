@@ -1,3 +1,4 @@
+
 <link rel = "stylesheet" type = "text/css" href = "{link file='frontend/_resources/paymill_styles.css'}" />
 <script type = "text/javascript" >
     var PAYMILL_PUBLIC_KEY = '{$publicKey}';
@@ -277,143 +278,30 @@ $(document).ready(function ()
 
 </div >
     {if $Controller != "account"}
-    <div class = "debit" >
+        <div class = "debit" >
         {if $payment_mean.name == 'paymillcc'}
-            {if {config name=paymillBrandIconAmex}}<div class="paymill-card-icon paymill-card-number-amex"></div>{/if}
-            {if {config name=paymillBrandIconCartaSi}}<div class="paymill-card-icon paymill-card-number-carta-si"></div>{/if}
-            {if {config name=paymillBrandIconCarteBleue}}<div class="paymill-card-icon paymill-card-number-carte-bleue"></div>{/if}
-            {if {config name=paymillBrandIconDankort}}<div class="paymill-card-icon paymill-card-number-dankort"></div>{/if}
-            {if {config name=paymillBrandIconDinersclub}}<div class="paymill-card-icon paymill-card-number-diners-club"></div>{/if}
-            {if {config name=paymillBrandIconDiscover}}<div class="paymill-card-icon paymill-card-number-discover"></div>{/if}
-            {if {config name=paymillBrandIconJcb}}<div class="paymill-card-icon paymill-card-number-jcb"></div>{/if}
-            {if {config name=paymillBrandIconMaestro}}<div class="paymill-card-icon paymill-card-number-maestro"></div>{/if}
-            {if {config name=paymillBrandIconMastercard}}<div class="paymill-card-icon paymill-card-number-mastercard"></div>{/if}
-            {if {config name=paymillBrandIconVisa}}<div class="paymill-card-icon paymill-card-number-visa"></div>{/if}
-            {if {config name=paymillBrandIconUnionpay}}<div class="paymill-card-icon paymill-card-number-china-unionpay"></div>{/if}
-                <br><br>
-                                                    {if $pigmbhTemplateActive == 1}
-                <div class = "form-group" >
-                    <label class = "col-lg-4 control-label"
-                           for = "card-holder" >{s namespace=Paymill name=frontend_creditcard_label_holder}Credit Card Holder{/s} *</label >
+            {assign var=showPaymillCCLogos value=false}
+            {if {config name=paymillBrandIconAmex}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-amex"></div>{/if}
+            {if {config name=paymillBrandIconCartaSi}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-carta-si"></div>{/if}
+            {if {config name=paymillBrandIconCarteBleue}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-carte-bleue"></div>{/if}
+            {if {config name=paymillBrandIconDankort}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-dankort"></div>{/if}
+            {if {config name=paymillBrandIconDinersclub}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-diners-club"></div>{/if}
+            {if {config name=paymillBrandIconDiscover}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-discover"></div>{/if}
+            {if {config name=paymillBrandIconJcb}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-jcb"></div>{/if}
+            {if {config name=paymillBrandIconMaestro}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-maestro"></div>{/if}
+            {if {config name=paymillBrandIconMastercard}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-mastercard"></div>{/if}
+            {if {config name=paymillBrandIconVisa}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-visa"></div>{/if}
+            {if {config name=paymillBrandIconUnionpay}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-china-unionpay"></div>{/if}
+            {if showPaymillCCLogos}<br><br>{/if}
+            {if $paymillPCI}
+                {include file='frontend/plugins/payment/paymill_cc_saq.tpl'}
+            {else}
+                {include file='frontend/plugins/payment/paymill_cc_saq_ep.tpl'}
+            {/if}
+        {/if}
 
-                    <div class = "col-lg-6" >
-                        <input id = "card-holder" type = "text" size = "20" class = "form-control"
-                               value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
-                    </div >
-                </div >
-                <div class = "form-group" >
-                    <label class = "col-lg-4 control-label"
-                           for = "card-number" >{s namespace=Paymill name=frontend_creditcard_label_number}Credit Card Number{/s} *</label >
-
-                    <div class = "col-lg-6" >
-                        <input id = "card-number" type = "text" size = "20" class = "form-control"
-                               value = "{$paymillCardNumber}" />
-                    </div >
-                </div >
-                <div class = "form-group" >
-                <span class = "col-lg-4 control-label" >
-                <label for = "card-cvc" >{s namespace=Paymill name=frontend_creditcard_label_cvc}CVC {/s} *</label >
-                <span class = "paymill-tooltip"
-                      title = "{s namespace=Paymill name=frontend_creditcard_tooltip_cvc}What is a CVV/CVC number? Prospective credit cards will have a 3 to 4-digit number, usually on the back of the card. It ascertains that the payment is carried out by the credit card holder and the card account is legitimate. On Visa the CVV (Card Verification Value) appears after and to the right of your card number. Same goes for Mastercard's CVC (Card Verfication Code), which also appears after and to the right of  your card number, and has 3-digits. Diners Club, Discover, and JCB credit and debit cards have a three-digit card security code which also appears after and to the right of your card number. The American Express CID (Card Identification Number) is a 4-digit number printed on the front of your card. It appears above and to the right of your card number. On Maestro the CVV appears after and to the right of your number. If you don’t have a CVV for your Maestro card you can use 000.{/s}" >?</span >
-                </span >
-
-                    <div class = "col-lg-6" >
-                        <input id = "card-cvc" type = "text" size = "20" class = "form-control"
-                               value = "{$paymillCvc}" />
-                    </div >
-                </div >
-                <div class = "form-group" >
-                    <label class = "col-lg-4 control-label"
-                           for = "card-expiry-month" >{s namespace=Paymill name=frontend_creditcard_label_valid}Valid until (MM/YYYY){/s} *</label >
-
-                    <div class = "col-lg-6" >
-                        <input id = "card-expiry-month" type = "text" size = "5" class = "form-control"
-                                    style = "width: 25%; display: inline-block;"
-                               value = "{$paymillMonth}" />
-                        <input id = "card-expiry-year" type = "text" size = "5" class = "form-control"
-                                    style = "width: 25%; display: inline-block;"
-                               value = "{$paymillYear}" />
-
-                    </div >
-                </div >
-                                                    {else}
-                <p class = "none" >
-                    <label >{s namespace=Paymill name=frontend_creditcard_label_holder}Credit Card Holder{/s} *</label >
-                    <input id = "card-holder" type = "text" size = "20" class = "text"
-                           value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
-                </p >
-                <p class = "none" >
-                    <label >{s namespace=Paymill name=frontend_creditcard_label_number}Credit Card Number{/s} *</label >
-                    <input id = "card-number" type = "text" size = "20" class = "text"
-                           value = "{$paymillCardNumber}" />
-                </p >
-                <p class = "none" >
-                    <label >{s namespace=Paymill name=frontend_creditcard_label_cvc}CVC{/s} *</label >
-                    <input id = "card-cvc" type = "text" size = "4" class = "text" value = "{$paymillCvc}" />
-                <span class = "paymill-tooltip"
-                      title = "{s namespace=Paymill name=frontend_creditcard_tooltip_cvc} What is a CVV/CVC number? Prospective credit cards will have a 3 to 4-digit number, usually on the back of the card. It ascertains that the payment is carried out by the credit card holder and the card account is legitimate. On Visa the CVV (Card Verification Value) appears after and to the right of your card number. Same goes for Mastercard's CVC (Card Verfication Code), which also appears after and to the right of  your card number, and has 3-digits. Diners Club, Discover, and JCB credit and debit cards have a three-digit card security code which also appears after and to the right of your card number. The American Express CID (Card Identification Number) is a 4-digit number printed on the front of your card. It appears above and to the right of your card number. On Maestro the CVV appears after and to the right of your number. If you don’t have a CVV for your Maestro card you can use 000.{/s}" >?</span >
-                </p >
-                <p class = "none" >
-                    <label >{s namespace=Paymill name=frontend_creditcard_label_valid}Valid until (MM/YYYY){/s} *</label >
-                    <input id = "card-expiry-month" type = "text" style = "width: 30px; display: inline-block;"
-                                                                        class = "text"
-                           value = "{$paymillMonth}" />
-                    <input id = "card-expiry-year" type = "text" style = "width: 60px; display: inline-block;"
-                                                                        class = "text"
-                           value = "{$paymillYear}" />
-                </p >
-                                                    {/if}
-                                                {/if}
-
-                                                {if $payment_mean.name == 'paymilldebit' }
-                                                    {if $pigmbhTemplateActive == 1}
-                <div class = "form-group" >
-                    <label class = "col-lg-4 control-label"
-                           for = "paymill_accountholder" >{s namespace=Paymill name=frontend_directdebit_label_holder}Account Holder{/s} *</label >
-
-                    <div class = "col-lg-6" >
-                        <input id = "paymill_accountholder" type = "text" size = "20" class = "form-control"
-                               value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
-                    </div >
-                </div >
-                <div class = "form-group" >
-                    <label class = "col-lg-4 control-label"
-                           for = "paymill_iban" >{s namespace=Paymill name=frontend_directdebit_label_number}Account Number{/s}/{s namespace=Paymill name=frontend_directdebit_label_iban}IBAN{/s} *</label >
-
-                    <div class = "col-lg-6" >
-                        <input id = "paymill_iban" type = "text" size = "20" class = "form-control"
-                               value = "{$paymillAccountNumber}" />
-                    </div >
-                </div >
-                <div class = "form-group" >
-                    <label class = "col-lg-4 control-label"
-                           for = "paymill_bic" >{s namespace=Paymill name=frontend_directdebit_label_bankcode}Bankcode{/s}/{s namespace=Paymill name=frontend_directdebit_label_bic}BIC{/s} *</label >
-
-                    <div class = "col-lg-6" >
-                        <input id = "paymill_bic" type = "text" size = "20" class = "form-control"
-                               value = "{$paymillBankCode}" />
-                    </div >
-                </div >
-                                                    {else}
-                <p class = "none" >
-                    <label for = "paymill_accountholder" >{s namespace=Paymill name=frontend_directdebit_label_holder}Account Holder{/s} *</label >
-                    <input id = "paymill_accountholder" type = "text" size = "20" class = "text"
-                           value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
-                </p >
-                <p class = "none" >
-                    <label for = "paymill_iban" >{s namespace=Paymill name=frontend_directdebit_label_number}Account Number{/s}/{s namespace=Paymill name=frontend_directdebit_label_iban}IBAN{/s} *</label >
-                    <input id = "paymill_iban" type = "text" size = "4" class = "text"
-                           value = "{$paymillAccountNumber}" />
-                </p >
-                <p class = "none" >
-                    <label for = "paymill_bic" >{s namespace=Paymill name=frontend_directdebit_label_bankcode}Bankcode{/s}/{s namespace=Paymill name=frontend_directdebit_label_bic}BIC{/s} *</label >
-                    <input id = "paymill_bic" type = "text" size = "4" class = "text"
-                           value = "{$paymillBankCode}" />
-                </p >
-                                                    {/if}
-                                                {/if}
-                                                {if ($payment_mean.name == 'paymilldebit') || ($payment_mean.name == 'paymillcc')}
-            <p class = "description" >{s namespace=Paymill name=feedback_info_general_required}Fields marked with a * are required.{/s}</p >
-                                                {/if}
-    </div >
-                                            {/if}
+        {if $payment_mean.name == 'paymilldebit' }
+            {include file='frontend/plugins/payment/paymill_debit.tpl'}
+        {/if}
+        </div >
+    {/if}
