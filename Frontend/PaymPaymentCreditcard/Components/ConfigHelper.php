@@ -18,12 +18,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper
                . "paymillLogging tinyint(1) NOT NULL,"
                . "paymillFastCheckout tinyint(1) NOT NULL,"
                . "paymillSepaActive tinyint(1) NOT NULL,"
-               . "paymillPCI varchar(8) NOT NULL"
+               . "paymillPCI varchar(8) NOT NULL,"
+               . "stylesheetURL varchar(255)"
                . ") ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
                . "INSERT IGNORE INTO paymill_config_data ("
                . "id, publicKey, privateKey, paymillPreAuth,"
-               . "paymillDebugging, paymillLogging, paymillFastCheckout, paymillSepaActive, paymillPCI) VALUES("
-               . "1, NULL,NULL,0,0,0,0,0,'SAQ A');";
+               . "paymillDebugging, paymillLogging, paymillFastCheckout, paymillSepaActive, paymillPCI, stylesheetURL) VALUES("
+               . "1, NULL,NULL,0,0,0,0,0,'SAQ A','');";
         Shopware()->Db()->query($sql);
     }
 
@@ -42,6 +43,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper
         $fastCheckoutFlag = $swConfig->get("paymillFastCheckout") == true;
         $sepaFlag = $swConfig->get("paymillSepaActive") == true;
         $pciFlag = $swConfig->get("paymillPCI") == true;
+        $stylesheetURL = trim($swConfig->get("stylesheetURL"));
 
         $sql = "UPDATE paymill_config_data SET"
                . "`paymillPreAuth` = ?,"
@@ -49,7 +51,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper
                . "`paymillLogging` = ?,"
                . "`paymillFastCheckout` = ?,"
                . "`paymillSepaActive` = ?,"
-               . "`paymillPCI` = ?"
+               . "`paymillPCI` = ?,"
+               . "`stylesheetURL` = ?" 
                . "WHERE id = 1";
         Shopware()->Db()->query(
         $sql,
@@ -59,7 +62,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper
                 $loggingFlag ? 1 : 0,
                 $fastCheckoutFlag ? 1 : 0,
                 $sepaFlag ? 1 : 0,
-                $pciFlag ? 'SAQ A-EP' : 'SAQ A'
+                $pciFlag ? 'SAQ A-EP' : 'SAQ A',
+                $stylesheetURL
             )
         );
 
