@@ -181,7 +181,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $arguments->getSubject()->View()->Template()->assign("sepaActive", $swConfig->get("paymillSepaActive"));
         $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
         $arguments->getSubject()->View()->Template()->assign("CreditcardBrands", $this->getEnabledCreditcardbrands());
-        $arguments->getSubject()->View()->Template()->assign("paymillPCI", trim($swConfig->get("paymillPCI")));
+        $arguments->getSubject()->View()->Template()->assign("paymillPCI", $swConfig->get("paymillPCI") === 'SAQ A');
+        
+        $paymillStylesheetURL = trim($swConfig->get("paymillStylesheetURL"));
+        if(substr($paymillStylesheetURL, 0, 8) !== "https://") {
+            $paymillStylesheetURL = false;
+        }
+        $arguments->getSubject()->View()->Template()->assign("paymillStylesheetURL", $paymillStylesheetURL);
 
         if ($paymentName === "paymilldebit" && Shopware()->Session()->sOrderVariables['sOrderNumber']) {
             $sepaDate = $this->util->getSepaDate(Shopware()->Session()->sOrderVariables['sOrderNumber']);

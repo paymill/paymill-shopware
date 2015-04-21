@@ -5,6 +5,7 @@
     var VALIDATE_CVC = true;
     var ActiveBrands = {$CreditcardBrands|@json_encode};
     var API_ERRORS = new Array();
+    var paymilliFrame = {$paymillPCI};
     API_ERRORS["PAYMILL_internal_server_error"] = '{s namespace=Paymill name=PAYMILL_internal_server_error}{/s}';
     API_ERRORS["PAYMILL_invalid_public_key"] = '{s namespace=Paymill name=PAYMILL_invalid_public_key}{/s}';
     API_ERRORS["PAYMILL_invalid_payment_data"] = '{s namespace=Paymill name=PAYMILL_invalid_payment_data}{/s}';
@@ -31,12 +32,12 @@
 <script type = "text/javascript" src = "{link file='frontend/_resources/javascript/Iban.js'}" ></script >
 <script type = "text/javascript" src = "{link file='frontend/_resources/javascript/BrandDetection.js'}" ></script >
 <script type = "text/javascript" >
-            function debug(message)
-            {
-    {if $debug}
-                console.log("[" + getPayment() + "] " + message);
-    {/if}
-            }
+    function debug(message)
+    {
+        {if $debug}
+            console.log("[" + getPayment() + "] " + message);
+        {/if}
+    }
 
     function getPayment()
     {
@@ -81,7 +82,7 @@
         errorsElv.parent().hide();
         errorsElv.html("");
         var result = true;
-        if (getPayment() === 'paymillcc') { //If CC
+        if (getPayment() === 'paymillcc' && paymilliFrame) { //If CC and not iFrame Solution
             if (!paymill.validateHolder($('#card-holder').val())) {
                 errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_holder}Please enter the cardholders name.{/s}</li>");
                 result = false;
@@ -108,6 +109,9 @@
             } else {
                 debug("Validations successful");
             }
+        } else {
+            result = true;
+            debug("No validation, because of iFrame Solution.");
         }
         if (getPayment() === 'paymilldebit') { //If ELV
             if (!paymill.validateHolder($('#paymill_accountholder').val())) {
@@ -182,7 +186,7 @@ $(document).ready(function ()
                 } else {
                     if (validate()) {
                         try {
-                            if (getPayment() === 'paymillcc') { //If CC
+                            if (getPayment() === 'paymillcc' && ) { //If CC and not iFrame Solution
                                 if (VALIDATE_CVC) {
                                     paymill.createToken({
                                     number:     $('#card-number').val(),
@@ -205,6 +209,11 @@ $(document).ready(function ()
                                     currency:   '{config name=currency|upper}'
                                     }, PaymillResponseHandler);
                                 }
+                            } else {
+                                    paymill.createToken({
+                                        amount_int: '{$tokenAmount}',
+                                        currency:   '{config name=currency|upper}'
+                                    }, PaymillResponseHandler);
                             }
                             if (getPayment() === 'paymilldebit') { //If ELV
                                 if (isSepa()) {
@@ -275,28 +284,26 @@ $(document).ready(function ()
         <li >{s namespace=Paymill name=feedback_error_directdebit_parent}Please enter your accountdata. For security reason we will not save them on our system.{/s}</li >
         <ul id = "errorsElv" ></ul >
     {/if}
-
 </div >
+
     {if $Controller != "account"}
         <div class = "debit" id='paymillFormContainer'>
         {if $payment_mean.name == 'paymillcc'}
-            {assign var=showPaymillCCLogos value=false}
-            {if {config name=paymillBrandIconAmex}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-amex"></div>{/if}
-            {if {config name=paymillBrandIconCartaSi}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-carta-si"></div>{/if}
-            {if {config name=paymillBrandIconCarteBleue}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-carte-bleue"></div>{/if}
-            {if {config name=paymillBrandIconDankort}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-dankort"></div>{/if}
-            {if {config name=paymillBrandIconDinersclub}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-diners-club"></div>{/if}
-            {if {config name=paymillBrandIconDiscover}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-discover"></div>{/if}
-            {if {config name=paymillBrandIconJcb}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-jcb"></div>{/if}
-            {if {config name=paymillBrandIconMaestro}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-maestro"></div>{/if}
-            {if {config name=paymillBrandIconMastercard}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-mastercard"></div>{/if}
-            {if {config name=paymillBrandIconVisa}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-visa"></div>{/if}
-            {if {config name=paymillBrandIconUnionpay}}{assign var=showPaymillCCLogos value=true}<div class="paymill-card-icon paymill-card-number-china-unionpay"></div>{/if}
-            {if showPaymillCCLogos}<br><br>{/if}
+            {if {config name=paymillBrandIconAmex}}<div class="paymill-card-icon paymill-card-number-amex"></div>{/if}
+            {if {config name=paymillBrandIconCartaSi}}<div class="paymill-card-icon paymill-card-number-carta-si"></div>{/if}
+            {if {config name=paymillBrandIconCarteBleue}}<div class="paymill-card-icon paymill-card-number-carte-bleue"></div>{/if}
+            {if {config name=paymillBrandIconDankort}}<div class="paymill-card-icon paymill-card-number-dankort"></div>{/if}
+            {if {config name=paymillBrandIconDinersclub}}<div class="paymill-card-icon paymill-card-number-diners-club"></div>{/if}
+            {if {config name=paymillBrandIconDiscover}}<div class="paymill-card-icon paymill-card-number-discover"></div>{/if}
+            {if {config name=paymillBrandIconJcb}}<div class="paymill-card-icon paymill-card-number-jcb"></div>{/if}
+            {if {config name=paymillBrandIconMaestro}}<div class="paymill-card-icon paymill-card-number-maestro"></div>{/if}
+            {if {config name=paymillBrandIconMastercard}}<div class="paymill-card-icon paymill-card-number-mastercard"></div>{/if}
+            {if {config name=paymillBrandIconVisa}}<div class="paymill-card-icon paymill-card-number-visa"></div>{/if}
+            {if {config name=paymillBrandIconUnionpay}}<div class="paymill-card-icon paymill-card-number-china-unionpay"></div>{/if}
             {if $paymillPCI}
-                {include file='frontend/plugins/payment/paymill_cc_saq.tpl'}
-            {else}
                 {include file='frontend/plugins/payment/paymill_cc_saq_ep.tpl'}
+            {else}
+                {include file='frontend/plugins/payment/paymill_cc_saq.tpl'}
             {/if}
         {/if}
 
