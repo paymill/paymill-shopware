@@ -143,7 +143,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $view->paymillCvc = "***";
             $view->paymillMonth = $paymentObject['expire_month'];
             $view->paymillYear = $paymentObject['expire_year'];
+            $view->paymillCardHolder = $paymentObject['card_holder'];
+            $view->paymillBrand = $paymentObject['card_type'];
         } else {
+            $view->paymillCardHolder = $user['billingaddress']['firstname'] . " " . $user['billingaddress']['lastname'];
             $view->paymillCardNumber = "";
             $view->paymillCvc = "";
             $view->paymillMonth = "";

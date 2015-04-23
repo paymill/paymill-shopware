@@ -5,7 +5,7 @@
 
                     <div class = "col-lg-6" >
                         <input id = "card-holder" type = "text" size = "20" class = "form-control"
-                               value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
+                               value = "{$paymillCardHolder}" />
                     </div >
                 </div >
                 <div class = "form-group" >
@@ -47,7 +47,7 @@
                 <p class = "none" >
                     <label >{s namespace=Paymill name=frontend_creditcard_label_holder}Credit Card Holder{/s} *</label >
                     <input id = "card-holder" type = "text" size = "20" class = "text"
-                           value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
+                           value = "{$paymillCardHolder}" />
                 </p >
                 <p class = "none" >
                     <label >{s namespace=Paymill name=frontend_creditcard_label_number}Credit Card Number{/s} *</label >

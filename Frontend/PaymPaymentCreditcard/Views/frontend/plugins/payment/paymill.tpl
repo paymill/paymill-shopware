@@ -5,7 +5,11 @@
     var VALIDATE_CVC = true;
     var ActiveBrands = {$CreditcardBrands|@json_encode};
     var API_ERRORS = new Array();
-    var paymilliFrame = {$paymillPCI};
+    var paymilliFrame = true;
+    var PAYMILL_FASTCHECKOUT_CC_CHANGED = false;
+    if('{$paymillPCI}' == 'true') {
+        paymilliFrame = false;
+    }
     API_ERRORS["PAYMILL_internal_server_error"] = '{s namespace=Paymill name=PAYMILL_internal_server_error}{/s}';
     API_ERRORS["PAYMILL_invalid_public_key"] = '{s namespace=Paymill name=PAYMILL_invalid_public_key}{/s}';
     API_ERRORS["PAYMILL_invalid_payment_data"] = '{s namespace=Paymill name=PAYMILL_invalid_payment_data}{/s}';
@@ -45,7 +49,7 @@
     }
     function hasDummyData()
     {
-        if (getPayment() === 'paymillcc') {
+        if (getPayment() === 'paymillcc' && !paymilliFrame) { //If CC and not iFrame Solution
             var cardNumber = $('#card-number').val();
             var validMonth = $('#card-expiry-month').val();
             var validYear = $('#card-expiry-year').val();
@@ -58,7 +62,8 @@
                 debug("Creditcard information found. New Information will be used. Token should be getting generated.");
                 return false;
             }
-
+        } else if (PAYMILL_FASTCHECKOUT_CC_CHANGED) {
+            return false;
         }
 
         if (getPayment() === 'paymilldebit') {
@@ -82,7 +87,7 @@
         errorsElv.parent().hide();
         errorsElv.html("");
         var result = true;
-        if (getPayment() === 'paymillcc' && paymilliFrame) { //If CC and not iFrame Solution
+        if (getPayment() === 'paymillcc' && !paymilliFrame) { //If CC and not iFrame Solution
             if (!paymill.validateHolder($('#card-holder').val())) {
                 errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_holder}Please enter the cardholders name.{/s}</li>");
                 result = false;
@@ -186,7 +191,7 @@ $(document).ready(function ()
                 } else {
                     if (validate()) {
                         try {
-                            if (getPayment() === 'paymillcc' && ) { //If CC and not iFrame Solution
+                            if (getPayment() === 'paymillcc' && !paymilliFrame) { //If CC and not iFrame Solution
                                 if (VALIDATE_CVC) {
                                     paymill.createToken({
                                     number:     $('#card-number').val(),
@@ -210,7 +215,7 @@ $(document).ready(function ()
                                     }, PaymillResponseHandler);
                                 }
                             } else {
-                                    paymill.createToken({
+                                    paymill.createTokenViaFrame({
                                         amount_int: '{$tokenAmount}',
                                         currency:   '{config name=currency|upper}'
                                     }, PaymillResponseHandler);
@@ -251,7 +256,15 @@ $(document).ready(function ()
                 return false;
             }
         });
+        
+        $('#paymillFastCheckoutIframeChange').click(function (event) {
+            $( "#paymillFastCheckoutTable" ).remove();
+            paymillEmbedFrame();
+        });
     });
+    
+    
+    
     function PaymillResponseHandler(error, result)
     {
         debug("Started Paymill response handler");
@@ -268,6 +281,7 @@ $(document).ready(function ()
             form.get(0).submit();
         }
     }
+
     function isSepa() {
     var reg = new RegExp(/^\D\D/);
             return reg.test($('#paymill_iban').val());
