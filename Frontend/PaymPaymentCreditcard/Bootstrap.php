@@ -749,7 +749,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
             $form->setElement('text', 'publicKey', array('label' => 'Public Key', 'required' => true, 'value' => $data['publicKey']));
             $form->setElement('text', 'privateKey', array('label' => 'Private Key', 'required' => true, 'value' => $data['privateKey']));
-            $form->setElement('select', 'paymillPCI', array('label' => 'PCI-DSS Compliance', 'value' => $data['paymillPCI'], 'store' => array( array(0, 'SAQ-A'),array(1, 'SAQ A-EP'))));
+            $form->setElement('select', 'paymillPCI', array('label' => 'PCI-DSS Compliance', 'value' => $data['paymillPCI'], 'store' => array( array(0, 'SAQ A'),array(1, 'SAQ A-EP'))));
             $form->setElement('text', 'paymillStylesheetURL', array('label' => 'Stylesheet URL', 'value' => $data['stylesheetURL']));
             $form->setElement('number', 'paymillSepaDate', array('label' => 'Days until debit', 'required' => true, 'value' => 7, 'attributes' => array('minValue' => 0)));
             $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => $data['paymillPreAuth'] == 1));

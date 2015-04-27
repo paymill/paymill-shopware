@@ -7,7 +7,7 @@
     var API_ERRORS = new Array();
     var paymilliFrame = true;
     var PAYMILL_FASTCHECKOUT_CC_CHANGED = false;
-    if('{$paymillPCI}' == '0') {
+    if('{$paymillPCI}' != '0') {
         paymilliFrame = false;
     }
     API_ERRORS["PAYMILL_internal_server_error"] = '{s namespace=Paymill name=internal_server_error}The communication with the psp failed.{/s}';
@@ -318,9 +318,9 @@ $(document).ready(function ()
             {if {config name=paymillBrandIconVisa}}<div class="paymill-card-icon paymill-card-number-visa"></div>{/if}
             {if {config name=paymillBrandIconUnionpay}}<div class="paymill-card-icon paymill-card-number-china-unionpay"></div>{/if}
             {if $paymillPCI == '0'}
-                {include file='frontend/plugins/payment/paymill_cc_saq_ep.tpl'}
-            {else}
                 {include file='frontend/plugins/payment/paymill_cc_saq.tpl'}
+            {else}
+                {include file='frontend/plugins/payment/paymill_cc_saq_ep.tpl'}
             {/if}
         {/if}
 
