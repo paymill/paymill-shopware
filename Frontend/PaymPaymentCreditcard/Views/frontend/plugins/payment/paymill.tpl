@@ -52,21 +52,23 @@
     }
     function hasDummyData()
     {
-        if (getPayment() === 'paymillcc' && !paymilliFrame) { //If CC and not iFrame Solution
-            var cardNumber = $('#card-number').val();
-            var validMonth = $('#card-expiry-month').val();
-            var validYear = $('#card-expiry-year').val();
+        if (getPayment() === 'paymillcc') { //If CC
+            if (!paymilliFrame) { //if not iframe solutin
+                var cardNumber = $('#card-number').val();
+                var validMonth = $('#card-expiry-month').val();
+                var validYear = $('#card-expiry-year').val();
 
-            debug(cardNumber);
-            debug(validMonth);
-            debug(validYear);
+                debug(cardNumber);
+                debug(validMonth);
+                debug(validYear);
 
-            if ((cardNumber === "" || validMonth === "" || validYear === "") || ("{$paymillCardNumber}" !== cardNumber) || ("{$paymillMonth}" !== validMonth) || ("{$paymillYear}" !== validYear)) {
-                debug("Creditcard information found. New Information will be used. Token should be getting generated.");
+                if ((cardNumber === "" || validMonth === "" || validYear === "") || ("{$paymillCardNumber}" !== cardNumber) || ("{$paymillMonth}" !== validMonth) || ("{$paymillYear}" !== validYear)) {
+                    debug("Creditcard information found. New Information will be used. Token should be getting generated.");
+                    return false;
+                }
+            } else if(PAYMILL_FASTCHECKOUT_CC_CHANGED) {
                 return false;
             }
-        } else if (PAYMILL_FASTCHECKOUT_CC_CHANGED) {
-            return false;
         }
 
         if (getPayment() === 'paymilldebit') {
@@ -90,37 +92,40 @@
         errorsElv.parent().hide();
         errorsElv.html("");
         var result = true;
-        if (getPayment() === 'paymillcc' && !paymilliFrame) { //If CC and not iFrame Solution
-            if (!paymill.validateHolder($('#card-holder').val())) {
-                errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_holder}Please enter the cardholders name.{/s}</li>");
-                result = false;
-            }
-            if (!paymill.validateCardNumber($('#card-number').val())) {
-                errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_number}Please enter a valid creditcardnumber.{/s}</li>");
-                result = false;
-            }
-            if (!paymill.validateCvc($('#card-cvc').val())) {
-                if (VALIDATE_CVC) {
-                    errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_cvc}Please enter a valid securecode (see back of creditcard).{/s}</li>");
+        if (getPayment() === 'paymillcc') { //If CC 
+            if (!paymilliFrame) { // if not iframe solution
+                if (!paymill.validateHolder($('#card-holder').val())) {
+                    errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_holder}Please enter the cardholders name.{/s}</li>");
                     result = false;
                 }
-            }
-            if (/^\d\d$/.test($('#card-expiry-year').val())) {
-                $('#card-expiry-year').val("20" + $('#card-expiry-year').val());
-            }
-            if (!paymill.validateExpiry($('#card-expiry-month').val(), $('#card-expiry-year').val())) {
-                errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_valid}The expiry date is invalid.{/s}</li>");
-                result = false;
-            }
-            if (!result) {
-                errorsCc.parent().show();
+                if (!paymill.validateCardNumber($('#card-number').val())) {
+                    errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_number}Please enter a valid creditcardnumber.{/s}</li>");
+                    result = false;
+                }
+                if (!paymill.validateCvc($('#card-cvc').val())) {
+                    if (VALIDATE_CVC) {
+                        errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_cvc}Please enter a valid securecode (see back of creditcard).{/s}</li>");
+                        result = false;
+                    }
+                }
+                if (/^\d\d$/.test($('#card-expiry-year').val())) {
+                    $('#card-expiry-year').val("20" + $('#card-expiry-year').val());
+                }
+                if (!paymill.validateExpiry($('#card-expiry-month').val(), $('#card-expiry-year').val())) {
+                    errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_valid}The expiry date is invalid.{/s}</li>");
+                    result = false;
+                }
+                if (!result) {
+                    errorsCc.parent().show();
+                } else {
+                    debug("Validations successful");
+                }
             } else {
-                debug("Validations successful");
-            }
-        } else {
-            result = true;
-            debug("No validation, because of iFrame Solution.");
-        }
+                result = true;
+                debug("No validation, because of iFrame Solution.");
+            }    
+        } 
+
         if (getPayment() === 'paymilldebit') { //If ELV
             if (!paymill.validateHolder($('#paymill_accountholder').val())) {
                 errorsElv.append("<li>{s namespace=Paymill name=feedback_error_directdebit_holder}Please enter the account name.{/s}</li>");
@@ -194,34 +199,36 @@ $(document).ready(function ()
                 } else {
                     if (validate()) {
                         try {
-                            if (getPayment() === 'paymillcc' && !paymilliFrame) { //If CC and not iFrame Solution
-                                if (VALIDATE_CVC) {
-                                    paymill.createToken({
-                                    number:     $('#card-number').val(),
-                                        cardholder: $('#card-holder').val(),
-                                    exp_month:  $('#card-expiry-month').val(),
-                                    exp_year:   $('#card-expiry-year').val(),
-                                    cvc:        $('#card-cvc').val(),
-                                        amount_int: '{$tokenAmount}',
-                                    currency:   '{config name=currency|upper}'
-                                    }, PaymillResponseHandler);
+                            if (getPayment() === 'paymillcc') { //If CC
+                                if (!paymilliFrame) { //if not iFrame Solution
+                                    if (VALIDATE_CVC) {
+                                        paymill.createToken({
+                                        number:     $('#card-number').val(),
+                                            cardholder: $('#card-holder').val(),
+                                        exp_month:  $('#card-expiry-month').val(),
+                                        exp_year:   $('#card-expiry-year').val(),
+                                        cvc:        $('#card-cvc').val(),
+                                            amount_int: '{$tokenAmount}',
+                                        currency:   '{config name=currency|upper}'
+                                        }, PaymillResponseHandler);
+                                    } else {
+                                        cvcInput = $('#card-cvc').val();
+                                        paymill.createToken({
+                                        number:     $('#card-number').val(),
+                                            cardholder: $('#card-holder').val(),
+                                        exp_month:  $('#card-expiry-month').val(),
+                                        exp_year:   $('#card-expiry-year').val(),
+                                        cvc:        cvcInput === "" ? "000" : cvcInput,
+                                            amount_int: '{$tokenAmount}',
+                                        currency:   '{config name=currency|upper}'
+                                        }, PaymillResponseHandler);
+                                    }
                                 } else {
-                                    cvcInput = $('#card-cvc').val();
-                                    paymill.createToken({
-                                    number:     $('#card-number').val(),
-                                        cardholder: $('#card-holder').val(),
-                                    exp_month:  $('#card-expiry-month').val(),
-                                    exp_year:   $('#card-expiry-year').val(),
-                                    cvc:        cvcInput === "" ? "000" : cvcInput,
-                                        amount_int: '{$tokenAmount}',
-                                    currency:   '{config name=currency|upper}'
-                                    }, PaymillResponseHandler);
-                                }
-                            } else {
                                     paymill.createTokenViaFrame({
                                         amount_int: '{$tokenAmount}',
                                         currency:   '{config name=currency|upper}'
                                     }, PaymillResponseHandler);
+                                }    
                             }
                             if (getPayment() === 'paymilldebit') { //If ELV
                                 if (isSepa()) {
