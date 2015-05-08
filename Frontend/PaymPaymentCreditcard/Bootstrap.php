@@ -50,7 +50,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function getVersion()
     {
-        return "1.5.1";
+        return "1.5.2";
     }
 
     /**
@@ -116,12 +116,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function onCheckoutConfirm(Enlight_Event_EventArgs $arguments)
     {
+        if (!$this->isDispatchedEventValid(
+            $arguments, array('checkout'), array('finish', 'confirm')
+        )) {
+            return null;
+        }
+
         $view = $arguments->getSubject()->View();
         $params = $arguments->getRequest()->getParams();
-
-        if ($params['sTargetAction'] === 'cart') {
-            return;
-        }
 
         $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
         $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
@@ -257,7 +259,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         return Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()
                 ->Path() . "/Controllers/backend/PaymillLogging.php";
     }
-    
+
     /**
      * Get Info for the Pluginmanager
      *
@@ -332,6 +334,50 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
+     * Validates if an event has the right context.
+     *
+     * Example:
+     * $this->isDispatchedEventValid(
+     *     $arguments, array('checkout'), array('finish')
+     * )
+     *
+     * See also: Shopware 4 Events und Hooks
+     * @link http://wiki.shopware.com/Shopware-4-Events-und-Hooks_detail_981.html
+     *
+     * @param  Enlight_Event_EventArgs $arguments
+     * @param  array                   $controller array of valid controller
+     * @param  array                   $actions    array of valid actions
+     * @return boolean
+     */
+    private function isDispatchedEventValid(
+        Enlight_Event_EventArgs $arguments,
+        array $controller,
+        array $actions
+    )
+    {
+        $isValid = false;
+
+        $currentController = $arguments->getSubject();
+        $request = $currentController->Request();
+        $response = $currentController->Response();
+        $currentAction = $request->getActionName();
+        $view = $currentController->View();
+        $currentControllerName = $request->getControllerName();
+
+        if($request->isDispatched()
+            && !$response->isException()
+            && $request->getModuleName() == 'frontend'
+            && in_array($currentControllerName, $controller)
+            && in_array($currentAction, $actions)
+            && $view->hasTemplate()
+        ) {
+            $isValid = true;
+        }
+
+        return $isValid;
+    }
+
+    /**
      * Fixes a known issue.
      *
      * @throws Exception
@@ -359,7 +405,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     {
         try {
             Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService::install();
-	    Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager::install();
+        Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager::install();
             Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
             $this->createPaymentMeans();
             $this->_createForm();
@@ -371,7 +417,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper($this->Form());
             $translationHelper->createPluginConfigTranslation();
             $this->solveKnownIssue();
-	    $this->Plugin()->setActive(true);
+        $this->Plugin()->setActive(true);
         } catch (Exception $exception) {
             $this->uninstall();
             throw new Exception($exception->getMessage());
@@ -424,8 +470,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             return;
         }
 
-	$paymillSepaDate = $this->util->getSepaDate($context['sOrderNumber']);
-	if (!empty($paymillSepaDate)) {
+    $paymillSepaDate = $this->util->getSepaDate($context['sOrderNumber']);
+    if (!empty($paymillSepaDate)) {
             $context['paymillSepaDate'] = date("d.m.Y", $paymillSepaDate);
             $mail = Shopware()->TemplateMail()->createMail('sORDER', $context);
             $arguments->setReturn($mail);
@@ -484,14 +530,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                     // add new events for preNotification
                     $this->_createEvents();
                 case "1.4.1":
-		    Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
-		case "1.4.2":
-		case "1.4.3":
-		case "1.4.4":
-		case "1.4.5":
-		case "1.4.6":
-		case "1.4.7":
-		    Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService::install();
+                    Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
+                case "1.4.2":
+                case "1.4.3":
+                case "1.4.4":
+                case "1.4.5":
+                case "1.4.6":
+                case "1.4.7":
+                    Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService::install();
                     // add new events for register Webhook
                     $this->_createEvents();
                 default:
@@ -729,13 +775,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $this->subscribeEvent('Shopware_Components_Document::assignValues::after', 'beforeCreatingDocument');
             $this->subscribeEvent('Shopware_Modules_Order_SendMail_Create', 'beforeSendingMail');
             $this->subscribeEvent('Shopware_Modules_Order_SaveOrderAttributes_FilterSQL', 'insertOrderAttribute');
-	    $this->subscribeEvent('Shopware_Controllers_Backend_Config::saveFormAction::before', 'beforeSavePluginConfig');
+        $this->subscribeEvent('Shopware_Controllers_Backend_Config::saveFormAction::before', 'beforeSavePluginConfig');
         } catch (Exception $exception) {
             Shopware()->Log()->Err("There was an error registering the plugins events. " . $exception->getMessage());
             throw new Exception("There was an error registering the plugins events. " . $exception->getMessage());
         }
     }
-    
+
     /**
      * Registers the endpoint for the notifications
      *
@@ -759,8 +805,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 $privateKey = $element['values'][0]['value'];
             }
         }
-	$webHookService = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService();
-	$webHookService->registerWebhookEndpoint($privateKey);
+    $webHookService = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService();
+    $webHookService->registerWebhookEndpoint($privateKey);
     }
 
     /**
