@@ -50,7 +50,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function getVersion()
     {
-        return "1.5.2";
+        return "1.6.0";
     }
 
     /**
@@ -550,8 +550,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                     Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService::install();
                     // add new events for register Webhook
                     $this->_createEvents();
-                case "1.5.0";
+                case "1.5.0":
                 case "1.5.1":
+                case "1.5.2":
                     $sql = "ALTER TABLE paymill_config_data ADD COLUMN paymillPCI varchar(8) NOT NULL DEFAULT 'SAQ A', ADD COLUMN stylesheetURL varchar (255);";
                     Shopware()->Db()->query($sql);
                     $this->_createForm();
