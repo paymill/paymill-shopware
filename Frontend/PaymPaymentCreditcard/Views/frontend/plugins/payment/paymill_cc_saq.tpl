@@ -43,7 +43,7 @@ function paymillEmbedFrame()
 </script >
 {else}
     </script >
-    <table id="paymillFastCheckoutTable">
+    <table id="paymillFastCheckoutTable" style="clear: both">
         <tr>
             <td>{s namespace=Paymill name=frontend_creditcard_label_number}Credit Card Number{/s}: </td>
             <td id="paymillFcCardNumber" class="paymill-card-number-{$paymillBrand}">{$paymillCardNumber}</td>
