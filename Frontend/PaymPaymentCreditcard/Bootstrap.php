@@ -185,12 +185,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
         $arguments->getSubject()->View()->Template()->assign("CreditcardBrands", $this->getEnabledCreditcardbrands());
         $arguments->getSubject()->View()->Template()->assign("paymillPCI", $swConfig->get("paymillPCI"));
-        
-        $paymillStylesheetURL = trim($swConfig->get("paymillStylesheetURL"));
-        if(substr($paymillStylesheetURL, 0, 8) !== "https://") {
-            $paymillStylesheetURL = false;
-        }
-        $arguments->getSubject()->View()->Template()->assign("paymillStylesheetURL", $paymillStylesheetURL);
 
         if ($paymentName === "paymilldebit" && Shopware()->Session()->sOrderVariables['sOrderNumber']) {
             $sepaDate = $this->util->getSepaDate(Shopware()->Session()->sOrderVariables['sOrderNumber']);
@@ -553,7 +547,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 case "1.5.0":
                 case "1.5.1":
                 case "1.5.2":
-                    $sql = "ALTER TABLE paymill_config_data ADD COLUMN paymillPCI varchar(8) NOT NULL DEFAULT 'SAQ A', ADD COLUMN stylesheetURL varchar (255);";
+                    $sql = "ALTER TABLE paymill_config_data ADD COLUMN paymillPCI varchar(8) NOT NULL DEFAULT 'SAQ A';";
                     Shopware()->Db()->query($sql);
                     $this->_createForm();
                 default:
@@ -751,7 +745,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $form->setElement('text', 'publicKey', array('label' => 'Public Key', 'required' => true, 'value' => $data['publicKey']));
             $form->setElement('text', 'privateKey', array('label' => 'Private Key', 'required' => true, 'value' => $data['privateKey']));
             $form->setElement('select', 'paymillPCI', array('label' => 'PCI-DSS Compliance', 'value' => $data['paymillPCI'], 'store' => array( array(0, 'SAQ A'),array(1, 'SAQ A-EP'))));
-            $form->setElement('text', 'paymillStylesheetURL', array('label' => 'Stylesheet URL', 'value' => $data['stylesheetURL']));
             $form->setElement('number', 'paymillSepaDate', array('label' => 'Days until debit', 'required' => true, 'value' => 7, 'attributes' => array('minValue' => 0)));
             $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => $data['paymillPreAuth'] == 1));
             $form->setElement('checkbox', 'paymillDebugging', array('label' => 'Activate debugging', 'value' => $data['paymillDebugging'] == 1));
