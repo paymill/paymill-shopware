@@ -12,7 +12,7 @@ function PaymillFrameResponseHandler(error, result)
 function paymillEmbedFrame()
 {
     PAYMILL_FASTCHECKOUT_CC_CHANGED = true;
-    paymill.embedFrame('paymillFormContainer', PaymillFrameResponseHandler);
+    paymill.embedFrame('paymillFormContainer', {lang: '{s namespace=Paymill name=paymill_lang}en{/s}'}, PaymillFrameResponseHandler);
 }
     
 {if $paymillCardNumber === '' || $paymillMonth === '' || $paymillYear === ''}
