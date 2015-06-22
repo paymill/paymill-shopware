@@ -277,7 +277,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             'supplier' => 'PAYMILL GmbH',
             'support' => 'support@paymill.com',
             'link' => 'https://www.paymill.com',
-            'copyright' => 'Copyright (c) 2013, PayIntelligent GmbH',
+            'copyright' => 'Copyright (c) 2015, Paymill GmbH',
             'label' => 'Paymill',
             'description' => '<h2>Payment plugin for Shopware Community Edition Version 4.0.0 - 4.2.3</h2>'
             . '<ul>'
@@ -744,7 +744,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
             $form->setElement('text', 'publicKey', array('label' => 'Public Key', 'required' => true, 'value' => $data['publicKey']));
             $form->setElement('text', 'privateKey', array('label' => 'Private Key', 'required' => true, 'value' => $data['privateKey']));
-            $form->setElement('select', 'paymillPCI', array('label' => 'PCI-DSS Compliance', 'value' => $data['paymillPCI'], 'store' => array( array(0, 'SAQ A'),array(1, 'SAQ A-EP'))));
+            $form->setElement('select', 'paymillPCI', array('label' => 'Payment form', 'value' => $data['paymillPCI'], 'store' => array( array(0, 'PayFrame (min. PCI SAQ A)'),array(1, 'direct integration (min. PCI SAQ A-EP)'))));
             $form->setElement('number', 'paymillSepaDate', array('label' => 'Days until debit', 'required' => true, 'value' => 7, 'attributes' => array('minValue' => 0)));
             $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => $data['paymillPreAuth'] == 1));
             $form->setElement('checkbox', 'paymillDebugging', array('label' => 'Activate debugging', 'value' => $data['paymillDebugging'] == 1));

@@ -18,7 +18,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper
                . "paymillLogging tinyint(1) NOT NULL,"
                . "paymillFastCheckout tinyint(1) NOT NULL,"
                . "paymillSepaActive tinyint(1) NOT NULL,"
-               . "paymillPCI varchar(8) NOT NULL"
+               . "paymillPCI varchar(255) NOT NULL"
                . ") ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
                . "INSERT IGNORE INTO paymill_config_data ("
                . "id, publicKey, privateKey, paymillPreAuth,"
@@ -59,7 +59,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper
                 $loggingFlag ? 1 : 0,
                 $fastCheckoutFlag ? 1 : 0,
                 $sepaFlag ? 1 : 0,
-                $pciFlag ? 'SAQ A-EP' : 'SAQ A'
+                $pciFlag ? 'direct integration (min. PCI SAQ A-EP)' : 'PayFrame (min. PCI SAQ A)'
             )
         );
 
