@@ -3,7 +3,7 @@
  *
  * @category   Shopware
  * @package    Shopware_Plugins
- * @copyright  Copyright (c) 2013 PayIntelligent GmbH (http://payintelligent.de)
+ * @copyright  Copyright (c) 2015 PAYMILL GmbH (https://www.paymill.com)
  */
     ////{block name="backend/order/view/detail/window" append}
     //{namespace name=backend/order/view/main}
