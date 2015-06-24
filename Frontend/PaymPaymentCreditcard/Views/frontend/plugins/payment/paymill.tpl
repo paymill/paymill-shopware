@@ -281,7 +281,10 @@ $(document).ready(function ()
         if (error) {
             errorText = API_ERRORS["PAYMILL_" + error.apierror];
             debug(errorText);
-            alert(errorText);
+            if(!paymilliFrame){
+                alert(errorText);
+            }
+            
             $("#basketButton").prop( "disabled",false);
         } else {
             debug("Received token from Paymill API: " + result.token);
