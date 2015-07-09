@@ -3,20 +3,6 @@ Paymill-Shopware
 
 Payment plugin for Shopware Community Edition Version 4.0.0 - 4.3.6
 
-# Introduced with version 1.6.0
-## PayFrame
- We’ve introduced a “payment form” option for easier compliance with PCI requirements.
- In addition to having a payment form directly integrated in your checkout page, you can
- use our embedded PayFrame solution to ensure that payment data never touches your
- website.
-
- PayFrame is enabled by default, but you can choose between both options in the plugin
- settings. Later this year, we’re bringing you the ability to customise the appearance and
- text content of the PayFrame version.
-
- To learn more about the benefits of PayFrame, please visit our FAQ:
- https://www.paymill.com/en/faq/how­does­paymills­payframe-solution­work
-
 ## Installation from this git repository
 
     https://github.com/paymill/paymill-shopware/archive/master.zip
@@ -44,6 +30,18 @@ Payment plugin for Shopware Community Edition Version 4.0.0 - 4.3.6
 * Supported Languages: German, English
 * Backend Log with custom View accessible from your shop backend
 
+## PayFrame
+ We’ve introduced a “payment form” option for easier compliance with PCI requirements.
+ In addition to having a payment form directly integrated in your checkout page, you can
+ use our embedded PayFrame solution to ensure that payment data never touches your
+ website.
+
+ PayFrame is enabled by default, but you can choose between both options in the plugin
+ settings. Later this year, we’re bringing you the ability to customise the appearance and
+ text content of the PayFrame version.
+
+ To learn more about the benefits of PayFrame, please visit our FAQ:
+ https://www.paymill.com/en/faq/how­does­paymills­payframe-solution­work
 
 ## Configuration
 
