@@ -41,7 +41,7 @@ Payment plugin for Shopware Community Edition Version 4.0.0 - 4.3.6
  text content of the PayFrame version.
 
  To learn more about the benefits of PayFrame, please visit our FAQ:
- https://www.paymill.com/en/faq/how­does­paymills­payframe-solution­work
+ [https://www.paymill.com/en/faq/how­-does-­paymills-­payframe­-solution-­work](https://www.paymill.com/en/faq/how­-does-­paymills-­payframe­-solution-­work)
 
 ## Configuration
 
