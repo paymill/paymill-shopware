@@ -279,7 +279,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             'link' => 'https://www.paymill.com',
             'copyright' => 'Copyright (c) 2015, Paymill GmbH',
             'label' => 'Paymill',
-            'description' => '<h2>Payment plugin for Shopware Community Edition Version 4.0.0 - 4.2.3</h2>'
+            'description' => '<h2>Payment plugin for Shopware Community Edition Version 4.0.0 - 4.3.6</h2>'
             . '<ul>'
             . '<li style="list-style: inherit;">PCI DSS compatibility</li>'
             . '<li style="list-style: inherit;">Payment means: Credit Card (Visa, Visa Electron, Mastercard, Maestro, Diners, Discover, JCB, AMEX, China Union Pay), Direct Debit (ELV)</li>'

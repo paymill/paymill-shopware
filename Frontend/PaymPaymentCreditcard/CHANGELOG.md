@@ -1,5 +1,8 @@
 #Release Notes
 
+##
+ - Integration of PayFrame to enable use of SAQ A for easier PCI DSS 3.0 compliance.
+
 ##1.5.1
  - removed transactionId in checkout
 
