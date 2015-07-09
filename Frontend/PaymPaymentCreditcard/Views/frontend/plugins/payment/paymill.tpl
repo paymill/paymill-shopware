@@ -284,7 +284,10 @@ $(document).ready(function ()
             if(!paymilliFrame){
                 alert(errorText);
             }
-            
+            $('html, body').animate({
+                scrollTop: $("#paymillFormContainer").offset().top
+            }, 1000);
+                        
             $("#basketButton").prop( "disabled",false);
         } else {
             debug("Received token from Paymill API: " + result.token);
