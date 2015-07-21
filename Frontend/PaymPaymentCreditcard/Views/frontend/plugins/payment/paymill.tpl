@@ -1,41 +1,50 @@
+
 <link rel = "stylesheet" type = "text/css" href = "{link file='frontend/_resources/paymill_styles.css'}" />
 <script type = "text/javascript" >
     var PAYMILL_PUBLIC_KEY = '{$publicKey}';
     var VALIDATE_CVC = true;
     var ActiveBrands = {$CreditcardBrands|@json_encode};
     var API_ERRORS = new Array();
-    API_ERRORS["PAYMILL_internal_server_error"] = '{s namespace=Paymill name=PAYMILL_internal_server_error}{/s}';
-    API_ERRORS["PAYMILL_invalid_public_key"] = '{s namespace=Paymill name=PAYMILL_invalid_public_key}{/s}';
-    API_ERRORS["PAYMILL_invalid_payment_data"] = '{s namespace=Paymill name=PAYMILL_invalid_payment_data}{/s}';
-    API_ERRORS["PAYMILL_unknown_error"] = '{s namespace=Paymill name=PAYMILL_unknown_error}{/s}';
-    API_ERRORS["PAYMILL_3ds_cancelled"] = '{s namespace=Paymill name=PAYMILL_3ds_cancelled}{/s}';
-    API_ERRORS["PAYMILL_field_invalid_card_number"] = '{s namespace=Paymill name=PAYMILL_field_invalid_card_number}{/s}';
-    API_ERRORS["PAYMILL_field_invalid_card_exp_year"] = '{s namespace=Paymill name=PAYMILL_field_invalid_card_exp_year}{/s}';
-    API_ERRORS["PAYMILL_field_invalid_card_exp_month"] = '{s namespace=Paymill name=PAYMILL_field_invalid_card_exp_month}{/s}';
-    API_ERRORS["PAYMILL_field_invalid_card_exp"] = '{s namespace=Paymill name=PAYMILL_field_invalid_card_exp}{/s}';
-    API_ERRORS["PAYMILL_field_invalid_card_cvc"] = '{s namespace=Paymill name=PAYMILL_field_invalid_card_cvc}{/s}';
-    API_ERRORS["PAYMILL_field_invalid_card_holder"] = '{s namespace=Paymill name=PAYMILL_field_invalid_card_holder}{/s}';
-    API_ERRORS["PAYMILL_field_invalid_amount_int"] = '{s namespace=Paymill name=PAYMILL_field_invalid_amount_int}{/s}';
-    API_ERRORS["PAYMILL_field_field_invalid_amount"] = '{s namespace=Paymill name=PAYMILL_field_field_invalid_amount}{/s}';
-    API_ERRORS["PAYMILL_field_field_field_invalid_currency"] = '{s namespace=Paymill name=PAYMILL_field_field_field_invalid_currency}{/s}';
-    API_ERRORS["PAYMILL_field_invalid_account_number"] = '{s namespace=Paymill name=PAYMILL_field_invalid_account_number}{/s}';
-    API_ERRORS["PAYMILL_field_invalid_account_holder"] = '{s namespace=Paymill name=PAYMILL_field_invalid_account_holder}{/s}';
-    API_ERRORS["PAYMILL_field_invalid_bank_code"] = '{s namespace=Paymill name=PAYMILL_field_invalid_bank_code}{/s}';
-    API_ERRORS["PAYMILL_field_invalid_iban"] = '{s namespace=Paymill name=PAYMILL_field_invalid_iban}{/s}';
-    API_ERRORS["PAYMILL_field_invalid_bic"] = '{s namespace=Paymill name=PAYMILL_field_invalid_bic}{/s}';
-    API_ERRORS["PAYMILL_field_invalid_country"] = '{s namespace=Paymill name=PAYMILL_field_invalid_country}{/s}';
-    API_ERRORS["PAYMILL_field_invalid_bank_data"] = '{s namespace=Paymill name=PAYMILL_field_invalid_bank_data}{/s}';
+    var paymilliFrame = true;
+    var PAYMILL_FASTCHECKOUT_CC_CHANGED = false;
+    if('{$paymillPCI}' != '0') {
+        paymilliFrame = false;
+    }
+    API_ERRORS["PAYMILL_internal_server_error"] = '{s namespace=Paymill name=internal_server_error}The communication with the psp failed.{/s}';
+    API_ERRORS["PAYMILL_invalid_public_key"] = '{s namespace=Paymill name=invalid_public_key}The public key is invalid.{/s}';
+    API_ERRORS["PAYMILL_invalid_payment_data"] = '{s namespace=Paymill name=invalid_payment_data}Paymentmethod, card type currency or country not authorized{/s}';
+    API_ERRORS["PAYMILL_unknown_error"] = '{s namespace=Paymill name=unknown_error}Unknown Error{/s}';
+    API_ERRORS["PAYMILL_3ds_cancelled"] = '{s namespace=Paymill name=3ds_cancelled}3-D Secure process has been canceled by the user{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_number"] = '{s namespace=Paymill name=field_invalid_card_number}Invalid Credit Card Number{/s}';
+    API_ERRORS["PAYMILL_field_invalid_number"] = '{s namespace=Paymill name=field_invalid_card_number}Invalid Credit Card Number{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_exp_year"] = '{s namespace=Paymill name=field_invalid_card_exp_year}Invalid Expiry Year{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_exp_month"] = '{s namespace=Paymill name=field_invalid_card_exp_month}Invalid Expiry Month{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_exp"] = '{s namespace=Paymill name=field_invalid_card_exp}Credit Card not valid{/s}';
+    API_ERRORS["PAYMILL_field_invalid_exp"] = '{s namespace=Paymill name=field_invalid_card_exp}Credit Card not valid{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_cvc"] = '{s namespace=Paymill name=field_invalid_card_cvc}Invalid CVC{/s}';
+    API_ERRORS["PAYMILL_field_invalid_cvc"] = '{s namespace=Paymill name=field_invalid_card_cvc}Invalid CVC{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_holder"] = '{s namespace=Paymill name=field_invalid_card_holder}Invalid Card Holder{/s}';
+    API_ERRORS["PAYMILL_field_invalid_amount_int"] = '{s namespace=Paymill name=field_invalid_amount_int}Missing amount for 3-D Secure{/s}';
+    API_ERRORS["PAYMILL_field_field_invalid_amount"] = '{s namespace=Paymill name=field_field_invalid_amount}Missing amount for 3-D Secure{/s}';
+    API_ERRORS["PAYMILL_field_field_field_invalid_currency"] = '{s namespace=Paymill name=field_invalid_currency}Invalid currency for 3-D Secure{/s}';
+    API_ERRORS["PAYMILL_field_invalid_account_number"] = '{s namespace=Paymill name=field_invalid_account_number}Invalid Account Number{/s}';
+    API_ERRORS["PAYMILL_field_invalid_account_holder"] = '{s namespace=Paymill name=field_invalid_account_holder}Invalid Account Holder{/s}';
+    API_ERRORS["PAYMILL_field_invalid_bank_code"] = '{s namespace=Paymill name=field_invalid_bank_code}Invalid bank code{/s}';
+    API_ERRORS["PAYMILL_field_invalid_iban"] = '{s namespace=Paymill name=field_invalid_iban}Invalid IBAN{/s}';
+    API_ERRORS["PAYMILL_field_invalid_bic"] = '{s namespace=Paymill name=field_invalid_bic}Invalid BIC{/s}';
+    API_ERRORS["PAYMILL_field_invalid_country"] = '{s namespace=Paymill name=field_invalid_country}Invalid country for sepa transactions{/s}';
+    API_ERRORS["PAYMILL_field_invalid_bank_data"] = '{s namespace=Paymill name=field_invalid_bank_data}Invalid bank data{/s}';
 </script >
-<script type = "text/javascript" src = "https://bridge.paymill.com/" ></script >
+<script type = "text/javascript" src = "https://bridge.paymill.com/dss3" ></script >
 <script type = "text/javascript" src = "{link file='frontend/_resources/javascript/Iban.js'}" ></script >
 <script type = "text/javascript" src = "{link file='frontend/_resources/javascript/BrandDetection.js'}" ></script >
 <script type = "text/javascript" >
-            function debug(message)
-            {
-    {if $debug}
-                console.log("[" + getPayment() + "] " + message);
-    {/if}
-            }
+    function debug(message)
+    {
+        {if $debug}
+            console.log("[" + getPayment() + "] " + message);
+        {/if}
+    }
 
     function getPayment()
     {
@@ -43,20 +52,23 @@
     }
     function hasDummyData()
     {
-        if (getPayment() === 'paymillcc') {
-            var cardNumber = $('#card-number').val();
-            var validMonth = $('#card-expiry-month').val();
-            var validYear = $('#card-expiry-year').val();
+        if (getPayment() === 'paymillcc') { //If CC
+            if (!paymilliFrame) { //if not iframe solutin
+                var cardNumber = $('#card-number').val();
+                var validMonth = $('#card-expiry-month').val();
+                var validYear = $('#card-expiry-year').val();
 
-            debug(cardNumber);
-            debug(validMonth);
-            debug(validYear);
+                debug(cardNumber);
+                debug(validMonth);
+                debug(validYear);
 
-            if ((cardNumber === "" || validMonth === "" || validYear === "") || ("{$paymillCardNumber}" !== cardNumber) || ("{$paymillMonth}" !== validMonth) || ("{$paymillYear}" !== validYear)) {
-                debug("Creditcard information found. New Information will be used. Token should be getting generated.");
+                if ((cardNumber === "" || validMonth === "" || validYear === "") || ("{$paymillCardNumber}" !== cardNumber) || ("{$paymillMonth}" !== validMonth) || ("{$paymillYear}" !== validYear)) {
+                    debug("Creditcard information found. New Information will be used. Token should be getting generated.");
+                    return false;
+                }
+            } else if(PAYMILL_FASTCHECKOUT_CC_CHANGED) {
                 return false;
             }
-
         }
 
         if (getPayment() === 'paymilldebit') {
@@ -80,34 +92,40 @@
         errorsElv.parent().hide();
         errorsElv.html("");
         var result = true;
-        if (getPayment() === 'paymillcc') { //If CC
-            if (!paymill.validateHolder($('#card-holder').val())) {
-                errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_holder}Please enter the cardholders name.{/s}</li>");
-                result = false;
-            }
-            if (!paymill.validateCardNumber($('#card-number').val())) {
-                errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_number}Please enter a valid creditcardnumber.{/s}</li>");
-                result = false;
-            }
-            if (!paymill.validateCvc($('#card-cvc').val())) {
-                if (VALIDATE_CVC) {
-                    errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_cvc}Please enter a valid securecode (see back of creditcard).{/s}</li>");
+        if (getPayment() === 'paymillcc') { //If CC 
+            if (!paymilliFrame) { // if not iframe solution
+                if (!paymill.validateHolder($('#card-holder').val())) {
+                    errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_holder}Please enter the cardholders name.{/s}</li>");
                     result = false;
                 }
-            }
-            if (/^\d\d$/.test($('#card-expiry-year').val())) {
-                $('#card-expiry-year').val("20" + $('#card-expiry-year').val());
-            }
-            if (!paymill.validateExpiry($('#card-expiry-month').val(), $('#card-expiry-year').val())) {
-                errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_valid}The expiry date is invalid.{/s}</li>");
-                result = false;
-            }
-            if (!result) {
-                errorsCc.parent().show();
+                if (!paymill.validateCardNumber($('#card-number').val())) {
+                    errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_number}Please enter a valid creditcardnumber.{/s}</li>");
+                    result = false;
+                }
+                if (!paymill.validateCvc($('#card-cvc').val())) {
+                    if (VALIDATE_CVC) {
+                        errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_cvc}Please enter a valid securecode (see back of creditcard).{/s}</li>");
+                        result = false;
+                    }
+                }
+                if (/^\d\d$/.test($('#card-expiry-year').val())) {
+                    $('#card-expiry-year').val("20" + $('#card-expiry-year').val());
+                }
+                if (!paymill.validateExpiry($('#card-expiry-month').val(), $('#card-expiry-year').val())) {
+                    errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_valid}The expiry date is invalid.{/s}</li>");
+                    result = false;
+                }
+                if (!result) {
+                    errorsCc.parent().show();
+                } else {
+                    debug("Validations successful");
+                }
             } else {
-                debug("Validations successful");
-            }
-        }
+                result = true;
+                debug("No validation, because of iFrame Solution.");
+            }    
+        } 
+
         if (getPayment() === 'paymilldebit') { //If ELV
             if (!paymill.validateHolder($('#paymill_accountholder').val())) {
                 errorsElv.append("<li>{s namespace=Paymill name=feedback_error_directdebit_holder}Please enter the account name.{/s}</li>");
@@ -182,28 +200,35 @@ $(document).ready(function ()
                     if (validate()) {
                         try {
                             if (getPayment() === 'paymillcc') { //If CC
-                                if (VALIDATE_CVC) {
-                                    paymill.createToken({
-                                    number:     $('#card-number').val(),
-                                        cardholder: $('#card-holder').val(),
-                                    exp_month:  $('#card-expiry-month').val(),
-                                    exp_year:   $('#card-expiry-year').val(),
-                                    cvc:        $('#card-cvc').val(),
-                                        amount_int: '{$tokenAmount}',
-                                    currency:   '{config name=currency|upper}'
-                                    }, PaymillResponseHandler);
+                                if (!paymilliFrame) { //if not iFrame Solution
+                                    if (VALIDATE_CVC) {
+                                        paymill.createToken({
+                                        number:     $('#card-number').val(),
+                                            cardholder: $('#card-holder').val(),
+                                        exp_month:  $('#card-expiry-month').val(),
+                                        exp_year:   $('#card-expiry-year').val(),
+                                        cvc:        $('#card-cvc').val(),
+                                            amount_int: '{$tokenAmount}',
+                                        currency:   '{config name=currency|upper}'
+                                        }, PaymillResponseHandler);
+                                    } else {
+                                        cvcInput = $('#card-cvc').val();
+                                        paymill.createToken({
+                                        number:     $('#card-number').val(),
+                                            cardholder: $('#card-holder').val(),
+                                        exp_month:  $('#card-expiry-month').val(),
+                                        exp_year:   $('#card-expiry-year').val(),
+                                        cvc:        cvcInput === "" ? "000" : cvcInput,
+                                            amount_int: '{$tokenAmount}',
+                                        currency:   '{config name=currency|upper}'
+                                        }, PaymillResponseHandler);
+                                    }
                                 } else {
-                                    cvcInput = $('#card-cvc').val();
-                                    paymill.createToken({
-                                    number:     $('#card-number').val(),
-                                        cardholder: $('#card-holder').val(),
-                                    exp_month:  $('#card-expiry-month').val(),
-                                    exp_year:   $('#card-expiry-year').val(),
-                                    cvc:        cvcInput === "" ? "000" : cvcInput,
+                                    paymill.createTokenViaFrame({
                                         amount_int: '{$tokenAmount}',
-                                    currency:   '{config name=currency|upper}'
+                                        currency:   '{config name=currency|upper}'
                                     }, PaymillResponseHandler);
-                                }
+                                }    
                             }
                             if (getPayment() === 'paymilldebit') { //If ELV
                                 if (isSepa()) {
@@ -241,14 +266,28 @@ $(document).ready(function ()
                 return false;
             }
         });
+        
+        $('#paymillFastCheckoutIframeChange').click(function (event) {
+            $( "#paymillFastCheckoutTable" ).remove();
+            paymillEmbedFrame();
+        });
     });
+    
+    
+    
     function PaymillResponseHandler(error, result)
     {
         debug("Started Paymill response handler");
         if (error) {
             errorText = API_ERRORS["PAYMILL_" + error.apierror];
             debug(errorText);
-            alert(errorText);
+            if(!paymilliFrame){
+                alert(errorText);
+            }
+            $('html, body').animate({
+                scrollTop: $("#paymillFormContainer").offset().top
+            }, 1000);
+                        
             $("#basketButton").prop( "disabled",false);
         } else {
             debug("Received token from Paymill API: " + result.token);
@@ -258,6 +297,7 @@ $(document).ready(function ()
             form.get(0).submit();
         }
     }
+
     function isSepa() {
     var reg = new RegExp(/^\D\D/);
             return reg.test($('#paymill_iban').val());
@@ -274,10 +314,10 @@ $(document).ready(function ()
         <li >{s namespace=Paymill name=feedback_error_directdebit_parent}Please enter your accountdata. For security reason we will not save them on our system.{/s}</li >
         <ul id = "errorsElv" ></ul >
     {/if}
-
 </div >
+
     {if $Controller != "account"}
-    <div class = "debit" >
+        <div class = "debit" id='paymillFormContainer'>
         {if $payment_mean.name == 'paymillcc'}
             {if {config name=paymillBrandIconAmex}}<div class="paymill-card-icon paymill-card-number-amex"></div>{/if}
             {if {config name=paymillBrandIconCartaSi}}<div class="paymill-card-icon paymill-card-number-carta-si"></div>{/if}
@@ -290,130 +330,15 @@ $(document).ready(function ()
             {if {config name=paymillBrandIconMastercard}}<div class="paymill-card-icon paymill-card-number-mastercard"></div>{/if}
             {if {config name=paymillBrandIconVisa}}<div class="paymill-card-icon paymill-card-number-visa"></div>{/if}
             {if {config name=paymillBrandIconUnionpay}}<div class="paymill-card-icon paymill-card-number-china-unionpay"></div>{/if}
-                <br><br>
-                                                    {if $pigmbhTemplateActive == 1}
-                <div class = "form-group" >
-                    <label class = "col-lg-4 control-label"
-                           for = "card-holder" >{s namespace=Paymill name=frontend_creditcard_label_holder}Credit Card Holder{/s} *</label >
+            {if $paymillPCI == '0'}
+                {include file='frontend/plugins/payment/paymill_cc_saq.tpl'}
+            {else}
+                {include file='frontend/plugins/payment/paymill_cc_saq_ep.tpl'}
+            {/if}
+        {/if}
 
-                    <div class = "col-lg-6" >
-                        <input id = "card-holder" type = "text" size = "20" class = "form-control"
-                               value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
-                    </div >
-                </div >
-                <div class = "form-group" >
-                    <label class = "col-lg-4 control-label"
-                           for = "card-number" >{s namespace=Paymill name=frontend_creditcard_label_number}Credit Card Number{/s} *</label >
-
-                    <div class = "col-lg-6" >
-                        <input id = "card-number" type = "text" size = "20" class = "form-control"
-                               value = "{$paymillCardNumber}" />
-                    </div >
-                </div >
-                <div class = "form-group" >
-                <span class = "col-lg-4 control-label" >
-                <label for = "card-cvc" >{s namespace=Paymill name=frontend_creditcard_label_cvc}CVC {/s} *</label >
-                <span class = "paymill-tooltip"
-                      title = "{s namespace=Paymill name=frontend_creditcard_tooltip_cvc}What is a CVV/CVC number? Prospective credit cards will have a 3 to 4-digit number, usually on the back of the card. It ascertains that the payment is carried out by the credit card holder and the card account is legitimate. On Visa the CVV (Card Verification Value) appears after and to the right of your card number. Same goes for Mastercard's CVC (Card Verfication Code), which also appears after and to the right of  your card number, and has 3-digits. Diners Club, Discover, and JCB credit and debit cards have a three-digit card security code which also appears after and to the right of your card number. The American Express CID (Card Identification Number) is a 4-digit number printed on the front of your card. It appears above and to the right of your card number. On Maestro the CVV appears after and to the right of your number. If you don’t have a CVV for your Maestro card you can use 000.{/s}" >?</span >
-                </span >
-
-                    <div class = "col-lg-6" >
-                        <input id = "card-cvc" type = "text" size = "20" class = "form-control"
-                               value = "{$paymillCvc}" />
-                    </div >
-                </div >
-                <div class = "form-group" >
-                    <label class = "col-lg-4 control-label"
-                           for = "card-expiry-month" >{s namespace=Paymill name=frontend_creditcard_label_valid}Valid until (MM/YYYY){/s} *</label >
-
-                    <div class = "col-lg-6" >
-                        <input id = "card-expiry-month" type = "text" size = "5" class = "form-control"
-                                    style = "width: 25%; display: inline-block;"
-                               value = "{$paymillMonth}" />
-                        <input id = "card-expiry-year" type = "text" size = "5" class = "form-control"
-                                    style = "width: 25%; display: inline-block;"
-                               value = "{$paymillYear}" />
-
-                    </div >
-                </div >
-                                                    {else}
-                <p class = "none" >
-                    <label >{s namespace=Paymill name=frontend_creditcard_label_holder}Credit Card Holder{/s} *</label >
-                    <input id = "card-holder" type = "text" size = "20" class = "text"
-                           value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
-                </p >
-                <p class = "none" >
-                    <label >{s namespace=Paymill name=frontend_creditcard_label_number}Credit Card Number{/s} *</label >
-                    <input id = "card-number" type = "text" size = "20" class = "text"
-                           value = "{$paymillCardNumber}" />
-                </p >
-                <p class = "none" >
-                    <label >{s namespace=Paymill name=frontend_creditcard_label_cvc}CVC{/s} *</label >
-                    <input id = "card-cvc" type = "text" size = "4" class = "text" value = "{$paymillCvc}" />
-                <span class = "paymill-tooltip"
-                      title = "{s namespace=Paymill name=frontend_creditcard_tooltip_cvc} What is a CVV/CVC number? Prospective credit cards will have a 3 to 4-digit number, usually on the back of the card. It ascertains that the payment is carried out by the credit card holder and the card account is legitimate. On Visa the CVV (Card Verification Value) appears after and to the right of your card number. Same goes for Mastercard's CVC (Card Verfication Code), which also appears after and to the right of  your card number, and has 3-digits. Diners Club, Discover, and JCB credit and debit cards have a three-digit card security code which also appears after and to the right of your card number. The American Express CID (Card Identification Number) is a 4-digit number printed on the front of your card. It appears above and to the right of your card number. On Maestro the CVV appears after and to the right of your number. If you don’t have a CVV for your Maestro card you can use 000.{/s}" >?</span >
-                </p >
-                <p class = "none" >
-                    <label >{s namespace=Paymill name=frontend_creditcard_label_valid}Valid until (MM/YYYY){/s} *</label >
-                    <input id = "card-expiry-month" type = "text" style = "width: 30px; display: inline-block;"
-                                                                        class = "text"
-                           value = "{$paymillMonth}" />
-                    <input id = "card-expiry-year" type = "text" style = "width: 60px; display: inline-block;"
-                                                                        class = "text"
-                           value = "{$paymillYear}" />
-                </p >
-                                                    {/if}
-                                                {/if}
-
-                                                {if $payment_mean.name == 'paymilldebit' }
-                                                    {if $pigmbhTemplateActive == 1}
-                <div class = "form-group" >
-                    <label class = "col-lg-4 control-label"
-                           for = "paymill_accountholder" >{s namespace=Paymill name=frontend_directdebit_label_holder}Account Holder{/s} *</label >
-
-                    <div class = "col-lg-6" >
-                        <input id = "paymill_accountholder" type = "text" size = "20" class = "form-control"
-                               value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
-                    </div >
-                </div >
-                <div class = "form-group" >
-                    <label class = "col-lg-4 control-label"
-                           for = "paymill_iban" >{s namespace=Paymill name=frontend_directdebit_label_number}Account Number{/s}/{s namespace=Paymill name=frontend_directdebit_label_iban}IBAN{/s} *</label >
-
-                    <div class = "col-lg-6" >
-                        <input id = "paymill_iban" type = "text" size = "20" class = "form-control"
-                               value = "{$paymillAccountNumber}" />
-                    </div >
-                </div >
-                <div class = "form-group" >
-                    <label class = "col-lg-4 control-label"
-                           for = "paymill_bic" >{s namespace=Paymill name=frontend_directdebit_label_bankcode}Bankcode{/s}/{s namespace=Paymill name=frontend_directdebit_label_bic}BIC{/s} *</label >
-
-                    <div class = "col-lg-6" >
-                        <input id = "paymill_bic" type = "text" size = "20" class = "form-control"
-                               value = "{$paymillBankCode}" />
-                    </div >
-                </div >
-                                                    {else}
-                <p class = "none" >
-                    <label for = "paymill_accountholder" >{s namespace=Paymill name=frontend_directdebit_label_holder}Account Holder{/s} *</label >
-                    <input id = "paymill_accountholder" type = "text" size = "20" class = "text"
-                           value = "{$sUserData['billingaddress']['firstname']} {$sUserData['billingaddress']['lastname']}" />
-                </p >
-                <p class = "none" >
-                    <label for = "paymill_iban" >{s namespace=Paymill name=frontend_directdebit_label_number}Account Number{/s}/{s namespace=Paymill name=frontend_directdebit_label_iban}IBAN{/s} *</label >
-                    <input id = "paymill_iban" type = "text" size = "4" class = "text"
-                           value = "{$paymillAccountNumber}" />
-                </p >
-                <p class = "none" >
-                    <label for = "paymill_bic" >{s namespace=Paymill name=frontend_directdebit_label_bankcode}Bankcode{/s}/{s namespace=Paymill name=frontend_directdebit_label_bic}BIC{/s} *</label >
-                    <input id = "paymill_bic" type = "text" size = "4" class = "text"
-                           value = "{$paymillBankCode}" />
-                </p >
-                                                    {/if}
-                                                {/if}
-                                                {if ($payment_mean.name == 'paymilldebit') || ($payment_mean.name == 'paymillcc')}
-            <p class = "description" >{s namespace=Paymill name=feedback_info_general_required}Fields marked with a * are required.{/s}</p >
-                                                {/if}
-    </div >
-                                            {/if}
+        {if $payment_mean.name == 'paymilldebit' }
+            {include file='frontend/plugins/payment/paymill_debit.tpl'}
+        {/if}
+        </div >
+    {/if}

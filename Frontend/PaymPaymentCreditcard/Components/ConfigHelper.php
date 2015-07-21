@@ -17,12 +17,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper
                . "paymillDebugging tinyint(1) NOT NULL,"
                . "paymillLogging tinyint(1) NOT NULL,"
                . "paymillFastCheckout tinyint(1) NOT NULL,"
-               . "paymillSepaActive tinyint(1) NOT NULL"
+               . "paymillSepaActive tinyint(1) NOT NULL,"
+               . "paymillPCI varchar(255) NOT NULL"
                . ") ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
                . "INSERT IGNORE INTO paymill_config_data ("
                . "id, publicKey, privateKey, paymillPreAuth,"
-               . "paymillDebugging, paymillLogging, paymillFastCheckout, paymillSepaActive) VALUES("
-               . "1, NULL,NULL,0,0,0,0,0);";
+               . "paymillDebugging, paymillLogging, paymillFastCheckout, paymillSepaActive, paymillPCI) VALUES("
+               . "1, NULL,NULL,0,0,0,0,0,'SAQ A');";
         Shopware()->Db()->query($sql);
     }
 
@@ -40,13 +41,15 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper
         $loggingFlag = $swConfig->get("paymillLogging") == true;
         $fastCheckoutFlag = $swConfig->get("paymillFastCheckout") == true;
         $sepaFlag = $swConfig->get("paymillSepaActive") == true;
+        $pciFlag = $swConfig->get("paymillPCI") == true;
 
         $sql = "UPDATE paymill_config_data SET"
                . "`paymillPreAuth` = ?,"
                . "`paymillDebugging` = ?,"
                . "`paymillLogging` = ?,"
                . "`paymillFastCheckout` = ?,"
-               . "`paymillSepaActive` = ?"
+               . "`paymillSepaActive` = ?,"
+               . "`paymillPCI` = ?"
                . "WHERE id = 1";
         Shopware()->Db()->query(
         $sql,
@@ -55,7 +58,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper
                 $debuggingFlag ? 1 : 0,
                 $loggingFlag ? 1 : 0,
                 $fastCheckoutFlag ? 1 : 0,
-                $sepaFlag ? 1 : 0
+                $sepaFlag ? 1 : 0,
+                $pciFlag ? 'direct integration (min. PCI SAQ A-EP)' : 'PayFrame (min. PCI SAQ A)'
             )
         );
 

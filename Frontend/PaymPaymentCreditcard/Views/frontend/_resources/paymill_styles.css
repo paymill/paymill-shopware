@@ -169,3 +169,7 @@
     font-size:      100%;
     vertical-align: baseline;
 }
+
+table#paymillFastCheckoutTable > tbody > tr > td#paymillFcCardNumber {
+    padding-right: 35px;
+}

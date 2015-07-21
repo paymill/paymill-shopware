@@ -6,7 +6,7 @@ require_once dirname(__FILE__) . '/../lib/Services/Paymill/Webhooks.php';
  * webhookService
  *
  * @category   PayIntelligent
- * @copyright  Copyright (c) 2011 PayIntelligent GmbH (http://payintelligent.de)
+ * @copyright  Copyright (c) 2015 PAYMILL GmbH (https://www.paymill.com)
  */
 class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService
 {

@@ -50,7 +50,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function getVersion()
     {
-        return "1.5.2";
+        return "1.6.0";
     }
 
     /**
@@ -143,7 +143,10 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $view->paymillCvc = "***";
             $view->paymillMonth = $paymentObject['expire_month'];
             $view->paymillYear = $paymentObject['expire_year'];
+            $view->paymillCardHolder = $paymentObject['card_holder'];
+            $view->paymillBrand = $paymentObject['card_type'];
         } else {
+            $view->paymillCardHolder = $user['billingaddress']['firstname'] . " " . $user['billingaddress']['lastname'];
             $view->paymillCardNumber = "";
             $view->paymillCvc = "";
             $view->paymillMonth = "";
@@ -181,6 +184,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $arguments->getSubject()->View()->Template()->assign("sepaActive", $swConfig->get("paymillSepaActive"));
         $arguments->getSubject()->View()->Template()->assign("debug", $swConfig->get("paymillDebugging"));
         $arguments->getSubject()->View()->Template()->assign("CreditcardBrands", $this->getEnabledCreditcardbrands());
+        $arguments->getSubject()->View()->Template()->assign("paymillPCI", $swConfig->get("paymillPCI"));
 
         if ($paymentName === "paymilldebit" && Shopware()->Session()->sOrderVariables['sOrderNumber']) {
             $sepaDate = $this->util->getSepaDate(Shopware()->Session()->sOrderVariables['sOrderNumber']);
@@ -273,9 +277,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             'supplier' => 'PAYMILL GmbH',
             'support' => 'support@paymill.com',
             'link' => 'https://www.paymill.com',
-            'copyright' => 'Copyright (c) 2013, PayIntelligent GmbH',
+            'copyright' => 'Copyright (c) 2015, Paymill GmbH',
             'label' => 'Paymill',
-            'description' => '<h2>Payment plugin for Shopware Community Edition Version 4.0.0 - 4.2.3</h2>'
+            'description' => '<h2>Payment plugin for Shopware Community Edition Version 4.0.0 - 4.3.6</h2>'
             . '<ul>'
             . '<li style="list-style: inherit;">PCI DSS compatibility</li>'
             . '<li style="list-style: inherit;">Payment means: Credit Card (Visa, Visa Electron, Mastercard, Maestro, Diners, Discover, JCB, AMEX, China Union Pay), Direct Debit (ELV)</li>'
@@ -540,6 +544,12 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                     Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService::install();
                     // add new events for register Webhook
                     $this->_createEvents();
+                case "1.5.0":
+                case "1.5.1":
+                case "1.5.2":
+                    $sql = "ALTER TABLE paymill_config_data ADD COLUMN paymillPCI varchar(8) NOT NULL DEFAULT 'SAQ A';";
+                    Shopware()->Db()->query($sql);
+                    $this->_createForm();
                 default:
                     // update translation
                     $this->_addTranslationSnippets();
@@ -734,6 +744,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
             $form->setElement('text', 'publicKey', array('label' => 'Public Key', 'required' => true, 'value' => $data['publicKey']));
             $form->setElement('text', 'privateKey', array('label' => 'Private Key', 'required' => true, 'value' => $data['privateKey']));
+            $form->setElement('select', 'paymillPCI', array('label' => 'Payment form', 'value' => $data['paymillPCI'], 'store' => array( array(0, 'PayFrame (min. PCI SAQ A)'),array(1, 'direct integration (min. PCI SAQ A-EP)'))));
             $form->setElement('number', 'paymillSepaDate', array('label' => 'Days until debit', 'required' => true, 'value' => 7, 'attributes' => array('minValue' => 0)));
             $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => $data['paymillPreAuth'] == 1));
             $form->setElement('checkbox', 'paymillDebugging', array('label' => 'Activate debugging', 'value' => $data['paymillDebugging'] == 1));
