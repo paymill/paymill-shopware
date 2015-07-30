@@ -173,8 +173,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         }
 
         //Save amount into session to allow 3Ds
-        $basket = $arguments->getSubject()->getBasket();
-        $totalAmount = $basket['sAmount'];
+        $totalAmount = $arguments->getSubject()->View()->getAssign('sAmount');
         $totalAmount = (round((float) $totalAmount * 100, 2));
 
 

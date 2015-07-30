@@ -1,5 +1,8 @@
 #Release Notes
 
+##1.5.2
+ - added controller and action check to onCheckoutConfirm event handler #2
+
 ##1.5.1
  - removed transactionId in checkout
 
