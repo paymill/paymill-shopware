@@ -753,7 +753,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $this->subscribeEvent('Shopware_Components_Document::assignValues::after', 'beforeCreatingDocument');
             $this->subscribeEvent('Shopware_Modules_Order_SendMail_Create', 'beforeSendingMail');
             $this->subscribeEvent('Shopware_Modules_Order_SaveOrderAttributes_FilterSQL', 'insertOrderAttribute');
-        $this->subscribeEvent('Shopware_Controllers_Backend_Config::saveFormAction::before', 'beforeSavePluginConfig');
+            $this->subscribeEvent('Shopware_Controllers_Backend_Config::saveFormAction::before', 'beforeSavePluginConfig');
+            $this->subscribeEvent('Theme_Compiler_Collect_Plugin_Javascript', 'addJsFiles');
+            $this->subscribeEvent('Theme_Compiler_Collect_Plugin_Less','addLessFiles');
         } catch (Exception $exception) {
             Shopware()->Log()->Err("There was an error registering the plugins events. " . $exception->getMessage());
             throw new Exception("There was an error registering the plugins events. " . $exception->getMessage());
@@ -866,5 +868,36 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $args->setReturn($attributeSql);
         }
     }
+
+    /**
+    * Provide the file collection for js files
+    *
+    * @param Enlight_Event_EventArgs $args
+    * @return \Doctrine\Common\Collections\ArrayCollection
+    */
+    public function addJsFiles(Enlight_Event_EventArgs $args)
+    {
+        $jsFiles = array(
+            $this->Path() . 'Views/common/frontend/_public/src/js/BrandDetection.js',
+            $this->Path() . 'Views/common/frontend/_public/src/js/Iban.js'
+        );
+        return new Doctrine\Common\Collections\ArrayCollection($jsFiles);
+    }
+
+    /**
+    * Provide the file collection for Less
+    */
+   public function addLessFiles(Enlight_Event_EventArgs $args)
+   {
+       $less = new \Shopware\Components\Theme\LessDefinition(
+           array(),
+           array(
+               __DIR__ . '/Views/common/frontend/_public/src/less/all.less'
+           ),
+           __DIR__
+       );
+
+       return new Doctrine\Common\Collections\ArrayCollection(array($less));
+   }
 
 }
