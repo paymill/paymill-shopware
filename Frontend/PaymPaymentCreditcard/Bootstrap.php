@@ -731,7 +731,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      * Registers all Controllers
      */
     private function _registerController(){
-        $this->registerController('Frontend', 'Paymill');
+        $this->registerController('Frontend', 'PaymentPaymill');
         $this->registerController('Backend', 'PaymillLogging');
         $this->registerController('Backend', 'PaymillOrderOperations');
     }
