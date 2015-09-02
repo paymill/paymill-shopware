@@ -50,20 +50,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function getVersion()
     {
-        return "1.6.0.1";
-    }
-
-    /**
-     * Returns the controller path
-     *
-     * @return string
-     */
-    public static function onGetControllerPath()
-    {
-        Shopware()->Template()->addTemplateDir(Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()
-                ->Path() . '/Views/');
-
-        return Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Path() . '/Controllers/frontend/Paymill.php';
+        return "2.0.0";
     }
 
     /**
@@ -248,21 +235,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         return ($arrayLength === 0 || $arrayLength === 11) ? $shouldBe : $result;
     }
 
-
-    /**
-     * Return the path of the backend controller
-     *
-     * @return String backend controller path
-     */
-    public function paymillBackendControllerLogging()
-    {
-        Shopware()->Template()->addTemplateDir(Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()
-                ->Path() . 'Views/');
-
-        return Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()
-                ->Path() . "/Controllers/backend/PaymillLogging.php";
-    }
-
     /**
      * Get Info for the Pluginmanager
      *
@@ -408,11 +380,12 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     {
         try {
             Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService::install();
-        Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager::install();
+            Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager::install();
             Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
             $this->createPaymentMeans();
             $this->_createForm();
             $this->_addTranslationSnippets();
+            $this->_registerController();
             $this->_createEvents();
             $this->_updateOrderMail();
             $this->_applyBackendViewModifications();
@@ -428,18 +401,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
         $installSuccess = parent::install();
         return $installSuccess;
-    }
-
-    /**
-     * Returns the controller path for the backend order operations controller
-     *
-     * @return string
-     */
-    public function paymillBackendControllerOperations()
-    {
-        Shopware()->Template()->addTemplateDir($this->Path() . 'Views/');
-
-        return $this->Path() . "/Controllers/backend/PaymillOrderOperations.php";
     }
 
     /**
@@ -767,6 +728,16 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     }
 
     /**
+     * Registers all Controllers
+     */
+    private function _registerController(){
+        $this->registerController('Frontend', 'Paymill');
+        $this->registerController('Backend', 'PaymillLogging');
+        $this->registerController('Backend', 'PaymillOrderOperations');
+    }
+
+
+    /**
      * Creates all Events for the plugins
      *
      * @throws Exception
@@ -776,10 +747,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     {
         try {
             $this->subscribeEvent('Enlight_Controller_Action_PostDispatch', 'onPostDispatch');
-            $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Frontend_PaymentPaymill', 'onGetControllerPath');
             $this->subscribeEvent('Enlight_Controller_Action_PostDispatch_Frontend_Checkout', 'onCheckoutConfirm');
-            $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Backend_PaymillLogging', 'paymillBackendControllerLogging');
-            $this->subscribeEvent('Enlight_Controller_Dispatcher_ControllerPath_Backend_PaymillOrderOperations', 'paymillBackendControllerOperations');
             $this->subscribeEvent('Shopware_Modules_Admin_UpdateAccount_FilterEmailSql', 'onUpdateCustomerEmail');
             $this->subscribeEvent('Enlight_Controller_Action_PostDispatch_Backend_Order', 'extendOrderDetailView');
             $this->subscribeEvent('Shopware_Components_Document::assignValues::after', 'beforeCreatingDocument');
