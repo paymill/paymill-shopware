@@ -1,5 +1,8 @@
 #Release Notes
 
+##1.6.0
+ - Integration of PayFrame to enable use of SAQ A for easier PCI DSS 3.0 compliance.
+
 ##1.5.2
  - added controller and action check to onCheckoutConfirm event handler #2
 
