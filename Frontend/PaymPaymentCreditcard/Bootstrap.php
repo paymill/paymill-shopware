@@ -60,14 +60,11 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      *
      * @return void
      */
-    public static function onPostDispatch(Enlight_Event_EventArgs $args)
+    public function onPostDispatch(Enlight_Event_EventArgs $args)
     {
         $request = $args->getSubject()->Request();
         $response = $args->getSubject()->Response();
         $view = $args->getSubject()->View();
-
-        Shopware()->Template()->addTemplateDir(Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()
-                ->Path() . '/Views/');
 
         if (!$request->isDispatched() || $response->isException() || $request->getModuleName() != 'frontend' || !$view->hasTemplate()) {
             return;
@@ -103,18 +100,18 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function onCheckoutConfirm(Enlight_Event_EventArgs $arguments)
     {
-        if (!$this->isDispatchedEventValid(
-            $arguments, array('checkout'), array('finish', 'confirm')
-        )) {
-            return null;
-        }
-        
         $controller = $arguments->getSubject();
         $controller->View()->addTemplateDir($this->Path() . 'Views/common/');
         if (Shopware()->Shop()->getTemplate()->getVersion() >= 3) {
             $controller->View()->addTemplateDir($this->Path() . 'Views/responsive/');
         }else{
             $controller->View()->addTemplateDir($this->Path() . 'Views/emotion/');
+        }
+        
+        if (!$this->isDispatchedEventValid(
+            $arguments, array('checkout'), array('finish', 'confirm')
+        )) {
+            return null;
         }
         
         $view = $arguments->getSubject()->View();
@@ -430,7 +427,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     public function uninstall()
     {
         $configHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper();
-        $configHelper->persist();
+//        $configHelper->persist();
         $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper(null);
         $translationHelper->dropSnippets();
         return parent::uninstall();
@@ -878,5 +875,5 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
        return new Doctrine\Common\Collections\ArrayCollection(array($less));
    }
-
+   
 }

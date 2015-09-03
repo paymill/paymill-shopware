@@ -1,3 +1,4 @@
+{extends file="parent:frontend/checkout/finish.tpl"}
 {* Transaction number *}
 {block name='frontend_checkout_finish_transaction_number' append}
     {if $sepaDate}
