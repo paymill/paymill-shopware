@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__FILE__) . '/lib/Services/Paymill/Payments.php';
+require_once dirname(__FILE__) . '/../../../lib/Services/Paymill/Payments.php';
 
 class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_Checkout_Form_PrefillData
 {
@@ -30,7 +30,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_Checkout_Form_P
     }
     
     public function isDataAvailable($paymentName, $userId){
-        return $this->servicePayments->getPaymillPaymentId($paymentName, $userId);
+        return $this->modelHelper->getPaymillPaymentId($paymentName, $userId);
     }
 
         /**
