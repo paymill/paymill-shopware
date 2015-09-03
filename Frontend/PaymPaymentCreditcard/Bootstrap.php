@@ -108,61 +108,36 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         )) {
             return null;
         }
-
+        
+        $controller = $arguments->getSubject();
+        $controller->View()->addTemplateDir($this->Path() . 'Views/common/');
+        if (Shopware()->Shop()->getTemplate()->getVersion() >= 3) {
+            $controller->View()->addTemplateDir($this->Path() . 'Views/responsive/');
+        }else{
+            $controller->View()->addTemplateDir($this->Path() . 'Views/emotion/');
+        }
+        
         $view = $arguments->getSubject()->View();
+        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
         $params = $arguments->getRequest()->getParams();
 
-        $modelHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper();
+        // Assign prefilled data to template
+        $prefillDataService = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_Checkout_Form_PrefillData();
+        $prefillData = $prefillDataService->prefill($user);
+        $view->assign($prefillData);
+        
         $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
-        $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
         $userId = $user['billingaddress']['userID'];
         $paymentName = $user['additional']['payment']['name'];
-        $privateKey = trim($swConfig->get("privateKey"));
-        $apiUrl = "https://api.paymill.com/v2/";
-
-        require_once dirname(__FILE__) . '/lib/Services/Paymill/Payments.php';
-        $paymentIdCc = $modelHelper->getPaymillPaymentId('cc', $userId);
-        $paymentIdElv = $modelHelper->getPaymillPaymentId('elv', $userId);
-        if ($paymentIdCc != "") {
-            $ccPayment = new Services_Paymill_Payments($privateKey, $apiUrl);
-            $paymentObject = $ccPayment->getOne($paymentIdCc);
-            $view->paymillCardNumber = "..." . $paymentObject['last4'];
-            $view->paymillCvc = "***";
-            $view->paymillMonth = $paymentObject['expire_month'];
-            $view->paymillYear = $paymentObject['expire_year'];
-            $view->paymillCardHolder = $paymentObject['card_holder'];
-            $view->paymillBrand = $paymentObject['card_type'];
-        } else {
-            $view->paymillCardHolder = $user['billingaddress']['firstname'] . " " . $user['billingaddress']['lastname'];
-            $view->paymillCardNumber = "";
-            $view->paymillCvc = "";
-            $view->paymillMonth = "";
-            $view->paymillYear = "";
-        }
-
-
-        if ($paymentIdElv != "") {
-            $elvPayment = new Services_Paymill_Payments($privateKey, $apiUrl);
-            $paymentObject = $elvPayment->getOne($paymentIdElv);
-            $view->paymillAccountNumber = $paymentObject['iban'] != null ? $paymentObject['iban'] : $paymentObject['account'];
-            $view->paymillBankCode = $paymentObject['bic'] != null ? $paymentObject['bic'] : $paymentObject['code'];
-        } else {
-            $view->paymillAccountNumber = "";
-            $view->paymillBankCode = "";
-        }
-
-
         if (in_array($paymentName, array("paymillcc", "paymilldebit"))) {
             $view->sRegisterFinished = 'false';
-            if ($modelHelper->getPaymillPaymentId($paymentName, $userId)) {
+            if($prefillDataService->isDataAvailable($paymentName, $userId)){
                 Shopware()->Session()->paymillTransactionToken = "NoTokenRequired";
             }
         }
 
         //Save amount into session to allow 3Ds
-        $totalAmount = $arguments->getSubject()->View()->getAssign('sAmount');
-        $totalAmount = (round((float) $totalAmount * 100, 2));
-
+        $totalAmount = round((float) $view->getAssign('sAmount') * 100, 2);
 
         Shopware()->Session()->paymillTotalAmount = $totalAmount;
         $arguments->getSubject()->View()->Template()->assign("tokenAmount", $totalAmount);
@@ -175,7 +150,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         if ($paymentName === "paymilldebit" && Shopware()->Session()->sOrderVariables['sOrderNumber']) {
             $sepaDate = $this->util->getSepaDate(Shopware()->Session()->sOrderVariables['sOrderNumber']);
             $arguments->getSubject()->View()->Template()->assign("sepaDate", date('d.m.Y', $sepaDate));
-            $view->extendsBlock("frontend_checkout_finishs_transaction_number", "{include file='frontend/Paymillfinish.tpl'}", "append");
+            if (Shopware()->Shop()->getTemplate()->getVersion() < 3) {
+                $view->extendsBlock("frontend_checkout_finishs_transaction_number", "{include file='frontend/Paymillfinish.tpl'}", "append");
+            }
         }
         if ($arguments->getRequest()->getActionName() !== 'confirm' && !isset($params["errorMessage"])) {
             return;
@@ -202,7 +179,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             '</div>' .
             '</div> ' .
             '{/if}';
-        $view->extendsBlock("frontend_index_content_top", $content, "append");
+        if (Shopware()->Shop()->getTemplate()->getVersion() < 3) {
+            $view->extendsBlock("frontend_index_content_top", $content, "append");
+        }
         $view->setScope(Enlight_Template_Manager::SCOPE_PARENT);
         $view->pigmbhErrorMessage = $pigmbhErrorMessage;
         $view->pigmbhErrorClass = $class;
