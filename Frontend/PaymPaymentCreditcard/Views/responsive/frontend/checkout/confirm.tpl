@@ -12,6 +12,74 @@
 {/block}
 {block name="frontend_checkout_confirm_product_table" prepend}
     {if $sPayment.name === 'paymillcc' || $sPayment.name === 'paymilldebit'}
+        <script type = "text/javascript" >
+            var PAYMILL_PUBLIC_KEY = '{$publicKey}';        
+            var paymillcheckout = new Object();
+            paymillcheckout.errormessages = new Object();
+            paymillcheckout.errormessages.bridge = {
+                internal_server_error: '{s namespace=Paymill name=internal_server_error}The communication with the psp failed.{/s}',
+                invalid_public_key: '{s namespace=Paymill name=invalid_public_key}The public key is invalid.{/s}',
+                invalid_payment_data: '{s namespace=Paymill name=invalid_payment_data}Paymentmethod, card type currency or country not authorized{/s}',
+                unknown_error: '{s namespace=Paymill name=unknown_error}Unknown Error{/s}',
+                cancelled3DS: '{s namespace=Paymill name=3ds_cancelled}3-D Secure process has been canceled by the user{/s}',
+                field_invalid_card_number: '{s namespace=Paymill name=field_invalid_card_number}Invalid Credit Card Number{/s}',
+                field_invalid_number: '{s namespace=Paymill name=field_invalid_card_number}Invalid Credit Card Number{/s}',
+                field_invalid_card_exp_year: '{s namespace=Paymill name=field_invalid_card_exp_year}Invalid Expiry Year{/s}',
+                field_invalid_card_exp_month: '{s namespace=Paymill name=field_invalid_card_exp_month}Invalid Expiry Month{/s}',
+                field_invalid_card_exp: '{s namespace=Paymill name=field_invalid_card_exp}Credit Card not valid{/s}',
+                field_invalid_exp: '{s namespace=Paymill name=field_invalid_card_exp}Credit Card not valid{/s}',
+                field_invalid_card_cvc: '{s namespace=Paymill name=field_invalid_card_cvc}Invalid CVC{/s}',
+                field_invalid_cvc: '{s namespace=Paymill name=field_invalid_card_cvc}Invalid CVC{/s}',
+                field_invalid_card_holder: '{s namespace=Paymill name=field_invalid_card_holder}Invalid Card Holder{/s}',
+                field_invalid_amount_int: '{s namespace=Paymill name=field_invalid_amount_int}Missing amount for 3-D Secure{/s}',
+                field_field_invalid_amount: '{s namespace=Paymill name=field_field_invalid_amount}Missing amount for 3-D Secure{/s}',
+                field_field_field_invalid_currency: '{s namespace=Paymill name=field_invalid_currency}Invalid currency for 3-D Secure{/s}',
+                field_invalid_account_number: '{s namespace=Paymill name=field_invalid_account_number}Invalid Account Number{/s}',
+                field_invalid_account_holder: '{s namespace=Paymill name=field_invalid_account_holder}Invalid Account Holder{/s}',
+                field_invalid_bank_code: '{s namespace=Paymill name=field_invalid_bank_code}Invalid bank code{/s}',
+                field_invalid_iban: '{s namespace=Paymill name=field_invalid_iban}Invalid IBAN{/s}',
+                field_invalid_bic: '{s namespace=Paymill name=field_invalid_bic}Invalid BIC{/s}',
+                field_invalid_country: '{s namespace=Paymill name=field_invalid_country}Invalid country for sepa transactions{/s}',
+                field_invalid_bank_data: '{s namespace=Paymill name=field_invalid_bank_data}Invalid bank data{/s}',
+            };
+            paymillcheckout.errormessages.validation = new Object();
+            paymillcheckout.errormessages.validation.creditcard = {
+                cardholder: '{s namespace=Paymill name=feedback_error_creditcard_holder}Please enter the cardholders name.{/s}',
+                cardnumber: '{s namespace=Paymill name=feedback_error_creditcard_number}Please enter a valid creditcardnumber.{/s}',
+                cvc: '{s namespace=Paymill name=feedback_error_creditcard_cvc}Please enter a valid securecode (see back of creditcard).{/s}',
+                expirydate: '{s namespace=Paymill name=feedback_error_creditcard_valid}The expiry date is invalid.{/s}',
+            };
+            paymillcheckout.errormessages.validation.directdebit = {
+                accountholder: '{s namespace=Paymill name=feedback_error_directdebit_holder}Please enter the account name.{/s}',
+                iban: '{s namespace=Paymill name=feedback_error_sepa_iban}Please enter a valid iban{/s}',
+                bic: '{s namespace=Paymill name=feedback_error_sepa_bic}Please a valid bic.{/s}',
+                accountnumber: '{s namespace=Paymill name=feedback_error_directdebit_number}Please enter a valid account number{/s}',
+                bankcode: '{s namespace=Paymill name=feedback_error_directdebit_bankcode}Please a valid bankcode.{/s}',
+            };
+            paymillcheckout.validateCvc = true;
+            paymillcheckout.activeBrands = {$CreditcardBrands|@json_encode};
+            paymillcheckout.iframe = {
+                active: '{$paymillPCI}' !== '0',
+                options: {
+                    lang: '{s namespace=Paymill name=paymill_lang}en{/s}'
+                }
+            };
+            paymillcheckout.debug = {if $debug}true{else}false{/if};
+            paymillcheckout.tokenAmount = '{$tokenAmount}';
+            paymillcheckout.tokenCurrency = '{config name=currency|upper}';
+            paymillcheckout.tokenPayment = '{$sPayment.name}';
+            paymillcheckout.fastcheckout = new Object();
+            paymillcheckout.fastcheckout.creditcard = {
+                cardnumber: '{$paymillCardNumber}',
+                month: '{$paymillMonth}',
+                year: '{$paymillYear}',
+            };
+            paymillcheckout.fastcheckout.directdebit = {
+                accountnumber: '{$paymillAccountNumber}',
+                bankcode: '{$paymillBankCode}',
+            };
+            paymillcheckout.fastcheckout.changed = true;
+        </script >
     <div class="panel has--border">
         <div class="panel--title is--underline">PAYMILL {$sPayment.description}</div>
         <div class="panel--body is--rounded">
