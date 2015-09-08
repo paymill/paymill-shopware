@@ -855,7 +855,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     {
         $jsFiles = array(
             $this->Path() . 'Views/common/frontend/_public/src/js/BrandDetection.js',
-            $this->Path() . 'Views/common/frontend/_public/src/js/Iban.js'
+            $this->Path() . 'Views/common/frontend/_public/src/js/Iban.js',
+            $this->Path() . 'Views/common/frontend/_public/src/js/PaymillCheckout.js'
         );
         return new Doctrine\Common\Collections\ArrayCollection($jsFiles);
     }

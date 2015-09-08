@@ -47,10 +47,10 @@ function validate()
 {
     debug("Paymill handler triggered");
     var errorsCc = $("#errorsCc");
-    errorsCc.parent().hide();
+    errorsCc.parents('.error').hide();
     errorsCc.html("");
     var errorsElv = $("#errorsElv");
-    errorsElv.parent().hide();
+    errorsElv.parents('.error').hide();
     errorsElv.html("");
     var result = true;
     if (getPayment() === 'paymillcc') { //If CC 
@@ -77,7 +77,7 @@ function validate()
                 result = false;
             }
             if (!result) {
-                errorsCc.parent().show();
+                errorsCc.parents('.error').show();
             } else {
                 debug("Validations successful");
             }
@@ -115,7 +115,7 @@ function validate()
             }
         }
         if (!result) {
-            errorsElv.parent().show();
+            errorsElv.parents('.error').show();
         } else {
             debug("Validations successful");
         }
@@ -130,13 +130,13 @@ function PaymillResponseHandler(error, result)
         errorText = paymillcheckout.errormessages.bridge[error.apierror];
         debug(errorText);
         alert(errorText);
-        $("#basketButton").prop("disabled", false);
+        $('button[type="submit"]').prop("disabled", false);
     } else {
         debug("Received token from Paymill API: " + result.token);
-        var form = $("#basketButton").closest('form');
+        var form = $('#confirm--form');
         var token = result.token;
         form.append("<input type='hidden' name='paymillToken' value='" + token + "'/>");
-        form.get(0).submit();
+        form.submit();
     }
 }
 
@@ -166,9 +166,15 @@ $(document).ready(function ()
 
     $('button[type="submit"]').click(function ()
     {
+        /* prevend token generation when agb hasn't been accepted */
+        if ($("input[type='checkbox'][name='sAGB']").length) {
+            if ($("input[type='checkbox'][name='sAGB']").attr('checked') !== "checked") {
+                return true;
+            }
+        }
         $(this).prop("disabled", true);
         if (hasDummyData()) {
-            var form = $('#confirm--form').closest('form');
+            var form = $('#confirm--form');
             form.submit();
         } else {
             if (validate()) {
@@ -237,7 +243,6 @@ $(document).ready(function ()
                 }
             }
         }
-        return false;
     });
 
     $('#paymillFastCheckoutIframeChange').click(function (event) {

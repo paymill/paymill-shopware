@@ -59,7 +59,7 @@
             paymillcheckout.validateCvc = true;
             paymillcheckout.activeBrands = {$CreditcardBrands|@json_encode};
             paymillcheckout.iframe = {
-                active: '{$paymillPCI}' !== '0',
+                active: '{$paymillPCI}' === '0',
                 options: {
                     lang: '{s namespace=Paymill name=paymill_lang}en{/s}'
                 }
@@ -78,11 +78,23 @@
                 accountnumber: '{$paymillAccountNumber}',
                 bankcode: '{$paymillBankCode}',
             };
-            paymillcheckout.fastcheckout.changed = true;
-        </script >
+            paymillcheckout.fastcheckout.changed = false;
+        </script>
+        <script type="text/javascript" src="https://bridge.paymill.com/dss3"></script>
     <div class="panel has--border">
         <div class="panel--title is--underline">PAYMILL {$sPayment.description}</div>
         <div class="panel--body is--rounded">
+            <div class="error" style="display: none">
+                {if $sPayment.name == 'paymillcc'}
+                    {include file="frontend/_includes/messages.tpl" type="warning" content="{s namespace=Paymill name=feedback_error_creditcard_parent}Please enter your credit card information. For security reason we will not save them on our system.{/s}"}
+                    {include file="frontend/_includes/messages.tpl" type="error" content="<ul id='errorsCc'></ul>"}
+                {/if}
+
+                {if $sPayment.name == 'paymilldebit'}
+                    {include file="frontend/_includes/messages.tpl" type="warning" content="{s namespace=Paymill name=feedback_error_directdebit_parent}Please enter your accountdata. For security reason we will not save them on our system.{/s}"}
+                    {include file="frontend/_includes/messages.tpl" type="error" content="<ul id='errorsElv'></ul>"}
+                {/if}
+            </div >
             {if $sPayment.name === 'paymillcc'}
                 {if {config name=paymillBrandIconAmex}}<div class="paymill-card-icon paymill-card-number-amex"></div>{/if}
                 {if {config name=paymillBrandIconCartaSi}}<div class="paymill-card-icon paymill-card-number-carta-si"></div>{/if}
@@ -95,7 +107,7 @@
                 {if {config name=paymillBrandIconMastercard}}<div class="paymill-card-icon paymill-card-number-mastercard"></div>{/if}
                 {if {config name=paymillBrandIconVisa}}<div class="paymill-card-icon paymill-card-number-visa"></div>{/if}
                 {if {config name=paymillBrandIconUnionpay}}<div class="paymill-card-icon paymill-card-number-china-unionpay"></div>{/if}
-                {if $paymillPCI == '0'}
+                {if $paymillPCI === '0'}
                     {include file='frontend/paymill/payment/paymill_cc_saq.tpl'}
                 {else}
                     {include file='frontend/paymill/payment/paymill_cc_saq_ep.tpl'}
