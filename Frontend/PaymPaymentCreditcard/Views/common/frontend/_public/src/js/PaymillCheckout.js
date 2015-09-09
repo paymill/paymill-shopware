@@ -125,12 +125,12 @@ function validate()
 
 function PaymillResponseHandler(error, result)
 {
+    $('button[type="submit"]').removeAttr("disabled");
     debug("Started Paymill response handler");
     if (error) {
         errorText = paymillcheckout.errormessages.bridge[error.apierror];
         debug(errorText);
         alert(errorText);
-        $('button[type="submit"]').prop("disabled", false);
     } else {
         debug("Received token from Paymill API: " + result.token);
         var form = $('#confirm--form');
@@ -167,18 +167,17 @@ $(document).ready(function ()
     $('button[type="submit"][form="confirm--form"]').click(function ()
     {
         debug('Event triggered');
-        /* prevend token generation when agb hasn't been accepted */
-        if ($("input[type='checkbox'][name='sAGB']").length) {
-            if ($("input[type='checkbox'][name='sAGB']").attr('checked') !== "checked") {
-                return true;
-            }
+        /* prevend token generation when token already exsist */
+        if ($("input[type='checkbox'][name='paymillToken']").length) {
+            return true;
         }
-        $(this).prop("disabled", true);
+        $(this).attr("disabled","disabled");
+        debug('Check for FastCheckout data.');
         if (hasDummyData()) {
             debug('Proceed Fastcheckout');
-            var form = $('#confirm--form');
-            form.submit();
+            $('#confirm--form').submit();
         } else {
+            debug('Validate data');
             if (validate()) {
                 try {
                     if (getPayment() === 'paymillcc') { //If CC
@@ -229,10 +228,10 @@ $(document).ready(function ()
                     }
                 } catch (e) {
                     alert("Ein Fehler ist aufgetreten: " + e);
-                    $(this).prop("disabled", false);
+                    $(this).removeAttr("disabled");
                 }
             } else {
-                $(this).prop("disabled", false);
+                $(this).removeAttr("disabled");
                 if (getPayment() === 'paymillcc') {
                     $('html, body').animate({
                         scrollTop: $("#errorsCc").offset().top - 100
@@ -245,6 +244,7 @@ $(document).ready(function ()
                 }
             }
         }
+        return false;
     });
 
     $('#paymillFastCheckoutIframeChange').click(function (event) {

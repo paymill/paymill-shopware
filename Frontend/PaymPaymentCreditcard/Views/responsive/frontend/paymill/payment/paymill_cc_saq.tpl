@@ -11,7 +11,7 @@ function PaymillFrameResponseHandler(error, result)
 
 function paymillEmbedFrame()
 {
-    PAYMILL_FASTCHECKOUT_CC_CHANGED = true;
+    paymillcheckout.fastcheckout.changed = true;
     var paymillOptions = {literal}{lang:'en'}{/literal};
     paymillOptions.lang = '{s namespace=Paymill name=paymill_lang}en{/s}';
     paymill.embedFrame('paymillFormContainer', paymillOptions,PaymillFrameResponseHandler);
