@@ -1,7 +1,7 @@
 
 <link rel = "stylesheet" type = "text/css" href = "{link file='frontend/_resources/paymill_styles.css'}" />
 <script type = "text/javascript" >
-    var PAYMILL_PUBLIC_KEY = '{$publicKey}';
+    var PAYMILL_PUBLIC_KEY = '{$publicKey}';        
     var VALIDATE_CVC = true;
     var ActiveBrands = {$CreditcardBrands|@json_encode};
     var API_ERRORS = new Array();
@@ -34,11 +34,11 @@
     API_ERRORS["PAYMILL_field_invalid_bic"] = '{s namespace=Paymill name=field_invalid_bic}Invalid BIC{/s}';
     API_ERRORS["PAYMILL_field_invalid_country"] = '{s namespace=Paymill name=field_invalid_country}Invalid country for sepa transactions{/s}';
     API_ERRORS["PAYMILL_field_invalid_bank_data"] = '{s namespace=Paymill name=field_invalid_bank_data}Invalid bank data{/s}';
-</script >
-<script type = "text/javascript" src = "https://bridge.paymill.com/dss3" ></script >
-<script type = "text/javascript" src = "{link file='frontend/_resources/javascript/Iban.js'}" ></script >
-<script type = "text/javascript" src = "{link file='frontend/_resources/javascript/BrandDetection.js'}" ></script >
-<script type = "text/javascript" >
+</script>
+<script type = "text/javascript" src = "https://bridge.paymill.com/dss3" ></script>
+<script type = "text/javascript" src = "{link file='frontend/_resources/javascript/Iban.js'}" ></script>
+<script type = "text/javascript" src = "{link file='frontend/_resources/javascript/BrandDetection.js'}"></script>
+<script type = "text/javascript">
     function debug(message)
     {
         {if $debug}
@@ -296,7 +296,7 @@ $(document).ready(function ()
     var reg = new RegExp(/^\D\D/);
             return reg.test($('#paymill_iban').val());
     }
-</script >
+</script>
 
 <div class = "error" style = "display: none" >
     {if $payment_mean.name == 'paymillcc'}
