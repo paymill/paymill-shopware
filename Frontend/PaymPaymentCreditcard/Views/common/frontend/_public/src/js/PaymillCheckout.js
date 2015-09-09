@@ -164,8 +164,9 @@ $(document).ready(function ()
         }
     });
 
-    $('button[type="submit"]').click(function ()
+    $('button[type="submit"][form="confirm--form"]').click(function ()
     {
+        debug('Event triggered');
         /* prevend token generation when agb hasn't been accepted */
         if ($("input[type='checkbox'][name='sAGB']").length) {
             if ($("input[type='checkbox'][name='sAGB']").attr('checked') !== "checked") {
@@ -174,6 +175,7 @@ $(document).ready(function ()
         }
         $(this).prop("disabled", true);
         if (hasDummyData()) {
+            debug('Proceed Fastcheckout');
             var form = $('#confirm--form');
             form.submit();
         } else {

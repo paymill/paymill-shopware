@@ -83,7 +83,7 @@
         <script type="text/javascript" src="https://bridge.paymill.com/dss3"></script>
     <div class="panel has--border">
         <div class="panel--title is--underline">PAYMILL {$sPayment.description}</div>
-        <div class="panel--body is--rounded">
+        <div class="panel--body is--rounded" id='paymillFormContainer'>
             <div class="error" style="display: none">
                 {if $sPayment.name == 'paymillcc'}
                     {include file="frontend/_includes/messages.tpl" type="warning" content="{s namespace=Paymill name=feedback_error_creditcard_parent}Please enter your credit card information. For security reason we will not save them on our system.{/s}"}
@@ -107,10 +107,10 @@
                 {if {config name=paymillBrandIconMastercard}}<div class="paymill-card-icon paymill-card-number-mastercard"></div>{/if}
                 {if {config name=paymillBrandIconVisa}}<div class="paymill-card-icon paymill-card-number-visa"></div>{/if}
                 {if {config name=paymillBrandIconUnionpay}}<div class="paymill-card-icon paymill-card-number-china-unionpay"></div>{/if}
-                {if $paymillPCI === '0'}
-                    {include file='frontend/paymill/payment/paymill_cc_saq.tpl'}
-                {else}
+                {if $paymillPCI}
                     {include file='frontend/paymill/payment/paymill_cc_saq_ep.tpl'}
+                {else}
+                    {include file='frontend/paymill/payment/paymill_cc_saq.tpl'}
                 {/if}
             {elseif $sPayment.name === 'paymilldebit'}
                 {include file='frontend/paymill/payment/paymill_debit.tpl'}
