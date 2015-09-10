@@ -61,7 +61,7 @@
             paymillcheckout.iframe = {
                 active: '{$paymillPCI}' === '0',
                 options: {
-                    lang: '{s namespace=Paymill name=paymill_lang}en{/s}'
+                    lang: '{s namespace=frontend/paym_payment_creditcard/form name=frontend_iframe_lang}en{/s}'
                 }
             };
             paymillcheckout.debug = {if $debug}true{else}false{/if};
