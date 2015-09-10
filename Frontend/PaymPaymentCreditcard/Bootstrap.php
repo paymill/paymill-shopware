@@ -430,6 +430,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 //        $configHelper->persist();
         $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper(null);
         $translationHelper->dropSnippets();
+        $this->removeSnippets();
         return parent::uninstall();
     }
 
