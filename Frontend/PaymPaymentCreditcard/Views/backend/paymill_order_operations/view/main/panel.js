@@ -177,7 +177,7 @@ Ext.define('Shopware.apps.PaymillOrderOperations.view.main.Panel', {
                 if (decodedResponse.success) {
                     messageText = "{s namespace=backend/paym_payment_creditcard/order_operations name=feedback_refund_success}Transaction refunded successfully.{/s}";
                 } else {
-                    messageText = "{s namespace=backend/paym_payment_creditcard/order_operations name=feedback_search_failure}Transaction could not be refunded: {/s}";
+                    messageText = "{s namespace=backend/paym_payment_creditcard/order_operations name=feedback_refund_failure}Transaction could not be refunded: {/s}";
                     messageText += decodedResponse.code;
                 }
                 if (decodedResponse.success) {
