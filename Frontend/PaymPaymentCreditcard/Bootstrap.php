@@ -530,7 +530,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $ccPayment = $this->Payments()->findOneBy(array('name' => 'paymillcc'));
             $elvPayment = $this->Payments()->findOneBy(array('name' => 'paymilldebit'));
 
-            $sortedSnippets = $this->getSortedSnippets();
+            $sortedSnippets = parse_ini_file(dirname(__FILE__).'/snippets/frontend/paym_payment_creditcard/checkout/payments.ini', true);
             $shops = Shopware()->Db()->select()
                 ->from('s_core_shops', array('id', 'locale_id', 'default'))
                 ->query()
@@ -539,8 +539,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             foreach ($shops as $shop) {
                 $shopId = $shop['id'];
                 $locale = $shop['locale_id'];
-                $this->updatePaymentTranslation($shopId, $ccPayment->getID(), $sortedSnippets[$locale]['frontend_creditcard'], $shop['default']);
-                $this->updatePaymentTranslation($shopId, $elvPayment->getID(), $sortedSnippets[$locale]['frontend_directdebit'], $shop['default']);
+                $this->updatePaymentTranslation($shopId, $ccPayment->getID(), $sortedSnippets[$locale]['creditcard'], $shop['default']);
+                $this->updatePaymentTranslation($shopId, $elvPayment->getID(), $sortedSnippets[$locale]['directdebit'], $shop['default']);
             }
         } catch (Exception $exception) {
             Shopware()->Log()->Err("Can not create translation for payment names." . $exception->getMessage());
