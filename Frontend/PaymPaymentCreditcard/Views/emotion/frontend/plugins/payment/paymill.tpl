@@ -10,30 +10,30 @@
     if('{$paymillPCI}' != '0') {
         paymilliFrame = false;
     }
-    API_ERRORS["PAYMILL_internal_server_error"] = '{s namespace=Paymill name=internal_server_error}The communication with the psp failed.{/s}';
-    API_ERRORS["PAYMILL_invalid_public_key"] = '{s namespace=Paymill name=invalid_public_key}The public key is invalid.{/s}';
-    API_ERRORS["PAYMILL_invalid_payment_data"] = '{s namespace=Paymill name=invalid_payment_data}Paymentmethod, card type currency or country not authorized{/s}';
-    API_ERRORS["PAYMILL_unknown_error"] = '{s namespace=Paymill name=unknown_error}Unknown Error{/s}';
-    API_ERRORS["PAYMILL_3ds_cancelled"] = '{s namespace=Paymill name=3ds_cancelled}3-D Secure process has been canceled by the user{/s}';
-    API_ERRORS["PAYMILL_field_invalid_card_number"] = '{s namespace=Paymill name=field_invalid_card_number}Invalid Credit Card Number{/s}';
-    API_ERRORS["PAYMILL_field_invalid_number"] = '{s namespace=Paymill name=field_invalid_card_number}Invalid Credit Card Number{/s}';
-    API_ERRORS["PAYMILL_field_invalid_card_exp_year"] = '{s namespace=Paymill name=field_invalid_card_exp_year}Invalid Expiry Year{/s}';
-    API_ERRORS["PAYMILL_field_invalid_card_exp_month"] = '{s namespace=Paymill name=field_invalid_card_exp_month}Invalid Expiry Month{/s}';
-    API_ERRORS["PAYMILL_field_invalid_card_exp"] = '{s namespace=Paymill name=field_invalid_card_exp}Credit Card not valid{/s}';
-    API_ERRORS["PAYMILL_field_invalid_exp"] = '{s namespace=Paymill name=field_invalid_card_exp}Credit Card not valid{/s}';
-    API_ERRORS["PAYMILL_field_invalid_card_cvc"] = '{s namespace=Paymill name=field_invalid_card_cvc}Invalid CVC{/s}';
-    API_ERRORS["PAYMILL_field_invalid_cvc"] = '{s namespace=Paymill name=field_invalid_card_cvc}Invalid CVC{/s}';
-    API_ERRORS["PAYMILL_field_invalid_card_holder"] = '{s namespace=Paymill name=field_invalid_card_holder}Invalid Card Holder{/s}';
-    API_ERRORS["PAYMILL_field_invalid_amount_int"] = '{s namespace=Paymill name=field_invalid_amount_int}Missing amount for 3-D Secure{/s}';
-    API_ERRORS["PAYMILL_field_field_invalid_amount"] = '{s namespace=Paymill name=field_field_invalid_amount}Missing amount for 3-D Secure{/s}';
-    API_ERRORS["PAYMILL_field_field_field_invalid_currency"] = '{s namespace=Paymill name=field_invalid_currency}Invalid currency for 3-D Secure{/s}';
-    API_ERRORS["PAYMILL_field_invalid_account_number"] = '{s namespace=Paymill name=field_invalid_account_number}Invalid Account Number{/s}';
-    API_ERRORS["PAYMILL_field_invalid_account_holder"] = '{s namespace=Paymill name=field_invalid_account_holder}Invalid Account Holder{/s}';
-    API_ERRORS["PAYMILL_field_invalid_bank_code"] = '{s namespace=Paymill name=field_invalid_bank_code}Invalid bank code{/s}';
-    API_ERRORS["PAYMILL_field_invalid_iban"] = '{s namespace=Paymill name=field_invalid_iban}Invalid IBAN{/s}';
-    API_ERRORS["PAYMILL_field_invalid_bic"] = '{s namespace=Paymill name=field_invalid_bic}Invalid BIC{/s}';
-    API_ERRORS["PAYMILL_field_invalid_country"] = '{s namespace=Paymill name=field_invalid_country}Invalid country for sepa transactions{/s}';
-    API_ERRORS["PAYMILL_field_invalid_bank_data"] = '{s namespace=Paymill name=field_invalid_bank_data}Invalid bank data{/s}';
+    API_ERRORS["PAYMILL_internal_server_error"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=internal_server_error}The communication with the psp failed.{/s}';
+    API_ERRORS["PAYMILL_invalid_public_key"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=invalid_public_key}The public key is invalid.{/s}';
+    API_ERRORS["PAYMILL_invalid_payment_data"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=invalid_payment_data}Paymentmethod, card type currency or country not authorized{/s}';
+    API_ERRORS["PAYMILL_unknown_error"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=unknown_error}Unknown Error{/s}';
+    API_ERRORS["PAYMILL_3ds_cancelled"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=3ds_cancelled}3-D Secure process has been canceled by the user{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_number"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_card_number}Invalid Credit Card Number{/s}';
+    API_ERRORS["PAYMILL_field_invalid_number"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_card_number}Invalid Credit Card Number{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_exp_year"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_card_exp_year}Invalid Expiry Year{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_exp_month"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_card_exp_month}Invalid Expiry Month{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_exp"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_card_exp}Credit Card not valid{/s}';
+    API_ERRORS["PAYMILL_field_invalid_exp"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_card_exp}Credit Card not valid{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_cvc"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_card_cvc}Invalid CVC{/s}';
+    API_ERRORS["PAYMILL_field_invalid_cvc"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_card_cvc}Invalid CVC{/s}';
+    API_ERRORS["PAYMILL_field_invalid_card_holder"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_card_holder}Invalid Card Holder{/s}';
+    API_ERRORS["PAYMILL_field_invalid_amount_int"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_amount_int}Missing amount for 3-D Secure{/s}';
+    API_ERRORS["PAYMILL_field_field_invalid_amount"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_field_invalid_amount}Missing amount for 3-D Secure{/s}';
+    API_ERRORS["PAYMILL_field_field_field_invalid_currency"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_currency}Invalid currency for 3-D Secure{/s}';
+    API_ERRORS["PAYMILL_field_invalid_account_number"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_account_number}Invalid Account Number{/s}';
+    API_ERRORS["PAYMILL_field_invalid_account_holder"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_account_holder}Invalid Account Holder{/s}';
+    API_ERRORS["PAYMILL_field_invalid_bank_code"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_bank_code}Invalid bank code{/s}';
+    API_ERRORS["PAYMILL_field_invalid_iban"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_iban}Invalid IBAN{/s}';
+    API_ERRORS["PAYMILL_field_invalid_bic"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_bic}Invalid BIC{/s}';
+    API_ERRORS["PAYMILL_field_invalid_country"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_country}Invalid country for sepa transactions{/s}';
+    API_ERRORS["PAYMILL_field_invalid_bank_data"] = '{s namespace=frontend/paym_payment_creditcard/checkout/errors/bridge name=field_invalid_bank_data}Invalid bank data{/s}';
 </script>
 <script type = "text/javascript" src = "https://bridge.paymill.com/dss3" ></script>
 <script type = "text/javascript" src = "{link file='frontend/_resources/javascript/Iban.js'}" ></script>
