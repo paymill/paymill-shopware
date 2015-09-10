@@ -44,17 +44,17 @@
             };
             paymillcheckout.errormessages.validation = new Object();
             paymillcheckout.errormessages.validation.creditcard = {
-                cardholder: '{s namespace=Paymill name=feedback_error_creditcard_holder}Please enter the cardholders name.{/s}',
-                cardnumber: '{s namespace=Paymill name=feedback_error_creditcard_number}Please enter a valid creditcardnumber.{/s}',
-                cvc: '{s namespace=Paymill name=feedback_error_creditcard_cvc}Please enter a valid securecode (see back of creditcard).{/s}',
-                expirydate: '{s namespace=Paymill name=feedback_error_creditcard_valid}The expiry date is invalid.{/s}',
+                cardholder: '{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=creditcard_holder}Please enter the cardholders name.{/s}',
+                cardnumber: '{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=creditcard_number}Please enter a valid creditcardnumber.{/s}',
+                cvc: '{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=creditcard_cvc}Please enter a valid securecode (see back of creditcard).{/s}',
+                expirydate: '{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=creditcard_valid}The expiry date is invalid.{/s}',
             };
             paymillcheckout.errormessages.validation.directdebit = {
-                accountholder: '{s namespace=Paymill name=feedback_error_directdebit_holder}Please enter the account name.{/s}',
-                iban: '{s namespace=Paymill name=feedback_error_sepa_iban}Please enter a valid iban{/s}',
-                bic: '{s namespace=Paymill name=feedback_error_sepa_bic}Please a valid bic.{/s}',
-                accountnumber: '{s namespace=Paymill name=feedback_error_directdebit_number}Please enter a valid account number{/s}',
-                bankcode: '{s namespace=Paymill name=feedback_error_directdebit_bankcode}Please a valid bankcode.{/s}',
+                accountholder: '{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=directdebit_holder}Please enter the account name.{/s}',
+                iban: '{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=sepa_iban}Please enter a valid iban{/s}',
+                bic: '{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=sepa_bic}Please a valid bic.{/s}',
+                accountnumber: '{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=directdebit_number}Please enter a valid account number{/s}',
+                bankcode: '{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=directdebit_bankcode}Please a valid bankcode.{/s}',
             };
             paymillcheckout.validateCvc = true;
             paymillcheckout.activeBrands = {$CreditcardBrands|@json_encode};
@@ -86,12 +86,12 @@
         <div class="panel--body is--rounded" id='paymillFormContainer'>
             <div class="error" style="display: none">
                 {if $sPayment.name == 'paymillcc'}
-                    {include file="frontend/_includes/messages.tpl" type="warning" content="{s namespace=Paymill name=feedback_error_creditcard_parent}Please enter your credit card information. For security reason we will not save them on our system.{/s}"}
+                    {include file="frontend/_includes/messages.tpl" type="warning" content="{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=creditcard_parent}Please enter your credit card information. For security reason we will not save them on our system.{/s}"}
                     {include file="frontend/_includes/messages.tpl" type="error" content="<ul id='errorsCc'></ul>"}
                 {/if}
 
                 {if $sPayment.name == 'paymilldebit'}
-                    {include file="frontend/_includes/messages.tpl" type="warning" content="{s namespace=Paymill name=feedback_error_directdebit_parent}Please enter your accountdata. For security reason we will not save them on our system.{/s}"}
+                    {include file="frontend/_includes/messages.tpl" type="warning" content="{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=directdebit_parent}Please enter your accountdata. For security reason we will not save them on our system.{/s}"}
                     {include file="frontend/_includes/messages.tpl" type="error" content="<ul id='errorsElv'></ul>"}
                 {/if}
             </div >

@@ -95,16 +95,16 @@
         if (getPayment() === 'paymillcc') { //If CC 
             if (!paymilliFrame) { // if not iframe solution
                 if (!paymill.validateHolder($('#card-holder').val())) {
-                    errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_holder}Please enter the cardholders name.{/s}</li>");
+                    errorsCc.append("<li>{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=creditcard_holder}Please enter the cardholders name.{/s}</li>");
                     result = false;
                 }
                 if (!paymill.validateCardNumber($('#card-number').val())) {
-                    errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_number}Please enter a valid creditcardnumber.{/s}</li>");
+                    errorsCc.append("<li>{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=creditcard_number}Please enter a valid creditcardnumber.{/s}</li>");
                     result = false;
                 }
                 if (!paymill.validateCvc($('#card-cvc').val())) {
                     if (VALIDATE_CVC) {
-                        errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_cvc}Please enter a valid securecode (see back of creditcard).{/s}</li>");
+                        errorsCc.append("<li>{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=creditcard_cvc}Please enter a valid securecode (see back of creditcard).{/s}</li>");
                         result = false;
                     }
                 }
@@ -112,7 +112,7 @@
                     $('#card-expiry-year').val("20" + $('#card-expiry-year').val());
                 }
                 if (!paymill.validateExpiry($('#card-expiry-month').val(), $('#card-expiry-year').val())) {
-                    errorsCc.append("<li>{s namespace=Paymill name=feedback_error_creditcard_valid}The expiry date is invalid.{/s}</li>");
+                    errorsCc.append("<li>{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=creditcard_valid}The expiry date is invalid.{/s}</li>");
                     result = false;
                 }
                 if (!result) {
@@ -128,28 +128,28 @@
 
         if (getPayment() === 'paymilldebit') { //If ELV
             if (!paymill.validateHolder($('#paymill_accountholder').val())) {
-                errorsElv.append("<li>{s namespace=Paymill name=feedback_error_directdebit_holder}Please enter the account name.{/s}</li>");
+                errorsElv.append("<li>{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=directdebit_holder}Please enter the account name.{/s}</li>");
                 result = false;
             }
             if (isSepa()) {
                 iban = new Iban();
                 if (!iban.validate($('#paymill_iban').val())) {
-                    errorsElv.append("<li>{s namespace=Paymill name=feedback_error_sepa_iban}Please enter a valid iban{/s}</li>");
+                    errorsElv.append("<li>{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=sepa_iban}Please enter a valid iban{/s}</li>");
                     result = false;
                 }
 
                 if ($('#paymill_bic').val() === '') {
-                    errorsElv.append("<li>{s namespace=Paymill name=feedback_error_sepa_bic}Please a valid bic.{/s}</li>");
+                    errorsElv.append("<li>{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=sepa_bic}Please a valid bic.{/s}</li>");
                     result = false;
                 }
             } else {
                 if (!paymill.validateAccountNumber($('#paymill_iban').val())) {
-                    errorsElv.append("<li>{s namespace=Paymill name=feedback_error_directdebit_number}Please enter a valid account number{/s}</li>");
+                    errorsElv.append("<li>{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=directdebit_number}Please enter a valid account number{/s}</li>");
                     result = false;
                 }
 
                 if (!paymill.validateBankCode($('#paymill_bic').val())) {
-                    errorsElv.append("<li>{s namespace=Paymill name=feedback_error_directdebit_bankcode}Please a valid bankcode.{/s}</li>");
+                    errorsElv.append("<li>{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=directdebit_bankcode}Please a valid bankcode.{/s}</li>");
                     result = false;
                 }
             }
@@ -300,12 +300,12 @@ $(document).ready(function ()
 
 <div class = "error" style = "display: none" >
     {if $payment_mean.name == 'paymillcc'}
-        <li >{s namespace=Paymill name=feedback_error_creditcard_parent}Please enter your credit card information. For security reason we will not save them on our system.{/s}</li >
+        <li >{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=creditcard_parent}Please enter your credit card information. For security reason we will not save them on our system.{/s}</li >
         <ul id = "errorsCc" ></ul >
     {/if}
 
     {if $payment_mean.name == 'paymilldebit'}
-        <li >{s namespace=Paymill name=feedback_error_directdebit_parent}Please enter your accountdata. For security reason we will not save them on our system.{/s}</li >
+        <li >{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=directdebit_parent}Please enter your accountdata. For security reason we will not save them on our system.{/s}</li >
         <ul id = "errorsElv" ></ul >
     {/if}
 </div >
