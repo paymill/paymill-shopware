@@ -23,7 +23,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelp
     );
 
     private $_form = null;
-    
+
     private $snippet = null;
 
     /**
@@ -56,7 +56,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelp
                     if(!array_key_exists($snippetKey,$this->_configTranslationMapping)){
                         continue;
                     }
-                    
+
                     $elementModel = $this->_form->getElement($this->_configTranslationMapping[$snippetKey]);
                     if ($elementModel === null) {
                         continue;
@@ -66,12 +66,11 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelp
                     if(array_key_exists($descriptionKey, $snippets)){
                         $description = $snippets[$descriptionKey];
                     }
-                    
+
                     $this->_addNewConfigTranslation($elementModel, $localeModel, $translation, $description);
                 }
             }
         } catch (Exception $exception) {
-            Shopware()->Log()->Err("Can not create translation for configuration form." . $exception->getMessage());
             throw new Exception("Can not create translation for configuration form." . $exception->getMessage());
         }
     }

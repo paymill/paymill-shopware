@@ -107,13 +107,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         }else{
             $controller->View()->addTemplateDir($this->Path() . 'Views/emotion/');
         }
-        
+
         if (!$this->isDispatchedEventValid(
             $arguments, array('checkout'), array('finish', 'confirm')
         )) {
             return null;
         }
-        
+
         $view = $arguments->getSubject()->View();
         $user = Shopware()->System()->sMODULES['sAdmin']->sGetUserData();
         $params = $arguments->getRequest()->getParams();
@@ -122,7 +122,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         $prefillDataService = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_Checkout_Form_PrefillData();
         $prefillData = $prefillDataService->prefill($user);
         $view->assign($prefillData);
-        
+
         $swConfig = Shopware()->Plugins()->Frontend()->PaymPaymentCreditcard()->Config();
         $userId = $user['billingaddress']['userID'];
         $paymentName = $user['additional']['payment']['name'];
@@ -495,7 +495,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             }
             return true;
         } catch (Exception $exception) {
-            Shopware()->Log()->Err($exception->getMessage());
             throw new Exception($exception->getMessage());
         }
     }
@@ -513,7 +512,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $csv = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_CsvReader(dirname(__FILE__) . '/locale/');
             Shopware()->Db()->exec($csv->getSqlInsert());
         } catch (Exception $exception) {
-            Shopware()->Log()->Err("Can not insert translation-snippets." . $exception->getMessage());
             throw new Exception("Can not insert translation-snippets." . $exception->getMessage());
         }
     }
@@ -543,7 +541,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 $this->updatePaymentTranslation($shopId, $elvPayment->getID(), $sortedSnippets[$locale]['directdebit'], $shop['default']);
             }
         } catch (Exception $exception) {
-            Shopware()->Log()->Err("Can not create translation for payment names." . $exception->getMessage());
             throw new Exception("Can not create translation for payment names." . $exception->getMessage());
         }
     }
@@ -614,7 +611,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 }
             }
         } catch (Exception $exception) {
-            Shopware()->Log()->Err("Cannot disable payment: " . $exception->getMessage());
             throw new Exception("Cannot disable payment: " . $exception->getMessage());
         }
 
@@ -652,7 +648,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 )
             );
         } catch (Exception $exception) {
-            Shopware()->Log()->Err("There was an error creating the payment means. " . $exception->getMessage());
             throw new Exception("There was an error creating the payment means. " . $exception->getMessage());
         }
     }
@@ -699,7 +694,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $form->setElement('checkbox', 'paymillBrandIconUnionpay', array('label' => 'China Unionpay', 'value' => $data['paymillBrandIconUnionpay'] == 1));
             $form->setElement('checkbox', 'paymillBrandIconVisa', array('label' => 'Visa', 'value' => $data['paymillBrandIconVisa'] == 1));
         } catch (Exception $exception) {
-            Shopware()->Log()->Err("There was an error creating the plugin configuration. " . $exception->getMessage());
             throw new Exception("There was an error creating the plugin configuration. " . $exception->getMessage());
         }
     }
@@ -734,7 +728,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $this->subscribeEvent('Theme_Compiler_Collect_Plugin_Javascript', 'addJsFiles');
             $this->subscribeEvent('Theme_Compiler_Collect_Plugin_Less','addLessFiles');
         } catch (Exception $exception) {
-            Shopware()->Log()->Err("There was an error registering the plugins events. " . $exception->getMessage());
             throw new Exception("There was an error registering the plugins events. " . $exception->getMessage());
         }
     }
@@ -779,7 +772,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $this->createMenuItem(array('label' => 'Paymill', 'class' => 'sprite-cards-stack', 'active' => 1,
                 'controller' => 'PaymillLogging', 'action' => 'index', 'parent' => $parent));
         } catch (Exception $exception) {
-            Shopware()->Log()->Err("can not create menu entry." . $exception->getMessage());
             throw new Exception("can not create menu entry." . $exception->getMessage());
         }
     }
@@ -877,5 +869,5 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
 
        return new Doctrine\Common\Collections\ArrayCollection(array($less));
    }
-   
+
 }
