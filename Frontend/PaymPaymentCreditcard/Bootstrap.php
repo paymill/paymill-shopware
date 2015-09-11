@@ -425,8 +425,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function uninstall()
     {
+        //@todo discuss if this feature should be removed
         $configHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper();
-//        $configHelper->persist();
+        $configHelper->persist();
         $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper(null);
         $translationHelper->dropSnippets();
         $this->removeSnippets();
