@@ -360,7 +360,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
             $this->createPaymentMeans();
             $this->_createForm();
-            $this->_addTranslationSnippets();
             $this->_registerController();
             $this->_createEvents();
             $this->_updateOrderMail();
@@ -369,7 +368,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper($this->Form());
             $translationHelper->createPluginConfigTranslation();
             $this->solveKnownIssue();
-        $this->Plugin()->setActive(true);
+            $this->Plugin()->setActive(true);
         } catch (Exception $exception) {
             $this->uninstall();
             throw new Exception($exception->getMessage());
@@ -489,30 +488,12 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                     $this->_createForm();
                 default:
                     // update translation
-                    $this->_addTranslationSnippets();
                     $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper($this->Form());
                     $translationHelper->createPluginConfigTranslation();
             }
             return true;
         } catch (Exception $exception) {
             throw new Exception($exception->getMessage());
-        }
-    }
-
-    /**
-     * Adds the translation snippets into the database.
-     * Returns true or throws an exception in case of an error
-     *
-     * @throws Exception
-     * @return void
-     */
-    private function _addTranslationSnippets()
-    {
-        try {
-            $csv = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_CsvReader(dirname(__FILE__) . '/locale/');
-            Shopware()->Db()->exec($csv->getSqlInsert());
-        } catch (Exception $exception) {
-            throw new Exception("Can not insert translation-snippets." . $exception->getMessage());
         }
     }
 
