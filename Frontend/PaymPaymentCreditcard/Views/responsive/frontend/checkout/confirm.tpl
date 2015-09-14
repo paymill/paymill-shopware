@@ -1,13 +1,7 @@
 {extends file="parent:frontend/checkout/confirm.tpl"}
 {block name='frontend_checkout_confirm_error_messages' append}
     {if $pigmbhErrorMessage} 
-        <div class="grid_20 {$pigmbhErrorClass}">
-            <div class="error">
-                <div class="center">
-                    <strong> {$pigmbhErrorMessage} </strong>
-                </div>
-            </div>
-        </div>
+        {include file="frontend/_includes/messages.tpl" type="error" content=$pigmbhErrorMessage}
     {/if}
 {/block}
 {block name="frontend_checkout_confirm_product_table" prepend}
