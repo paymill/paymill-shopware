@@ -107,6 +107,7 @@
                 {if {config name=paymillBrandIconMastercard}}<div class="paymill-card-icon paymill-card-number-mastercard"></div>{/if}
                 {if {config name=paymillBrandIconVisa}}<div class="paymill-card-icon paymill-card-number-visa"></div>{/if}
                 {if {config name=paymillBrandIconUnionpay}}<div class="paymill-card-icon paymill-card-number-china-unionpay"></div>{/if}
+                <br>
                 {if $paymillPCI}
                     {include file='frontend/paymill/payment/paymill_cc_saq_ep.tpl'}
                 {else}
