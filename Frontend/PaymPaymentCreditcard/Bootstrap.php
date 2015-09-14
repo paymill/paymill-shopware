@@ -425,9 +425,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function uninstall()
     {
-        //@todo discuss if this feature should be removed
-        $configHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper();
-        $configHelper->persist();
         $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper(null);
         $translationHelper->dropSnippets();
         $this->removeSnippets();
@@ -459,38 +456,26 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 case "1.1.3":
                 case "1.1.4":
                 case "1.2.0":
-                    $this->uninstall();
-                    $this->install();
-                    break;
                 case "1.3.0":
-                    $this->solveKnownIssue();
                 case "1.3.1":
                 case "1.4.0":
-                    // add new config for CreditcardBrands
-                    $this->_createForm();
-                    // add new events for preNotification
-                    $this->_createEvents();
                 case "1.4.1":
-                    Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper::install($this);
                 case "1.4.2":
                 case "1.4.3":
                 case "1.4.4":
                 case "1.4.5":
                 case "1.4.6":
                 case "1.4.7":
-                    Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService::install();
-                    // add new events for register Webhook
-                    $this->_createEvents();
                 case "1.5.0":
                 case "1.5.1":
                 case "1.5.2":
-                    $sql = "ALTER TABLE paymill_config_data ADD COLUMN paymillPCI varchar(8) NOT NULL DEFAULT 'SAQ A';";
-                    Shopware()->Db()->query($sql);
-                    $this->_createForm();
-                default:
-                    // update translation
-                    $translationHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper($this->Form());
-                    $translationHelper->createPluginConfigTranslation();
+                    $sql = "DELETE FROM s_core_config_element_translations
+                        WHERE element_id IN (SELECT s_core_config_elements.id FROM s_core_config_elements
+                        WHERE s_core_config_elements.form_id = (SELECT s_core_config_forms.id FROM s_core_config_forms
+                        WHERE s_core_config_forms.plugin_id = ?));
+                        DELETE FROM s_core_config_elements
+                        WHERE form_id = (SELECT id FROM s_core_config_forms WHERE plugin_id = ?);";
+                     Shopware()->Db()->query($sql, array($this->getId(), $this->getId()));
             }
             return true;
         } catch (Exception $exception) {
@@ -548,29 +533,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 $shopId, "config_payment", $paymentId, array('description' => $description), true
             );
         }
-    }
-
-    /**
-     * Returns a sorted array of all snippets
-     *
-     * @return array
-     */
-    private function getSortedSnippets()
-    {
-        $snippets = Shopware()->Db()->select()
-            ->from('s_core_snippets', array('localeID', 'name', 'value'))
-            ->where('namespace=?', "Paymill")
-            ->where('name=?', "frontend_creditcard")
-            ->orWhere('name=?', "frontend_directdebit")
-            ->group(array('localeID', 'value'))
-            ->query()
-            ->fetchAll();
-
-        $sortedSnippets = array();
-        foreach ($snippets as $snippet) {
-            $sortedSnippets[$snippet['localeID']][$snippet['name']] = $snippet['value'];
-        }
-        return $sortedSnippets;
     }
 
     /**
@@ -642,39 +604,27 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     private function _createForm()
     {
-
         try {
             $form = $this->Form();
-            $configHelper = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ConfigHelper();
-            $data = $configHelper->loadData();
-
-            $sql = "DELETE FROM s_core_config_element_translations
-               WHERE element_id IN (SELECT s_core_config_elements.id FROM s_core_config_elements
-               WHERE s_core_config_elements.form_id = (SELECT s_core_config_forms.id FROM s_core_config_forms
-               WHERE s_core_config_forms.plugin_id = ?));
-               DELETE FROM s_core_config_elements
-               WHERE form_id = (SELECT id FROM s_core_config_forms WHERE plugin_id = ?);";
-            Shopware()->Db()->query($sql, array($this->getId(), $this->getId()));
-
-            $form->setElement('text', 'publicKey', array('label' => 'Public Key', 'required' => true, 'value' => $data['publicKey']));
-            $form->setElement('text', 'privateKey', array('label' => 'Private Key', 'required' => true, 'value' => $data['privateKey']));
-            $form->setElement('select', 'paymillPCI', array('label' => 'Payment form', 'value' => $data['paymillPCI'], 'store' => array( array(0, 'PayFrame (min. PCI SAQ A)'),array(1, 'direct integration (min. PCI SAQ A-EP)'))));
-            $form->setElement('number', 'paymillSepaDate', array('label' => 'Days until debit', 'required' => true, 'value' => 7, 'attributes' => array('minValue' => 0)));
-            $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => $data['paymillPreAuth'] == 1));
-            $form->setElement('checkbox', 'paymillDebugging', array('label' => 'Activate debugging', 'value' => $data['paymillDebugging'] == 1));
-            $form->setElement('checkbox', 'paymillFastCheckout', array('label' => 'Save data for FastCheckout', 'value' => $data['paymillFastCheckout'] == 1));
-            $form->setElement('checkbox', 'paymillLogging', array('label' => 'Activate logging', 'value' => $data['paymillLogging'] == 1));
-            $form->setElement('checkbox', 'paymillBrandIconAmex', array('label' => 'American Express', 'value' => $data['paymillBrandIconAmex'] == 1));
-            $form->setElement('checkbox', 'paymillBrandIconCartaSi', array('label' => 'Carta Si', 'value' => $data['paymillBrandIconCartaSi'] == 1));
-            $form->setElement('checkbox', 'paymillBrandIconCarteBleue', array('label' => 'Carte Bleue', 'value' => $data['paymillBrandIconCarteBleue'] == 1));
-            $form->setElement('checkbox', 'paymillBrandIconDankort', array('label' => 'Dankort', 'value' => $data['paymillBrandIconDankort'] == 1));
-            $form->setElement('checkbox', 'paymillBrandIconDinersclub', array('label' => 'Dinersclub', 'value' => $data['paymillBrandIconDinersclub'] == 1));
-            $form->setElement('checkbox', 'paymillBrandIconDiscover', array('label' => 'Discover', 'value' => $data['paymillBrandIconDiscover'] == 1));
-            $form->setElement('checkbox', 'paymillBrandIconJcb', array('label' => 'JCB', 'value' => $data['paymillBrandIconJcb'] == 1));
-            $form->setElement('checkbox', 'paymillBrandIconMaestro', array('label' => 'Maestro', 'value' => $data['paymillBrandIconMaestro'] == 1));
-            $form->setElement('checkbox', 'paymillBrandIconMastercard', array('label' => 'Mastercard', 'value' => $data['paymillBrandIconMastercard'] == 1));
-            $form->setElement('checkbox', 'paymillBrandIconUnionpay', array('label' => 'China Unionpay', 'value' => $data['paymillBrandIconUnionpay'] == 1));
-            $form->setElement('checkbox', 'paymillBrandIconVisa', array('label' => 'Visa', 'value' => $data['paymillBrandIconVisa'] == 1));
+            $form->setElement('text', 'publicKey', array('label' => 'Public Key', 'required' => true, 'position' => 0));
+            $form->setElement('text', 'privateKey', array('label' => 'Private Key', 'required' => true, 'position' => 10));
+            $form->setElement('select', 'paymillPCI', array('label' => 'Payment form', 'value' => 0, 'position' => 20, 'store' => array( array(0, 'PayFrame (min. PCI SAQ A)'),array(1, 'direct integration (min. PCI SAQ A-EP)'))));
+            $form->setElement('number', 'paymillSepaDate', array('label' => 'Days until debit', 'required' => true, 'value' => 7, 'position' => 30, 'attributes' => array('minValue' => 0)));
+            $form->setElement('checkbox', 'paymillPreAuth', array('label' => 'Authorize credit card transactions during checkout and capture manually', 'value' => false, 'position' => 40));
+            $form->setElement('checkbox', 'paymillDebugging', array('label' => 'Activate debugging', 'value' => false, 'position' => 50));
+            $form->setElement('checkbox', 'paymillFastCheckout', array('label' => 'Save data for FastCheckout', 'value' => false, 'position' => 60));
+            $form->setElement('checkbox', 'paymillLogging', array('label' => 'Activate logging', 'value' => true, 'position' => 70));
+            $form->setElement('checkbox', 'paymillBrandIconAmex', array('label' => 'American Express', 'value' => false, 'position' => 80));
+            $form->setElement('checkbox', 'paymillBrandIconCartaSi', array('label' => 'Carta Si', 'value' => false, 'position' => 90));
+            $form->setElement('checkbox', 'paymillBrandIconCarteBleue', array('label' => 'Carte Bleue', 'value' => false, 'position' => 100));
+            $form->setElement('checkbox', 'paymillBrandIconDankort', array('label' => 'Dankort', 'value' => false, 'position' => 110));
+            $form->setElement('checkbox', 'paymillBrandIconDinersclub', array('label' => 'Dinersclub', 'value' => false, 'position' => 120));
+            $form->setElement('checkbox', 'paymillBrandIconDiscover', array('label' => 'Discover', 'value' => false, 'position' => 130));
+            $form->setElement('checkbox', 'paymillBrandIconJcb', array('label' => 'JCB', 'value' => false, 'position' => 140));
+            $form->setElement('checkbox', 'paymillBrandIconMaestro', array('label' => 'Maestro', 'value' => false, 'position' => 150));
+            $form->setElement('checkbox', 'paymillBrandIconMastercard', array('label' => 'Mastercard', 'value' => false, 'position' => 160));
+            $form->setElement('checkbox', 'paymillBrandIconUnionpay', array('label' => 'China Unionpay', 'value' => false, 'position' => 170));
+            $form->setElement('checkbox', 'paymillBrandIconVisa', array('label' => 'Visa', 'value' => false, 'position' => 180));
         } catch (Exception $exception) {
             throw new Exception("There was an error creating the plugin configuration. " . $exception->getMessage());
         }
@@ -737,8 +687,8 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
                 $privateKey = $element['values'][0]['value'];
             }
         }
-    $webHookService = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService();
-    $webHookService->registerWebhookEndpoint($privateKey);
+        $webHookService = new Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_WebhookService();
+        $webHookService->registerWebhookEndpoint($privateKey);
     }
 
     /**
