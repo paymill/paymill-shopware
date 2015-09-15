@@ -56,16 +56,16 @@ function validate()
     if (getPayment() === 'paymillcc') { //If CC 
         if (!paymillcheckout.iframe.active) { // if not iframe solution
             if (!paymill.validateHolder($('#card-holder').val())) {
-                errorsCc.append("<li>"+paymillcheckout.errormessages.validation.creditcard.cardholder+"</li>");
+                errorsCc.append("<div>"+paymillcheckout.errormessages.validation.creditcard.cardholder+"</div>");
                 result = false;
             }
             if (!paymill.validateCardNumber($('#card-number').val())) {
-                errorsCc.append("<li>"+paymillcheckout.errormessages.validation.creditcard.cardnumber+"</li>");
+                errorsCc.append("<div>"+paymillcheckout.errormessages.validation.creditcard.cardnumber+"</div>");
                 result = false;
             }
             if (!paymill.validateCvc($('#card-cvc').val())) {
                 if (paymillcheckout.validateCvc) {
-                    errorsCc.append("<li>"+paymillcheckout.errormessages.validation.creditcard.cvc+"</li>");
+                    errorsCc.append("<div>"+paymillcheckout.errormessages.validation.creditcard.cvc+"</div>");
                     result = false;
                 }
             }
@@ -73,7 +73,7 @@ function validate()
                 $('#card-expiry-year').val("20" + $('#card-expiry-year').val());
             }
             if (!paymill.validateExpiry($('#card-expiry-month').val(), $('#card-expiry-year').val())) {
-                errorsCc.append("<li>"+paymillcheckout.errormessages.validation.creditcard.expirydate+"</li>");
+                errorsCc.append("<div>"+paymillcheckout.errormessages.validation.creditcard.expirydate+"</div>");
                 result = false;
             }
             if (!result) {
@@ -89,28 +89,28 @@ function validate()
 
     if (getPayment() === 'paymilldebit') { //If ELV
         if (!paymill.validateHolder($('#paymill_accountholder').val())) {
-            errorsElv.append("<li>"+paymillcheckout.errormessages.validation.directdebit.accountholder+"</li>");
+            errorsElv.append("<div>"+paymillcheckout.errormessages.validation.directdebit.accountholder+"</div>");
             result = false;
         }
         if (isSepa()) {
             var iban = new Iban();
             if (!iban.validate($('#paymill_iban').val())) {
-                errorsElv.append("<li>"+paymillcheckout.errormessages.validation.directdebit.iban+"</li>");
+                errorsElv.append("<div>"+paymillcheckout.errormessages.validation.directdebit.iban+"</div>");
                 result = false;
             }
 
             if ($('#paymill_bic').val() === '') {
-                errorsElv.append("<li>"+paymillcheckout.errormessages.validation.directdebit.bic+"</li>");
+                errorsElv.append("<div>"+paymillcheckout.errormessages.validation.directdebit.bic+"</div>");
                 result = false;
             }
         } else {
             if (!paymill.validateAccountNumber($('#paymill_iban').val())) {
-                errorsElv.append("<li>"+paymillcheckout.errormessages.validation.directdebit.accountnumber+"</li>");
+                errorsElv.append("<div>"+paymillcheckout.errormessages.validation.directdebit.accountnumber+"</div>");
                 result = false;
             }
 
             if (!paymill.validateBankCode($('#paymill_bic').val())) {
-                errorsElv.append("<li>"+paymillcheckout.errormessages.validation.directdebit.bankcode+"</li>");
+                errorsElv.append("<div>"+paymillcheckout.errormessages.validation.directdebit.bankcode+"</div>");
                 result = false;
             }
         }

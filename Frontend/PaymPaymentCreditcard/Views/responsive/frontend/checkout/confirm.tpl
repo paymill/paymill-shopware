@@ -81,12 +81,12 @@
             <div class="error" style="display: none">
                 {if $sPayment.name == 'paymillcc'}
                     {include file="frontend/_includes/messages.tpl" type="warning" content="{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=creditcard_parent}Please enter your credit card information. For security reason we will not save them on our system.{/s}"}
-                    {include file="frontend/_includes/messages.tpl" type="error" content="<ul id='errorsCc'></ul>"}
+                    {include file="frontend/_includes/messages.tpl" type="error" content="<div id='errorsCc'></div>"}
                 {/if}
 
                 {if $sPayment.name == 'paymilldebit'}
                     {include file="frontend/_includes/messages.tpl" type="warning" content="{s namespace=frontend/paym_payment_creditcard/checkout/errors/validation name=directdebit_parent}Please enter your accountdata. For security reason we will not save them on our system.{/s}"}
-                    {include file="frontend/_includes/messages.tpl" type="error" content="<ul id='errorsElv'></ul>"}
+                    {include file="frontend/_includes/messages.tpl" type="error" content="<div id='errorsElv'></div>"}
                 {/if}
             </div >
             {if $sPayment.name === 'paymillcc'}
