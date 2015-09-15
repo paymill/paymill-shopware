@@ -123,7 +123,7 @@ function validate()
     return result;
 }
 
-function PaymillResponseHandler(error, result)
+function paymillResponseHandler(error, result)
 {
     $('button[type="submit"]').removeAttr("disabled");
     debug("Started Paymill response handler");
@@ -133,11 +133,11 @@ function PaymillResponseHandler(error, result)
         alert(errorText);
     } else {
         debug("Received token from Paymill API: " + result.token);
-        PaymillSubmitForm(result.token);
+        paymillSubmitForm(result.token);
     }
 }
 
-function PaymillSubmitForm(token){
+function paymillSubmitForm(token){
     var form = $('#confirm--form');
     var name;
     if(getPayment() === 'paymillcc'){
@@ -185,7 +185,7 @@ $(document).ready(function ()
         debug('Check for FastCheckout data.');
         if (hasDummyData()) {
             debug('Proceed Fastcheckout');
-            PaymillSubmitForm('NoTokenRequired');
+            paymillSubmitForm('NoTokenRequired');
         } else {
             debug('Validate data');
             if (validate()) {
@@ -201,7 +201,7 @@ $(document).ready(function ()
                                     cvc: $('#card-cvc').val(),
                                     amount_int: paymillcheckout.tokenAmount,
                                     currency: paymillcheckout.tokenCurrency
-                                }, PaymillResponseHandler);
+                                }, paymillResponseHandler);
                             } else {
                                 cvcInput = $('#card-cvc').val();
                                 paymill.createToken({
@@ -212,13 +212,13 @@ $(document).ready(function ()
                                     cvc: cvcInput === "" ? "000" : cvcInput,
                                     amount_int: paymillcheckout.tokenAmount,
                                     currency: paymillcheckout.tokenCurrency
-                                }, PaymillResponseHandler);
+                                }, paymillResponseHandler);
                             }
                         } else {
                             paymill.createTokenViaFrame({
                                 amount_int: paymillcheckout.tokenAmount,
                                 currency: paymillcheckout.tokenCurrency
-                            }, PaymillResponseHandler);
+                            }, paymillResponseHandler);
                         }
                     }
                     if (getPayment() === 'paymilldebit') { //If ELV
@@ -227,13 +227,13 @@ $(document).ready(function ()
                                 iban: $('#paymill_iban').val(),
                                 bic: $('#paymill_bic').val(),
                                 accountholder: $('#paymill_accountholder').val()
-                            }, PaymillResponseHandler);
+                            }, paymillResponseHandler);
                         } else {
                             paymill.createToken({
                                 number: $('#paymill_iban').val(),
                                 bank: $('#paymill_bic').val(),
                                 accountholder: $('#paymill_accountholder').val()
-                            }, PaymillResponseHandler);
+                            }, paymillResponseHandler);
                         }
                     }
                 } catch (e) {
