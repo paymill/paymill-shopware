@@ -22,7 +22,7 @@ function hasDummyData()
             debug(validMonth);
             debug(validYear);
 
-            if ((cardNumber === "" || validMonth === "" || validYear === "") || (paymillcheckout.fastcheckout.creditcard.cardNumber !== cardNumber) || (paymillcheckout.fastcheckout.creditcard.month !== validMonth) || (paymillcheckout.fastcheckout.creditcard.year !== validYear)) {
+            if ((cardNumber === "" || validMonth === "" || validYear === "") || (paymillcheckout.fastcheckout.creditcard.cardnumber != cardNumber) || (paymillcheckout.fastcheckout.creditcard.month != validMonth) || (paymillcheckout.fastcheckout.creditcard.year != validYear)) {
                 debug("Creditcard information found. New Information will be used. Token should be getting generated.");
                 return false;
             }
