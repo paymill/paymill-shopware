@@ -133,11 +133,21 @@ function PaymillResponseHandler(error, result)
         alert(errorText);
     } else {
         debug("Received token from Paymill API: " + result.token);
-        var form = $('#confirm--form');
-        var token = result.token;
-        form.append("<input type='hidden' name='paymillToken' value='" + token + "'/>");
-        form.submit();
+        PaymillSubmitForm(result.token);
     }
+}
+
+function PaymillSubmitForm(token){
+    var form = $('#confirm--form');
+    var name;
+    if(getPayment() === 'paymillcc'){
+        name = $('#card-holder').val();    
+    }else{
+        name = $('#paymill_accountholder').val();
+    }
+    form.append("<input type='hidden' name='paymillToken' value='" + token + "'/>");
+    form.append("<input type='hidden' name='paymillName' value='" + name + "'/>");
+    form.submit();
 }
 
 function isSepa() {
@@ -175,7 +185,7 @@ $(document).ready(function ()
         debug('Check for FastCheckout data.');
         if (hasDummyData()) {
             debug('Proceed Fastcheckout');
-            $('#confirm--form').submit();
+            PaymillSubmitForm('NoTokenRequired');
         } else {
             debug('Validate data');
             if (validate()) {

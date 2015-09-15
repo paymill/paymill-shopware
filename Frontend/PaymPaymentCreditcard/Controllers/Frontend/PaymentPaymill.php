@@ -85,7 +85,7 @@ class Shopware_Controllers_Frontend_PaymentPaymill extends Shopware_Controllers_
             'authorizedAmount' => (int)Shopware()->Session()->paymillTotalAmount,
             'amount'           => (int)(round($this->getAmount() * 100, 0)),
             'currency'         => $this->getCurrencyShortName(),
-            'name'             => $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname'],
+            'name'             => Shopware()->Session()->paymillTransactionName ? Shopware()->Session()->paymillTransactionName : $user['billingaddress']['lastname'] . ', ' . $user['billingaddress']['firstname'],
             'email'            => $user['additional']['user']['email'],
             'description'      => substr($user['additional']['user']['email'] . " " . Shopware()->Config()->get('shopname'),0,128),
             'payment'          => $paymentShortcut

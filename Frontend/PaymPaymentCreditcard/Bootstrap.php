@@ -74,6 +74,9 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
         if ($request->get("paymillToken")) {
             Shopware()->Session()->paymillTransactionToken = $request->get("paymillToken");
         }
+        if ($request->get("paymillName")) {
+            Shopware()->Session()->paymillTransactionName = $request->get("paymillName");
+        }
 
         $user = Shopware()->Session()->sOrderVariables['sUserData'];
         $userId = $user['billingaddress']['userID'];
