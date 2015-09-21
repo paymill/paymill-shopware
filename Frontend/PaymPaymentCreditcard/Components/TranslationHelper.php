@@ -11,18 +11,20 @@
 class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelper
 {
     private $_configTranslationMapping = array(
-        'publicKey'           => 'config_publicKey_label',
-        'privateKey'          => 'config_privateKey_label',
-        'paymillPreAuth'      => 'config_preAuth_label',
-        'paymillDebugging'    => 'config_debugging_label',
-        'paymillFastCheckout' => 'config_fastCheckout_label',
-        'paymillLogging'      => 'config_logging_label',
-        'paymillSepaActive'   => 'config_sepa_active_label',
-        'paymillSepaDate'     => 'config_sepa_date',
-        'paymillPCI'          => 'config_paymillPCI_label'
+        'label_publicKey' => 'publicKey',
+        'label_privateKey' => 'privateKey',
+        'label_preAuth' => 'paymillPreAuth',
+        'label_debugging' => 'paymillDebugging',
+        'label_fastCheckout' => 'paymillFastCheckout',
+        'label_logging' => 'paymillLogging',
+        'label_sepa_active' => 'paymillSepaActive',
+        'label_sepa_date' => 'paymillSepaDate',
+        'label_paymillPCI' => 'paymillPCI'
     );
 
     private $_form = null;
+
+    private $snippet = null;
 
     /**
      * Creates an instance of the translation helper
@@ -32,6 +34,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelp
     public function __construct($form)
     {
         $this->_form = $form;
+        $this->snippet = parse_ini_file(dirname(__FILE__).'/../snippets/backend/paym_payment_creditcard/config.ini', true);
     }
 
     /**
@@ -43,26 +46,31 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelp
     public function createPluginConfigTranslation()
     {
         try {
-            $form = $this->_form;
-            $translationStore = $this->_getSnippets();
-
-            foreach ($translationStore as $locale => $snippets) {
-                $shopRepository = Shopware()->Models()->getRepository('\Shopware\Models\Shop\Locale');
+            $shopRepository = Shopware()->Models()->getRepository('\Shopware\Models\Shop\Locale');
+            foreach ($this->snippet as $locale => $snippets) {
                 $localeModel = $shopRepository->findOneBy(array('locale' => $locale));
-
-                foreach ($snippets as $elementName => $snippet) {
-                    if ($localeModel === null) {
+                if ($localeModel === null) {
+                    continue;
+                }
+                foreach ($snippets as $snippetKey => $translation) {
+                    if(!array_key_exists($snippetKey,$this->_configTranslationMapping)){
                         continue;
                     }
-                    $elementModel = $form->getElement($elementName);
+
+                    $elementModel = $this->_form->getElement($this->_configTranslationMapping[$snippetKey]);
                     if ($elementModel === null) {
                         continue;
                     }
-                    $this->_addNewConfigTranslation($localeModel, $snippet, $elementModel);
+                    $description = null;
+                    $descriptionKey = str_replace('label_', 'description_', $snippetKey);
+                    if(array_key_exists($descriptionKey, $snippets)){
+                        $description = $snippets[$descriptionKey];
+                    }
+
+                    $this->_addNewConfigTranslation($elementModel, $localeModel, $translation, $description);
                 }
             }
         } catch (Exception $exception) {
-            Shopware()->Log()->Err("Can not create translation for configuration form." . $exception->getMessage());
             throw new Exception("Can not create translation for configuration form." . $exception->getMessage());
         }
     }
@@ -74,35 +82,15 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_TranslationHelp
      * @param string                          $translationSnippet
      * @param \Shopware\Models\Config\Element $elementModel
      */
-    private function _addNewConfigTranslation($localeModel, $translationSnippet, $elementModel)
+    private function _addNewConfigTranslation($elementModel, $localeModel, $translationSnippet, $description=null)
     {
         $translationModel = new \Shopware\Models\Config\ElementTranslation();
+        if(!is_null($description)){
+            $translationModel->setDescription($description);
+        }
         $translationModel->setLabel($translationSnippet);
         $translationModel->setLocale($localeModel);
         $elementModel->addTranslation($translationModel);
-    }
-
-    /**
-     * Returns an array of translation snippets. array[language][elementName][snippet]
-     *
-     * @return array
-     */
-    private function _getSnippets()
-    {
-        $translationStore = array();
-        $sql = "SELECT value FROM s_core_snippets s, s_core_locales l
-                WHERE s.localeID = l.id
-                AND l.locale = ?
-                AND `name` = ?";
-
-        foreach ($this->_configTranslationMapping as $elementName => $translationName) {
-            $translationStore['de_DE'][$elementName] = Shopware()->Db()->fetchOne($sql, array('de_DE',
-                                                                                              $translationName));
-            $translationStore['en_GB'][$elementName] = Shopware()->Db()->fetchOne($sql, array('en_GB',
-                                                                                              $translationName));
-        }
-
-        return $translationStore;
     }
 
     /**

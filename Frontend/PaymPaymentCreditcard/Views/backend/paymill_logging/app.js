@@ -17,7 +17,7 @@ Ext.define('Shopware.apps.PaymillLogging', {
     launch:      function ()
     {
         var me = this;
-        me.windowTitle = '{s namespace=Paymill name=log_title}Paymill Log {/s}';
+        me.windowTitle = '{s namespace=backend/paym_payment_creditcard/log name=log_title}Paymill Log {/s}';
         var mainController = me.getController('Main');
         return mainController.mainWindow;
     }

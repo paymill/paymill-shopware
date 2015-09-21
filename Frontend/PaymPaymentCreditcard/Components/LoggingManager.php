@@ -64,7 +64,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager 
 
             Shopware()->Db()->query($sql);
         } catch (Exception $exception) {
-            Shopware()->Log()->Err("There was an Error creating the Log-Table: " . $exception->getMessage());
             throw new Exception("There was an Error creating the Log-Table: " . $exception->getMessage());
         }
     }
@@ -104,36 +103,36 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_LoggingManager 
         $start = (int)$start;
         $limit = (int)$limit;
         $preparedArray = array();
-        
+
         if($direction !== 'ASC' && $direction !== 'DESC') {
             $direction = 'DESC';
         }
-        
+
         $possibleProperty = array('id', 'processId', 'entryDate', 'version', 'merchantInfo', 'devInfo');
         if(!in_array($property, $possibleProperty)) {
             $property = 'entryDate';
         }
-        
+
         if($searchTerm !== ""){
             $searchTerm = '%' . $searchTerm . '%';
             $sqlWhere = 'WHERE (merchantInfo LIKE ? OR devInfo LIKE ?) ';
             array_push($preparedArray, $searchTerm);
             array_push($preparedArray, $searchTerm);
         }
-        
+
         if($connectedSearch) {
             $sqlWhere = "WHERE processId IN (SELECT processId FROM `paymill_log` $sqlWhere)";
         }
-        
+
         $sqlSelect = "SELECT * FROM  `paymill_log` ";
-        
+
         $sqlOrder = "ORDER BY  `paymill_log`.". $property  ." ". $direction ." LIMIT ". $start .", " . $limit;
 
         $sql = $sqlSelect . $sqlWhere . $sqlOrder;
 
         //Process Select and return result
         $result = Shopware()->Db()->fetchAll($sql,$preparedArray);
-        
+
         return $result;
     }
 

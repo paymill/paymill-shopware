@@ -74,18 +74,13 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_CsvReader
      */
     private function _loadCsvFiles()
     {
-        try {
-            if (($files = scandir($this->getPath()))) {
-                foreach ($files as $file) {
-                    if (is_file($this->getPath() . $file)) {
-                        $this->_loadCsvFileByName($file);
-                    }
+        if (($files = scandir($this->getPath()))) {
+            foreach ($files as $file) {
+                if (is_file($this->getPath() . $file)) {
+                    $this->_loadCsvFileByName($file);
                 }
             }
-        } catch (Exception $exc) {
-            Shopware()->Log()->Error($exc->getTraceAsString());
         }
-
         return $this->_prepareDbInsert($this->_translations);
     }
 
@@ -114,23 +109,19 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_CsvReader
     private function _prepareDbInsert()
     {
         $result = "";
-        try {
-            $snippetsArray = $this->_translations;
-            $shopIdsSql = "SELECT id FROM s_core_shops WHERE locale_id = ?";
-            foreach ($snippetsArray as $localeId => $snippets) {
-                $shopIds = Shopware()->Db()->fetchAll($shopIdsSql, array($localeId));
-                foreach ($shopIds as $list => $shopId) {
-                    foreach ($snippets as $name => $value) {
-                        $baseString = "('Paymill', ". Shopware()->Db()->quote(array($name, $value, $localeId, $shopId['id'])) .", NOW(), NOW()),";
-                        $result .= $baseString;
-                    }
+        $snippetsArray = $this->_translations;
+        $shopIdsSql = "SELECT id FROM s_core_shops WHERE locale_id = ?";
+        foreach ($snippetsArray as $localeId => $snippets) {
+            $shopIds = Shopware()->Db()->fetchAll($shopIdsSql, array($localeId));
+            foreach ($shopIds as $list => $shopId) {
+                foreach ($snippets as $name => $value) {
+                    $baseString = "('Paymill', ". Shopware()->Db()->quote(array($name, $value, $localeId, $shopId['id'])) .", NOW(), NOW()),";
+                    $result .= $baseString;
                 }
             }
-            $result = substr_replace($result ,"",-1);
-            $result .= ";";
-        } catch (Exception $exc) {
-            Shopware()->Log()->Error($exc->getTraceAsString());
         }
+        $result = substr_replace($result ,"",-1);
+        $result .= ";";
         return $result;
     }
 
