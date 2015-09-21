@@ -174,7 +174,7 @@ $(document).ready(function ()
         }
     });
 
-    $('button[type="submit"][form="confirm--form"]').click(function ()
+    $('button[type="submit"][form="confirm--form"]').click(function (event)
     {
         debug('Event triggered');
         /* prevend token generation when token already exsist */
