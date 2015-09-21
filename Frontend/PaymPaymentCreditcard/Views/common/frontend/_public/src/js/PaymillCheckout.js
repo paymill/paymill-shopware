@@ -181,6 +181,14 @@ $(document).ready(function ()
         if ($("input[type='checkbox'][name='paymillToken']").length) {
             return true;
         }
+        
+        /* prevend token generation when agb hasn't been accepted */
+        if ($("input[type='checkbox'][name='sAGB']").length) {
+            if ($("input[type='checkbox'][name='sAGB']").attr('checked') !== "checked") {
+                event.preventDefault();
+            }
+        }
+        
         $(this).attr("disabled","disabled");
         debug('Check for FastCheckout data.');
         if (hasDummyData()) {
