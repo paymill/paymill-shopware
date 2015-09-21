@@ -69,6 +69,7 @@
                 year: '{$paymillYear}',
             };
             paymillcheckout.fastcheckout.directdebit = {
+                accountholder: '{$paymillAccountHolder}',
                 accountnumber: '{$paymillAccountNumber}',
                 bankcode: '{$paymillBankCode}',
             };
