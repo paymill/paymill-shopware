@@ -12,7 +12,7 @@ Ext.require([
 ]);
 Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
     extend:    'Enlight.app.Window',
-    title:     '{s namespace=Paymill name=log_title}Paymill Logging{/s}',
+    title:     '{s namespace=backend/paym_payment_creditcard/log name=window_title}Paymill Logging{/s}',
     alias:     'widget.paymill_logging-main-window',
     border:    false,
     autoShow:  true,
@@ -43,23 +43,23 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
             width:       '100%',
             columns:     [
                 {
-                    text:      '{s namespace=Paymill name=log_date_title}Date{/s}',
+                    text:      '{s namespace=backend/paym_payment_creditcard/log name=column_header_date}Date{/s}',
                     dataIndex: 'entryDate',
                     width:     75
                 },
                 {
-                    text:      '{s namespace=Paymill name=log_version_title}Version{/s}',
+                    text:      '{s namespace=backend/paym_payment_creditcard/log name=column_header_version}Version{/s}',
                     dataIndex: 'version',
                     width:     40
                 },
                 {
-                    text:      '{s namespace=Paymill name=log_merchantInfo_title}Merchant Information{/s}',
+                    text:      '{s namespace=backend/paym_payment_creditcard/log name=column_header_merchantinfo}Merchant Information{/s}',
                     dataIndex: 'merchantInfo',
                     width:     350
                 },
                 {
                     xtype:  'actioncolumn',
-                    header: '{s namespace=Paymill name=paymill_backend_log_action}Actions{/s}',
+                    header: '{s namespace=backend/paym_payment_creditcard/log name=column_header_actions}Actions{/s}',
                     width:  35,
                     items:  [
                         {
@@ -122,7 +122,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                                             defaultType: 'displayfield',
                                             items:       [
                                                 {
-                                                    fieldLabel: '{s namespace=Paymill name=log_date_title}Date{/s}',
+                                                    fieldLabel: '{s namespace=backend/paym_payment_creditcard/log name=column_header_date}Date{/s}',
                                                     value:      record.get('entryDate'),
                                                     fieldStyle: { margin: '0 0 0 50px' }
                                                 }
@@ -134,7 +134,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                                             margin:      '0 0 0 50px',
                                             items:       [
                                                 {
-                                                    fieldLabel: '{s namespace=Paymill name=log_version_title}Version{/s}',
+                                                    fieldLabel: '{s namespace=backend/paym_payment_creditcard/log name=column_header_version}Version{/s}',
                                                     value:      record.get('version'),
                                                     fieldStyle: { margin: '0 0 0 50px' }
                                                 }
@@ -148,7 +148,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                                             xtype:      'panel',
                                             border:     false,
                                             layout:     'fit',
-                                            title:      '{s namespace=Paymill name=log_devInfo_title}Developer Information{/s}',
+                                            title:      '{s namespace=backend/paym_payment_creditcard/log name=column_header_developer}Developer Information{/s}',
                                             html:       record.get('devInfo'),
                                             autoScroll: true,
                                             width:      '100%',
@@ -172,7 +172,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                 name: 'searchfield',
                 id: 'searchfield',
                 cls:'searchfield',
-                emptyText:'{s namespace=Paymill name=log_search_button}Search...{/s}',
+                emptyText:'{s namespace=backend/paym_payment_creditcard/log name=toolbar_button_search}Search...{/s}',
                 checkChangeBuffer: 1000,
                 enableKeyEvents:true,
                 width: 400
@@ -182,7 +182,7 @@ Ext.define('Shopware.apps.PaymillLogging.view.main.Window', {
                 name: 'connectedSearch',
                 id: 'connectedSearch',
                 cls:'connectedSearch',
-                fieldLabel:'{s namespace=Paymill name=log_connectedSearch_button}Connected Search{/s}'
+                fieldLabel:'{s namespace=backend/paym_payment_creditcard/log name=toolbar_checkbox_connectedsearch}Connected Search{/s}'
             }
         );
         return items;

@@ -41,7 +41,6 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Components_ModelHelper
             $bootstrap->Application()->Models()->generateAttributeModels(array('s_order_attributes'));
             $bootstrap->Application()->Models()->generateAttributeModels(array('s_user_attributes'));
         } catch (Exception $exception) {
-            Shopware()->Log()->Err("Cannot edit shopware models. " . $exception->getMessage());
             throw new Exception("Cannot edit shopware models. " . $exception->getMessage());
         }
     }
