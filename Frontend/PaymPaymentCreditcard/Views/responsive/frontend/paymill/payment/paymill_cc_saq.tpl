@@ -3,9 +3,9 @@
 function PaymillFrameResponseHandler(error, result)
 {
     if (error) {
-        debug("iFrame load failed with " + error.apierror + error.message);
+        console.log("iFrame load failed with " + error.apierror + error.message);
     } else {
-        debug("iFrame successfully loaded");
+        console.log("iFrame successfully loaded");
     }
 }
 
