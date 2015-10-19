@@ -184,7 +184,7 @@ $(document).ready(function ()
         
         /* prevend token generation when agb hasn't been accepted */
         if ($("input[type='checkbox'][name='sAGB']").length) {
-            if ($("input[type='checkbox'][name='sAGB']").attr('checked') !== "checked") {
+            if (!$("input[type='checkbox'][name='sAGB']").is('checked')) {
                 event.preventDefault();
             }
         }
@@ -249,7 +249,17 @@ $(document).ready(function ()
                     $(this).removeAttr("disabled");
                 }
             } else {
-                $(this).removeAttr("disabled");
+                var intervall = setInterval(function () {
+                    var button = $('button[type="submit"][form="confirm--form"]');
+                    if(button.attr('disabled')){
+                       button.removeAttr('disabled');
+                       button.children('div').remove();
+                       if(button.children('i').length === 0){
+                           button.append('<i class="icon--arrow-right"></i>');
+                       }
+                       clearInterval(intervall);
+                    }
+                },75);
                 if (getPayment() === 'paymillcc') {
                     $('html, body').animate({
                         scrollTop: $("#errorsCc").offset().top - 100
@@ -262,6 +272,7 @@ $(document).ready(function ()
                 }
             }
         }
+//        $('button[type="submit"][form="confirm--form"]').removeAttr('disabled');
         return false;
     });
 
