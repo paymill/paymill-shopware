@@ -230,7 +230,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     public function getInfo()
     {
         return array('version' => $this->getVersion(),
-            'author' => 'PayIntelligent GmbH',
+            'author' => 'PAYMILL GmbH',
             'source' => $this->getSource(),
             'supplier' => 'PAYMILL GmbH',
             'support' => 'support@paymill.com',
