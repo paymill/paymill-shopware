@@ -91,7 +91,11 @@ BrandDetection.prototype.detect = function(cardnumber)
 
 BrandDetection.prototype.validate = function(cardnumber)
 {
-    return this.creditcard[this.detect(cardnumber)].cardlength.indexOf(cardnumber.length)  !== -1;
+    var result = false;
+    if(this.detect(cardnumber) !== 'unknown'){
+        result = this.creditcard[this.detect(cardnumber)].cardlength.indexOf(cardnumber.length)  !== -1;
+    }
+    return result;
 };
 
 BrandDetection.prototype.luhn = function(cardnumber)

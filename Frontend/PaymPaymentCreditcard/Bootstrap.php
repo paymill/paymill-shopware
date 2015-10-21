@@ -36,6 +36,14 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     private $util;
 
     /**
+     * Indicates the caches to be cleared after install/enable/disable the plugin
+     * @var type
+     */
+    private $clearCache = array(
+        'config', 'backend', 'theme'
+    );
+
+    /**
      * initiates this class
      */
     public function init()
@@ -50,7 +58,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
      */
     public function getVersion()
     {
-        return "2.0.0";
+        return "2.0.2";
     }
 
     /**
@@ -377,8 +385,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             throw new Exception($exception->getMessage());
         }
 
-        $installSuccess = parent::install();
-        return $installSuccess;
+        return array('success' => parent::install(),'invalidateCache' => $this->clearCache);
     }
 
     /**
@@ -563,7 +570,12 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
             throw new Exception("Cannot disable payment: " . $exception->getMessage());
         }
 
-        return parent::disable();
+        return array('success' => true, 'invalidateCache' => $this->clearCache);
+    }
+
+    public function enable()
+    {
+        return array('success' => true, 'invalidateCache' => $this->clearCache);
     }
 
     /**

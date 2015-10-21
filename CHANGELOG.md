@@ -1,5 +1,14 @@
 #Release Notes
 
+##2.0.2
+ - Fix checkout with iframe
+
+##2.0.1
+ - Fix checkout for directintegration
+
+##2.0.0
+ - Shopware 5 Port
+
 ##1.6.0
  - Integration of PayFrame to enable use of SAQ A for easier PCI DSS 3.0 compliance.
 
