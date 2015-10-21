@@ -131,6 +131,19 @@ function paymillResponseHandler(error, result)
         errorText = paymillcheckout.errormessages.bridge[error.apierror];
         debug(errorText);
         alert(errorText);
+        if(paymillcheckout.iframe.active){
+            var intervall = setInterval(function () {
+                var button = $('button[type="submit"][form="confirm--form"]');
+                if(button.attr('disabled')){
+                   button.removeAttr('disabled');
+                   button.children('div').remove();
+                   if(button.children('i').length === 0){
+                       button.append('<i class="icon--arrow-right"></i>');
+                   }
+                   clearInterval(intervall);
+                }
+            },75);
+        }
     } else {
         debug("Received token from Paymill API: " + result.token);
         paymillSubmitForm(result.token);
