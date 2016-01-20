@@ -22,7 +22,7 @@ Payment plugin for Shopware Community Edition Version 4.3.0 - 5.1
 
 ## Your Advantages
 * PCI DSS compatibility
-* Payment means: Credit Card (Visa, Visa Electron, Mastercard, Maestro, Diners, Discover, JCB, AMEX, China Union Pay), Direct Debit (ELV)
+* Payment means: Credit Card (Visa, Visa Electron, Mastercard, Maestro, Diners, Discover, JCB, AMEX), Direct Debit (ELV)
 * Refunds can be created from an additional tab in the order detail view
 * Optional configuration for authorization and manual capture with credit card payments
 * Optional fast checkout configuration allowing your customers not to enter their payment detail over and over during checkout
