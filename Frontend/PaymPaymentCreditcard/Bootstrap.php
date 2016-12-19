@@ -717,7 +717,7 @@ class Shopware_Plugins_Frontend_PaymPaymentCreditcard_Bootstrap extends Shopware
     private function _applyBackendViewModifications()
     {
         try {
-            $parent = $this->Menu()->findOneBy('label', 'logfile');
+            $parent = $this->Menu()->findOneBy(['label' => 'logfile']);
             $this->createMenuItem(array('label' => 'Paymill', 'class' => 'sprite-cards-stack', 'active' => 1,
                 'controller' => 'PaymillLogging', 'action' => 'index', 'parent' => $parent));
         } catch (Exception $exception) {
