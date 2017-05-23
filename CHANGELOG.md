@@ -1,5 +1,11 @@
 #Release Notes
 
+##2.0.3
+
+- Remove CURLOPT_CAINFO - path to Certificate Authority (CA) bundle
+- Remove paymill.crt
+- Change user agent info to "Paymill-Shopware/2.0.3"
+
 ##2.0.2
  - Fix checkout with iframe
 
