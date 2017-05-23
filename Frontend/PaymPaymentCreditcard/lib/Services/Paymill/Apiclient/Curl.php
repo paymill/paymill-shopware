@@ -33,7 +33,7 @@ class Services_Paymill_Apiclient_Curl implements Services_Paymill_Apiclient_Inte
      */
     private $_apiUrl = '/';
 
-    const USER_AGENT = 'Paymill-Shopware/2.0.2';
+    const USER_AGENT = 'Paymill-Shopware/2.0.3';
 
     public static $lastRawResponse;
     public static $lastRawCurlOptions;
